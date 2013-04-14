@@ -156,7 +156,7 @@ function TOOL:Think()
 	local wep = pl:GetActiveWeapon()
 	if not wep:IsValid() or wep:GetClass() != "gmod_tool" or pl:GetInfo("gmod_toolmode") != "acfarmorprop" then return end
 	local trace = pl:GetEyeTrace()
-	if IsReallyValid(trace) then pl:SetNetworkedFloat("WeightMass", trace.Entity:GetPhysicsObject():GetMass()) end
+	--if IsReallyValid(trace) then pl:SetNetworkedFloat("WeightMass", trace.Entity:GetPhysicsObject():GetMass()) end
 	
 
 	local ent = trace.Entity
@@ -164,16 +164,22 @@ function TOOL:Think()
 		if( ACF_Check ~= mil ) then
 			local valid = ACF_Check( ent )
 			if valid then
+				local mass = ent:GetPhysicsObject():GetMass()
+				self:GetOwner():ConCommand("acfarmorprop_mass "..mass);
+				self:GetOwner():ConCommand("acfarmorprop_area "..ent.ACF.Aera);
+				self.Weapon:SetNetworkedInt( "WeightMass", mass )
 				self.Weapon:SetNetworkedInt( "HP", ent.ACF.Health )
 				self.Weapon:SetNetworkedInt( "Armour", ent.ACF.Armour )
 				self.Weapon:SetNetworkedInt( "MaxHP", ent.ACF.MaxHealth )
 				self.Weapon:SetNetworkedInt( "MaxArmour", ent.ACF.MaxArmour )
+				Recalc(self:GetOwner())
 			end
 		end
 		self.lastent = ent
 		self.updateacf = false
 	end
 	if ent:IsWorld() and !self.updateacf then
+		self.Weapon:SetNetworkedInt( "WeightMass", 0 )
 		self.Weapon:SetNetworkedInt( "HP", 0 )
 		self.Weapon:SetNetworkedInt( "Armour", 0 )
 		self.Weapon:SetNetworkedInt( "MaxHP", 0 )
@@ -238,6 +244,75 @@ if CLIENT then
 			Recalc(LocalPlayer(), "thick")
 		end)
 	end)
+	
+	local TipColor = Color( 250, 250, 200, 255 )
+
+	surface.CreateFont( "GModWorldtip", {font="coolvetica", size=24, weight=500, antialias=true, additive=false} )
+	surface.CreateFont("Torchfont", {size=40, weight=1000, antialias=true, additive=false, font="arial"})
+	
+	local function DrawWeightTip()
+		local pl = LocalPlayer()
+		local wep = pl:GetActiveWeapon()
+		if not wep:IsValid() or wep:GetClass() != "gmod_tool" or pl:GetInfo("gmod_toolmode") != "acfarmorprop" then return end
+		local trace = pl:GetEyeTrace()
+		if not IsReallyValid(trace) then return end
+		
+		local mass = math.floor((wep:GetNetworkedFloat("WeightMass") or 0) *10)/10
+		local armour = math.floor((wep:GetNetworkedBool("MaxArmour") or 0) *100)/100
+		local health = math.floor((wep:GetNetworkedBool("MaxHP") or 0) * 10)/10
+		local mass2 = math.floor((GetConVarNumber("acfarmorprop_mass") or 0)*10)/10
+		local armour2 = math.floor((GetConVarNumber("acfarmorprop_marmor") or 0)*10)/10
+		local health2 = math.floor((GetConVarNumber("acfarmorprop_mhealth") or 0)*10)/10
+		local text = "Current:\nWeight: "..mass.."\nArmour: "..armour.."\nHealth: "..health.."\nAfter:\nWeight: "..mass2.."\nArmour: "..armour2.."\nHealth: "..health2
+	
+		local pos = (trace.Entity:LocalToWorld(trace.Entity:OBBCenter())):ToScreen()
+		
+		local black = Color( 0, 0, 0, 255 )
+		local tipcol = Color( TipColor.r, TipColor.g, TipColor.b, 255 )
+		
+		local x = 0
+		local y = 0
+		local padding = 10
+		local offset = 50
+		
+		surface.SetFont( "GModWorldtip" )
+		local w, h = surface.GetTextSize( text )
+		
+		x = pos.x - w 
+		y = pos.y - h 
+		
+		x = x - offset
+		y = y - offset
+
+		draw.RoundedBox( 8, x-padding-2, y-padding-2, w+padding*2+4, h+padding*2+4, black )
+		
+		
+		local verts = {}
+		verts[1] = { x=x+w/1.5-2, y=y+h+2 }
+		verts[2] = { x=x+w+2, y=y+h/2-1 }
+		verts[3] = { x=pos.x-offset/2+2, y=pos.y-offset/2+2 }
+		
+		draw.NoTexture()
+		surface.SetDrawColor( 0, 0, 0, tipcol.a )
+		surface.DrawPoly( verts )
+		
+		
+		draw.RoundedBox( 8, x-padding, y-padding, w+padding*2, h+padding*2, tipcol )
+		
+		local verts = {}
+		verts[1] = { x=x+w/1.5, y=y+h }
+		verts[2] = { x=x+w, y=y+h/2 }
+		verts[3] = { x=pos.x-offset/2, y=pos.y-offset/2 }
+		
+		draw.NoTexture()
+		surface.SetDrawColor( tipcol.r, tipcol.g, tipcol.b, tipcol.a )
+		surface.DrawPoly( verts )
+		
+		
+		draw.DrawText( text, "GModWorldtip", x + w/2, y, black, TEXT_ALIGN_CENTER )
+	end
+	
+	hook.Add("HUDPaint", "ACF_WeightWorldTip", DrawWeightTip)
 
 	function TOOL:DrawToolScreen(w,h)
 		local Health = math.floor((self.Weapon:GetNetworkedBool("HP")or 0) *10)/10 
