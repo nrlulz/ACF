@@ -1,3 +1,4 @@
+m
 /*
 Weight STool 1.21
 	by Spoco
@@ -35,16 +36,18 @@ local function ApplySettings( Player, Entity, Data )
 	if Data.Mass then
 		local physobj = Entity:GetPhysicsObject()
 		if physobj:IsValid() then physobj:SetMass(Data.Mass) end
+		duplicator.StoreEntityModifier( Entity, "mass", {Mass = Data.Mass} )
 	end
 	if Data.Ductility then
 		Entity.ACF = Entity.ACF or {}
 		Entity.ACF.Ductility = (Data.Ductility/100)
+		duplicator.StoreEntityModifier( Entity, "acfsettings", {Ductility = Data.Ductility} )
 	end
 	
-	duplicator.StoreEntityModifier( Entity, "acfsettings", Data )
 end
 
 duplicator.RegisterEntityModifier( "acfsettings", ApplySettings )
+duplicator.RegisterEntityModifier( "mass", ApplySettings )
 
 local function Recalc(Ply, What)
 	local Thick, Ductility, Area, Mass
@@ -124,7 +127,7 @@ function TOOL:RightClick( trace )
 	local thick = ent.ACF.MaxArmour
 	local area = ent.ACF.Aera
 	self:GetOwner():ConCommand("acfarmorprop_mass "..mass);
-	self:GetOwner():ConCommand("acfarmorprop_ductility "..ductility);
+	self:GetOwner():ConCommand("acfarmorprop_ductility "..(ductility*100));
 	self:GetOwner():ConCommand("acfarmorprop_mhealth "..mhealth);
 	self:GetOwner():ConCommand("acfarmorprop_marmor "..marmor);
 	self:GetOwner():ConCommand("acfarmorprop_thick "..marmor);
