@@ -24,17 +24,22 @@ function ENT:GetOverlayText()
 	local name = self:GetNetworkedString( "WireName" )
 	local id = self:GetNetworkedBeamString( "ID" )
 	local txt = List["Mobility"][id]["name"].."\n"
-	
-	for i = 1, List["Mobility"][id]["gears"] do
+	local cvt
+	if List["Mobility"][id]["cvt"] then cvt = 1 else cvt = 0 end
+	for i = 1+cvt, List["Mobility"][id]["gears"] do
 		local gear = math.Round( self:GetNetworkedBeamFloat( "Gear" .. i ), 3 )
 		txt = txt .. "Gear " .. i .. ": " .. tostring( gear ) .. "\n"
 	end
 	local fd = math.Round( self:GetNetworkedBeamFloat( "FinalDrive" ), 3 )
 	txt = txt .. "Final Drive: " .. tostring( fd ) .. "\n"
 	
+	if cvt == 1 then
+		local targetrpm = self:GetNetworkedBeamInt( "TargetRPM" )
+		txt = txt.."Target Input RPM: " .. tostring( targetrpm ) .. "\n"
+	end
+	
 	local maxtq = List["Mobility"][id]["maxtq"]
 	txt = txt .. "Maximum Torque Rating: " .. tostring( maxtq ) .. "n-m / " .. tostring( math.Round( maxtq * 0.73 ) ) .. "ft-lb"
-	
 	if (not game.SinglePlayer()) then
 		local PlayerName = self:GetPlayerName()
 		txt = txt .. "\n(" .. PlayerName .. ")"
@@ -73,11 +78,18 @@ function ACFGearboxGUICreate( Table )
 	
 	acfmenupanel:CPanelText("Desc", Table.desc)	--Description (Name, Desc)
 	
-	for ID,Value in pairs(acfmenupanel.GearboxData[Table.id]["GearTable"]) do
-		if ID > 0 then
-			ACF_GearsSlider(ID, Value, Table.id)
-		elseif ID == -1 then
-			ACF_GearsSlider(10, Value, Table.id, "Final Drive")
+	if (acfmenupanel.GearboxData[Table.id]["GearTable"][-2] or 0) != 0 then
+		ACF_GearsSlider(2, acfmenupanel.GearboxData[Table.id]["GearTable"][2], Table.id)
+		ACF_GearsSlider(9, acfmenupanel.GearboxData[Table.id]["GearTable"][-2], Table.id, "Target Input RPM")
+		ACF_GearsSlider(10, acfmenupanel.GearboxData[Table.id]["GearTable"][-1], Table.id, "Final Drive")
+		RunConsoleCommand( "acfmenu_data1", 0.01 )
+	else
+		for ID,Value in pairs(acfmenupanel.GearboxData[Table.id]["GearTable"]) do
+			if ID > 0 then
+				ACF_GearsSlider(ID, Value, Table.id)
+			elseif ID == -1 then
+				ACF_GearsSlider(10, Value, Table.id, "Final Drive")
+			end
 		end
 	end
 	
@@ -92,12 +104,13 @@ end
 function ACF_GearsSlider(Gear, Value, ID, Desc)
 
 	if Gear and not acfmenupanel["CData"][Gear] then	
+		local CVT = Gear == 9
 		acfmenupanel["CData"][Gear] = vgui.Create( "DNumSlider", acfmenupanel.CustomDisplay )
 			acfmenupanel["CData"][Gear]:SetText( Desc or "Gear "..Gear )
 			acfmenupanel["CData"][Gear]:SetDark( true )
-			acfmenupanel["CData"][Gear]:SetMin( -1 )
-			acfmenupanel["CData"][Gear]:SetMax( 1 )
-			acfmenupanel["CData"][Gear]:SetDecimals( 2 )
+			acfmenupanel["CData"][Gear]:SetMin( CVT and 1 or -1 )
+			acfmenupanel["CData"][Gear]:SetMax( CVT and 10000 or 1 )
+			acfmenupanel["CData"][Gear]:SetDecimals( (not CVT) and 2 or 0 )
 			acfmenupanel["CData"][Gear]["Gear"] = Gear
 			acfmenupanel["CData"][Gear]["ID"] = ID
 			acfmenupanel["CData"][Gear]:SetValue(Value)
