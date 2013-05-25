@@ -62,7 +62,10 @@ function MakeACF_Gearbox(Owner, Pos, Angle, Id, Data1, Data2, Data3, Data4, Data
 	Gearbox.Gears = List["Mobility"][Id]["gears"]
 	Gearbox.Dual = List["Mobility"][Id]["doubleclutch"]
     Gearbox.CVT = List["Mobility"][Id]["cvt"]
-    if Gearbox.CVT then Gearbox.TargetRPM = Data9 * 1 end
+    if Gearbox.CVT then
+		Gearbox.TargetMinRPM = Data3
+		Gearbox.TargetMaxRPM = math.max(Data4,Data3+100)
+	end
 	Gearbox.GearTable = List["Mobility"][Id]["geartable"]
 		Gearbox.GearTable["Final"] = Data10
 		Gearbox.GearTable[1] = Data1
@@ -103,14 +106,18 @@ function MakeACF_Gearbox(Owner, Pos, Angle, Id, Data1, Data2, Data3, Data4, Data
     local Outputs = { "Ratio", "Entity" , "Current Gear" }
     local OutputTypes = { "NORMAL" , "ENTITY" , "NORMAL" }
     if Gearbox.CVT then
-        table.insert(Outputs,"Target RPM")
+        table.insert(Outputs,"Min Target RPM")
+        table.insert(Outputs,"Max Target RPM")
         table.insert(OutputTypes,"NORMAL")
     end
 	
 	Gearbox.Inputs = Wire_CreateInputs( Gearbox.Entity, Inputs )
 	Gearbox.Outputs = WireLib.CreateSpecialOutputs( Gearbox.Entity, Outputs, OutputTypes )
 	Wire_TriggerOutput(Gearbox.Entity, "Entity", Gearbox.Entity)
-    if Gearbox.CVT then Wire_TriggerOutput(Gearbox.Entity, "Target RPM", Gearbox.TargetRPM) end
+    if Gearbox.CVT then
+		Wire_TriggerOutput(Gearbox.Entity, "Min Target RPM", Gearbox.TargetMinRPM)
+		Wire_TriggerOutput(Gearbox.Entity, "Max Target RPM", Gearbox.TargetMaxRPM)
+	end
 	Gearbox.WireDebugName = "ACF Gearbox"
 	
 	Gearbox.LClutch = Gearbox.MaxTorque
@@ -143,7 +150,8 @@ function MakeACF_Gearbox(Owner, Pos, Angle, Id, Data1, Data2, Data3, Data4, Data
 	Gearbox:SetNetworkedBeamString( "ID", Id )
 	Gearbox:SetNetworkedBeamFloat( "FinalDrive", Gearbox.Gear0 )
 	if Gearbox.CVT then
-		Gearbox:SetNetworkedBeamInt( "TargetRPM", Gearbox.TargetRPM )
+		Gearbox:SetNetworkedBeamInt( "TargetMinRPM", Gearbox.TargetMinRPM )
+		Gearbox:SetNetworkedBeamInt( "TargetMaxRPM", Gearbox.TargetMaxRPM )
 	end
 	
 	for i = 1, Gearbox.Gears do
@@ -193,7 +201,8 @@ function ENT:Update( ArgsTable )	--That table is the player data, as sorted in t
         local Outputs = { "Ratio", "Entity" , "Current Gear" }
         local OutputTypes = { "NORMAL" , "ENTITY" , "NORMAL" }
         if self.CVT then
-            table.insert(Outputs,"Target RPM")
+			table.insert(Outputs,"Min Target RPM")
+			table.insert(Outputs,"Max Target RPM")
             table.insert(OutputTypes,"NORMAL")
         end
 		
@@ -203,8 +212,10 @@ function ENT:Update( ArgsTable )	--That table is the player data, as sorted in t
 	end
     
     if self.CVT then 
-        self.TargetRPM = ArgsTable[13] * 1
-        Wire_TriggerOutput(self.Entity, "Target RPM", self.TargetRPM)
+        self.TargetMinRPM = ArgsTable[7]
+        self.TargetMaxRPM = math.max(ArgsTable[8],ArgsTable[7]+100)
+		Wire_TriggerOutput(self.Entity, "Min Target RPM", self.TargetMinRPM)
+		Wire_TriggerOutput(self.Entity, "Max Target RPM", self.TargetMaxRPM)
     end
 	
 	self.GearTable["Final"] = ArgsTable[14]
@@ -246,7 +257,8 @@ function ENT:Update( ArgsTable )	--That table is the player data, as sorted in t
 	end
 	
 	if self.CVT then
-		self:SetNetworkedBeamInt( "TargetRPM", self.TargetRPM )
+		self:SetNetworkedBeamInt( "TargetMinRPM", self.TargetMinRPM )
+		self:SetNetworkedBeamInt( "TargetMaxRPM", self.TargetMaxRPM )
 	end
 	
 	return Feedback
@@ -377,14 +389,8 @@ function ENT:Calc( InputRPM, InputInertia )
 			end
 		
             if self.CVT and self.Gear == 1 then
-                local Ratio = self.GearTable[1]
-                if InputRPM < self.TargetRPM then
-                    Ratio = Ratio - 0.01
-                else
-                    Ratio = Ratio + 0.01
-                end
-                self.GearTable[1] = math.Clamp(Ratio,0.01,1)
-                self.GearRatio = (self.GearTable[self.Gear] or 0)*self.GearTable["Final"]
+                self.GearTable[1] = math.Clamp((InputRPM - self.TargetMinRPM) / ((self.TargetMaxRPM - self.TargetMinRPM) or 1),0.01,1)
+                self.GearRatio = (self.GearTable[1] or 0)*self.GearTable["Final"]
                 Wire_TriggerOutput(self.Entity, "Ratio", self.GearRatio)
             end
 		

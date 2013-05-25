@@ -12,7 +12,7 @@ local GearCVTMT = 340
 local GearCVTLT = 3200
 
 -- general description
-local CVTDesc = "\n\nA CVT will adjust the ratio of gear 1 to keep the engine at the desired RPM, allowing constant peak performance. However, this comes at the cost of increased weight and limited torque ratings."
+local CVTDesc = "\n\nA CVT will adjust the ratio its first gear to keep an engine within a target rpm range, allowing constant peak performance. However, this comes at the cost of increased weight and limited torque ratings."
 
 -- Inline
 
@@ -27,8 +27,9 @@ ACF_DefineGearbox( "CVT-L-S", {
 	gears = 2,
 	cvt = true,
 	geartable = {
-        [-2] = 5000, --target rpm slider
-		[-1] = 0.5, --final drive
+		[-3] = 3000, --target min rpm
+        [-2] = 5000, --target max rpm
+		[-1] = 1, --final drive
 		[ 0 ] = 0,
 		[ 1 ] = 0,
 		[ 2 ] = -0.1
@@ -46,8 +47,9 @@ ACF_DefineGearbox( "CVT-L-M", {
 	gears = 2,
 	cvt = true,
 	geartable = {
-        [-2] = 5000, --target rpm slider
-		[-1] = 0.5, --final drive
+		[-3] = 3000, --target min rpm
+        [-2] = 5000, --target max rpm
+		[-1] = 1, --final drive
 		[ 0 ] = 0,
 		[ 1 ] = 0,
 		[ 2 ] = -0.1
@@ -65,8 +67,9 @@ ACF_DefineGearbox( "CVT-L-L", {
 	gears = 2,
 	cvt = true,
 	geartable = {
-        [-2] = 5000, --target rpm slider
-		[-1] = 0.5, --final drive
+		[-3] = 3000, --target min rpm
+        [-2] = 5000, --target max rpm
+		[-1] = 1, --final drive
 		[ 0 ] = 0,
 		[ 1 ] = 0,
 		[ 2 ] = -0.1
@@ -87,8 +90,9 @@ ACF_DefineGearbox( "CVT-LD-S", {
 	doubleclutch = true,
 	cvt = true,
 	geartable = {
-        [-2] = 5000, --target rpm slider
-		[-1] = 0.5, --final drive
+		[-3] = 3000, --target min rpm
+        [-2] = 5000, --target max rpm
+		[-1] = 1, --final drive
 		[ 0 ] = 0,
 		[ 1 ] = 0,
 		[ 2 ] = -0.1
@@ -107,8 +111,9 @@ ACF_DefineGearbox( "CVT-LD-M", {
 	doubleclutch = true,
 	cvt = true,
 	geartable = {
-        [-2] = 5000, --target rpm slider
-		[-1] = 0.5, --final drive
+		[-3] = 3000, --target min rpm
+        [-2] = 5000, --target max rpm
+		[-1] = 1, --final drive
 		[ 0 ] = 0,
 		[ 1 ] = 0,
 		[ 2 ] = -0.1
@@ -127,8 +132,9 @@ ACF_DefineGearbox( "CVT-LD-L", {
 	doubleclutch = true,
 	cvt = true,
 	geartable = {
-        [-2] = 5000, --target rpm slider
-		[-1] = 0.5, --final drive
+		[-3] = 3000, --target min rpm
+        [-2] = 5000, --target max rpm
+		[-1] = 1, --final drive
 		[ 0 ] = 0,
 		[ 1 ] = 0,
 		[ 2 ] = -0.1
@@ -148,8 +154,9 @@ ACF_DefineGearbox( "CVT-T-S", {
 	gears = 2,
 	cvt = true,
 	geartable = {
-        [-2] = 5000, --target rpm slider
-		[-1] = 0.5, --final drive
+		[-3] = 3000, --target min rpm
+        [-2] = 5000, --target max rpm
+		[-1] = 1, --final drive
 		[ 0 ] = 0,
 		[ 1 ] = 0,
 		[ 2 ] = -0.1
@@ -167,8 +174,9 @@ ACF_DefineGearbox( "CVT-T-M", {
 	gears = 2,
 	cvt = true,
 	geartable = {
-        [-2] = 5000, --target rpm slider
-		[-1] = 0.5, --final drive
+		[-3] = 3000, --target min rpm
+        [-2] = 5000, --target max rpm
+		[-1] = 1, --final drive
 		[ 0 ] = 0,
 		[ 1 ] = 0,
 		[ 2 ] = -0.1
@@ -186,8 +194,9 @@ ACF_DefineGearbox( "CVT-T-L", {
 	gears = 2,
 	cvt = true,
 	geartable = {
-        [-2] = 5000, --target rpm slider
-		[-1] = 0.5, --final drive
+		[-3] = 3000, --target min rpm
+        [-2] = 5000, --target max rpm
+		[-1] = 1, --final drive
 		[ 0 ] = 0,
 		[ 1 ] = 0,
 		[ 2 ] = -0.1
@@ -208,8 +217,9 @@ ACF_DefineGearbox( "CVT-TD-S", {
 	doubleclutch = true,
 	cvt = true,
 	geartable = {
-        [-2] = 5000, --target rpm slider
-		[-1] = 0.5, --final drive
+		[-3] = 3000, --target min rpm
+        [-2] = 5000, --target max rpm
+		[-1] = 1, --final drive
 		[ 0 ] = 0,
 		[ 1 ] = 0,
 		[ 2 ] = -0.1
@@ -228,8 +238,9 @@ ACF_DefineGearbox( "CVT-TD-M", {
 	doubleclutch = true,
 	cvt = true,
 	geartable = {
-        [-2] = 5000, --target rpm slider
-		[-1] = 0.5, --final drive
+		[-3] = 3000, --target min rpm
+        [-2] = 5000, --target max rpm
+		[-1] = 1, --final drive
 		[ 0 ] = 0,
 		[ 1 ] = 0,
 		[ 2 ] = -0.1
@@ -248,8 +259,9 @@ ACF_DefineGearbox( "CVT-TD-L", {
 	doubleclutch = true,
 	cvt = true,
 	geartable = {
-        [-2] = 5000, --target rpm slider
-		[-1] = 0.5, --final drive
+		[-3] = 3000, --target min rpm
+        [-2] = 5000, --target max rpm
+		[-1] = 1, --final drive
 		[ 0 ] = 0,
 		[ 1 ] = 0,
 		[ 2 ] = -0.1
@@ -269,8 +281,9 @@ ACF_DefineGearbox( "CVT-ST-S", {
 	gears = 2,
 	cvt = true,
 	geartable = {
-        [-2] = 5000, --target rpm slider
-		[-1] = 0.5, --final drive
+		[-3] = 3000, --target min rpm
+        [-2] = 5000, --target max rpm
+		[-1] = 1, --final drive
 		[ 0 ] = 0,
 		[ 1 ] = 0,
 		[ 2 ] = -0.1
@@ -288,8 +301,9 @@ ACF_DefineGearbox( "CVT-ST-M", {
 	gears = 2,
 	cvt = true,
 	geartable = {
-        [-2] = 5000, --target rpm slider
-		[-1] = 0.5, --final drive
+		[-3] = 3000, --target min rpm
+        [-2] = 5000, --target max rpm
+		[-1] = 1, --final drive
 		[ 0 ] = 0,
 		[ 1 ] = 0,
 		[ 2 ] = -0.1
@@ -307,8 +321,9 @@ ACF_DefineGearbox( "CVT-ST-L", {
 	gears = 2,
 	cvt = true,
 	geartable = {
-        [-2] = 5000, --target rpm slider
-		[-1] = 0.5, --final drive
+		[-3] = 3000, --target min rpm
+        [-2] = 5000, --target max rpm
+		[-1] = 1, --final drive
 		[ 0 ] = 0,
 		[ 1 ] = 0,
 		[ 2 ] = -0.1

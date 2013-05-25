@@ -34,8 +34,9 @@ function ENT:GetOverlayText()
 	txt = txt .. "Final Drive: " .. tostring( fd ) .. "\n"
 	
 	if cvt == 1 then
-		local targetrpm = self:GetNetworkedBeamInt( "TargetRPM" )
-		txt = txt.."Target Input RPM: " .. tostring( targetrpm ) .. "\n"
+		local targetminrpm = self:GetNetworkedBeamInt( "TargetMinRPM" )
+		local targetmaxrpm = self:GetNetworkedBeamInt( "TargetMaxRPM" )
+		txt = txt.."Min Target RPM: " .. tostring( targetminrpm ) .. "\nMax Target RPM: " .. tostring( targetmaxrpm ) .. "\n"
 	end
 	
 	local maxtq = List["Mobility"][id]["maxtq"]
@@ -80,7 +81,8 @@ function ACFGearboxGUICreate( Table )
 	
 	if (acfmenupanel.GearboxData[Table.id]["GearTable"][-2] or 0) != 0 then
 		ACF_GearsSlider(2, acfmenupanel.GearboxData[Table.id]["GearTable"][2], Table.id)
-		ACF_GearsSlider(9, acfmenupanel.GearboxData[Table.id]["GearTable"][-2], Table.id, "Target Input RPM")
+		ACF_GearsSlider(3, acfmenupanel.GearboxData[Table.id]["GearTable"][-3], Table.id, "Min Target RPM",true)
+		ACF_GearsSlider(4, acfmenupanel.GearboxData[Table.id]["GearTable"][-2], Table.id, "Max Target RPM",true)
 		ACF_GearsSlider(10, acfmenupanel.GearboxData[Table.id]["GearTable"][-1], Table.id, "Final Drive")
 		RunConsoleCommand( "acfmenu_data1", 0.01 )
 	else
@@ -101,10 +103,9 @@ function ACFGearboxGUICreate( Table )
 	maxtorque = Table.maxtq
 end
 
-function ACF_GearsSlider(Gear, Value, ID, Desc)
+function ACF_GearsSlider(Gear, Value, ID, Desc, CVT)
 
 	if Gear and not acfmenupanel["CData"][Gear] then	
-		local CVT = Gear == 9
 		acfmenupanel["CData"][Gear] = vgui.Create( "DNumSlider", acfmenupanel.CustomDisplay )
 			acfmenupanel["CData"][Gear]:SetText( Desc or "Gear "..Gear )
 			acfmenupanel["CData"][Gear]:SetDark( true )
