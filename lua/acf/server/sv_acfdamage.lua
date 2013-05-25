@@ -383,17 +383,25 @@ function ACF_AmmoExplosion( Origin , Pos )
 				if ( Occ.Hit and Occ.Entity:EntIndex() != Found.Entity:EntIndex() ) then 
 						--Msg("Target Occluded\n")
 				else
-					local FoundHE = Found.Ammo*2
-					--Msg("Adding " ..FoundAmmo.. " to the blast\n")
-					HEWeight = HEWeight + FoundHE
-					--Msg("Boom = " ..BoomPower.. "\n")
+				
+					local FoundHE, FoundPropel
+					if Found.RoundType == "Refill" then
+						FoundHE = 0.001
+						FoundPropel = 0.001
+					else 
+						FoundHE = Found.BulletData["FillerMass"] or 0
+						FoundPropel = Found.BulletData["PropMass"] or 0
+					end
+					local FoundHEWeight = (FoundHE+FoundPropel*(ACF.PBase/ACF.HEPower))*Found.Ammo
+	
+					--local FoundHE = Found.Ammo*2
+					HEWeight = HEWeight + FoundHEWeight
 					Found.IsExplosive = false
 					Found.DamageAction = false
 					Found.KillAction = false
 					Found.Exploding = true
 					table.insert(Filter,Found)
 					Found:Remove()
-					
 				end			
 			end
 		end	

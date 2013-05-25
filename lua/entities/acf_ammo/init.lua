@@ -259,7 +259,7 @@ function ENT:Think()
 		if self.Damaged < CurTime() then
 			ACF_AmmoExplosion( self.Entity , self.Entity:GetPos() )
 		else
-			if not self.BulletData["Type"] == "Refill" then
+			if not (self.BulletData["Type"] == "Refill") then
 				if math.Rand(0,150) > self.BulletData["RoundVolume"]^0.5 and math.Rand(0,1) < self.Ammo/math.max(self.Capacity,1) and ACF.RoundTypes[self.BulletData["Type"]] then
 					self.Entity:EmitSound( "ambient/explosions/explode_4.wav" , 350 , math.max(255 - self.BulletData["PropMass"]*100,60)  )	
 					local MuzzlePos = self.Entity:GetPos()
