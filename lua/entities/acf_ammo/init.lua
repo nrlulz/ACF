@@ -259,22 +259,24 @@ function ENT:Think()
 		if self.Damaged < CurTime() then
 			ACF_AmmoExplosion( self.Entity , self.Entity:GetPos() )
 		else
-			if math.Rand(0,150) > self.BulletData["RoundVolume"]^0.5 and math.Rand(0,1) < self.Ammo/math.max(self.Capacity,1) and ACF.RoundTypes[self.BulletData["Type"]] then
-				self.Entity:EmitSound( "ambient/explosions/explode_4.wav" , 350 , math.max(255 - self.BulletData["PropMass"]*100,60)  )	
-				local MuzzlePos = self.Entity:GetPos()
-				local MuzzleVec = VectorRand()
-				local Speed = ACF_MuzzleVelocity( self.BulletData["PropMass"], self.BulletData["ProjMass"]/2, self.Caliber )
-				
-				self.BulletData["Pos"] = MuzzlePos
-				self.BulletData["Flight"] = (MuzzleVec):GetNormalized() * Speed * 39.37 + self:GetVelocity()
-				self.BulletData["Owner"] = self.Inflictor or self.Owner
-				self.BulletData["Gun"] = self.Entity
-				self.BulletData["Crate"] = self.Entity:EntIndex()
-				self.CreateShell = ACF.RoundTypes[self.BulletData["Type"]]["create"]
-				self:CreateShell( self.BulletData )
-				
-				self.Ammo = self.Ammo - 1
-				
+			if not self.BulletData["Type"] == "Refill" then
+				if math.Rand(0,150) > self.BulletData["RoundVolume"]^0.5 and math.Rand(0,1) < self.Ammo/math.max(self.Capacity,1) and ACF.RoundTypes[self.BulletData["Type"]] then
+					self.Entity:EmitSound( "ambient/explosions/explode_4.wav" , 350 , math.max(255 - self.BulletData["PropMass"]*100,60)  )	
+					local MuzzlePos = self.Entity:GetPos()
+					local MuzzleVec = VectorRand()
+					local Speed = ACF_MuzzleVelocity( self.BulletData["PropMass"], self.BulletData["ProjMass"]/2, self.Caliber )
+					
+					self.BulletData["Pos"] = MuzzlePos
+					self.BulletData["Flight"] = (MuzzleVec):GetNormalized() * Speed * 39.37 + self:GetVelocity()
+					self.BulletData["Owner"] = self.Inflictor or self.Owner
+					self.BulletData["Gun"] = self.Entity
+					self.BulletData["Crate"] = self.Entity:EntIndex()
+					self.CreateShell = ACF.RoundTypes[self.BulletData["Type"]]["create"]
+					self:CreateShell( self.BulletData )
+					
+					self.Ammo = self.Ammo - 1
+					
+				end
 			end
 			self.Entity:NextThink( CurTime() + 0.01 + self.BulletData["RoundVolume"]^0.5/100 )
 		end
