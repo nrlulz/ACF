@@ -352,7 +352,7 @@ e2function void entity:acfClutchRight( number clutch )
 	if not isGearbox(this) then return end
 	if not isOwner(self, this) then return end
 	if (not this.Dual) then return end
-	this:TriggerInput("Right Clutch", Clutch)
+	this:TriggerInput("Right Clutch", clutch)
 end
 
 

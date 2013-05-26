@@ -389,7 +389,7 @@ function ENT:Calc( InputRPM, InputInertia )
 			end
 		
             if self.CVT and self.Gear == 1 then
-                self.GearTable[1] = math.Clamp((InputRPM - self.TargetMinRPM) / ((self.TargetMaxRPM - self.TargetMinRPM) or 1),0.01,1)
+                self.GearTable[1] = math.Clamp((InputRPM - self.TargetMinRPM) / ((self.TargetMaxRPM - self.TargetMinRPM) or 1),0.05,1)
                 self.GearRatio = (self.GearTable[1] or 0)*self.GearTable["Final"]
                 Wire_TriggerOutput(self.Entity, "Ratio", self.GearRatio)
             end
