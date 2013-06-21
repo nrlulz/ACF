@@ -52,6 +52,7 @@ function MakeACF_Engine(Owner, Pos, Angle, Id)
 	Engine.iselec = List["Mobility"][Id]["iselec"]
 	Engine.elecpower = List["Mobility"][Id]["elecpower"]
 	Engine.FlywheelOverride = List["Mobility"][Id]["flywheeloverride"]
+	Engine.IsTrans = List["Mobility"][Id]["istrans"] -- driveshaft outputs to the side
 
 	Engine.FlyRPM = 0
 	Engine:SetModel( Engine.Model )	
@@ -121,6 +122,7 @@ function ENT:Update( ArgsTable )
 	self.iselec = List["Mobility"][Id]["iselec"] -- is the engine electric?
 	self.elecpower = List["Mobility"][Id]["elecpower"] -- how much power does it output
 	self.FlywheelOverride = List["Mobility"][Id]["flywheeloverride"] -- how much power does it output
+	self.IsTrans = List["Mobility"][Id]["istrans"]
 
 	self:SetModel( self.Model )	
 	self:SetSolid( SOLID_VPHYSICS )
@@ -339,7 +341,9 @@ function ENT:CheckRopes()
 			self:Unlink( Ent )
 		end
 
-		local DrvAngle = (self:LocalToWorld(self.Out) - Ent:LocalToWorld(Ent.In)):GetNormalized():DotProduct( self:GetForward() )
+		local Direction
+		if self.IsTrans then Direction = -self:GetRight() else Direction = self:GetForward() end
+		local DrvAngle = (self:LocalToWorld(self.Out) - Ent:LocalToWorld(Ent.In)):GetNormalized():DotProduct((Direction))
 		if ( DrvAngle < 0.7 ) then
 			self:Unlink( Ent )
 		end
@@ -363,7 +367,9 @@ function ENT:Link( Target )
 
 	local InPos = Target:LocalToWorld(Target.In)
 	local OutPos = self:LocalToWorld(self.Out)
-	local DrvAngle = ( OutPos - InPos ):GetNormalized():DotProduct( self:GetForward() )
+	local Direction
+	if self.IsTrans then Direction = -self:GetRight() else Direction = self:GetForward() end
+	local DrvAngle = (OutPos - InPos):GetNormalized():DotProduct((Direction))
 	if DrvAngle < 0.7 then
 		return false, "Cannot link due to excessive driveshaft angle!"
 	end
