@@ -124,7 +124,13 @@ end
 -- Returns the power in kW of an ACF engine
 e2function number entity:acfMaxPower()
 	if not isEngine(this) then return 0 end
-	return (math.floor(this.PeakTorque * this.PeakMaxRPM / 9548.8)) or 0
+	local peakpower
+	if this.iselec then
+		peakpower = math.floor(this.PeakTorque * this.LimitRPM / (4*9548.8))
+	else
+		peakpower = math.floor(this.PeakTorque * this.PeakMaxRPM / 9548.8)
+	end
+	return peakpower or 0
 end
 
 -- Returns the idle rpm of an ACF engine

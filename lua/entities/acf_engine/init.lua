@@ -74,7 +74,7 @@ function MakeACF_Engine(Owner, Pos, Angle, Id)
 	Engine:SetNetworkedBeamInt("Torque",Engine.PeakTorque)	
 	-- add in the variable to check if its an electric motor
 	if (Engine.iselec == true )then
-		Engine:SetNetworkedBeamInt("Power",Engine.elecpower) -- add in the value from the elecpower
+		Engine:SetNetworkedBeamInt("Power",math.floor(Engine.PeakTorque * Engine.LimitRPM / (4*9548.8))) --elecs and turbines peak power is at limitrpm/2, and has peaktorque/2 nm at that rpm
 	else
 		Engine:SetNetworkedBeamInt("Power",math.floor(Engine.PeakTorque * Engine.PeakMaxRPM / 9548.8))
 	end
@@ -135,7 +135,7 @@ function ENT:Update( ArgsTable )
 	self:SetNetworkedBeamInt("Torque",self.PeakTorque)
 	-- add in the variable to check if its an electric motor
 	if self.iselec then
-		self:SetNetworkedBeamInt("Power",self.elecpower) -- add in the value from the elecpower
+		self:SetNetworkedBeamInt("Power",math.floor(self.PeakTorque * self.LimitRPM / (4*9548.8))) --elecs and turbines peak power is at limitrpm/2, and has peak torque/2 at that rpm
 	else
 		self:SetNetworkedBeamInt("Power",math.floor(self.PeakTorque * self.PeakMaxRPM / 9548.8))
 	end

@@ -57,7 +57,8 @@ function ACFEngineGUICreate( Table )
 	acfmenupanel:CPanelText("Desc", Table.desc)
 	
 	if (Table.iselec == true )then
-		acfmenupanel:CPanelText("Power", "Peak Power : "..Table.elecpower.." kW / "..math.Round(Table.elecpower*1.34).." HP @ "..(Table.peakmaxrpm).." RPM")
+		local peakkw = math.floor(Table.torque * Table.limitrpm / (4*9548.8))
+		acfmenupanel:CPanelText("Power", "Peak Power : "..peakkw.." kW / "..math.Round(peakkw*1.34).." HP @ "..(Table.limitrpm/2).." RPM")
 	else	
 		acfmenupanel:CPanelText("Power", "Peak Power : "..(math.floor(Table.torque * Table.peakmaxrpm / 9548.8)).." kW / "..math.Round(math.floor(Table.torque * Table.peakmaxrpm / 9548.8)*1.34).." HP @ "..(Table.peakmaxrpm).." RPM")
 	end
