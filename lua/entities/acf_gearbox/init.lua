@@ -65,6 +65,7 @@ function MakeACF_Gearbox(Owner, Pos, Angle, Id, Data1, Data2, Data3, Data4, Data
     if Gearbox.CVT then
 		Gearbox.TargetMinRPM = Data3
 		Gearbox.TargetMaxRPM = math.max(Data4,Data3+100)
+		Gearbox.CVTRatio = nil
 	end
 	Gearbox.GearTable = List["Mobility"][Id]["geartable"]
 		Gearbox.GearTable["Final"] = Data10
@@ -93,6 +94,9 @@ function MakeACF_Gearbox(Owner, Pos, Angle, Id, Data1, Data2, Data3, Data4, Data
 	Gearbox:SetModel( Gearbox.Model )	
 		
 	local Inputs = {"Gear","Gear Up","Gear Down"}
+	if Gearbox.CVT then
+		table.insert(Inputs,"CVT Ratio")
+	end
 	if Gearbox.Dual then
 		table.insert(Inputs,"Left Clutch")
 		table.insert(Inputs,"Right Clutch")
@@ -189,6 +193,9 @@ function ENT:Update( ArgsTable )
         self.CVT = List["Mobility"][Id]["cvt"]
 		
 		local Inputs = {"Gear","Gear Up","Gear Down"}
+		if self.CVT then
+			table.insert(Inputs,"CVT Ratio")
+		end
 		if self.Dual then
 			table.insert(Inputs,"Left Clutch")
 			table.insert(Inputs,"Right Clutch")
@@ -215,6 +222,7 @@ function ENT:Update( ArgsTable )
     if self.CVT then 
         self.TargetMinRPM = ArgsTable[7]
         self.TargetMaxRPM = math.max(ArgsTable[8],ArgsTable[7]+100)
+		self.CVTRatio = nil
 		Wire_TriggerOutput(self, "Min Target RPM", self.TargetMinRPM)
 		Wire_TriggerOutput(self, "Max Target RPM", self.TargetMaxRPM)
     end
@@ -296,6 +304,8 @@ function ENT:TriggerInput( iname , value )
 		self.LClutch = math.Clamp(1-value,0,1)*self.MaxTorque
 	elseif ( iname == "Right Clutch" ) then
 		self.RClutch = math.Clamp(1-value,0,1)*self.MaxTorque
+	elseif ( iname == "CVT Ratio" ) then
+		self.CVTRatio = math.Clamp(value,0,1)
 	end		
 
 end
@@ -395,7 +405,11 @@ function ENT:Calc( InputRPM, InputInertia )
 			end
 		
             if self.CVT and self.Gear == 1 then
-                self.GearTable[1] = math.Clamp((InputRPM - self.TargetMinRPM) / ((self.TargetMaxRPM - self.TargetMinRPM) or 1),0.05,1)
+				if self.CVTRatio and self.CVTRatio > 0 then
+					self.GearTable[1] = math.Clamp(self.CVTRatio,0.01,1)
+				else
+					self.GearTable[1] = math.Clamp((InputRPM - self.TargetMinRPM) / ((self.TargetMaxRPM - self.TargetMinRPM) or 1),0.05,1)
+				end
                 self.GearRatio = (self.GearTable[1] or 0)*self.GearTable["Final"]
                 Wire_TriggerOutput(self, "Ratio", self.GearRatio)
             end

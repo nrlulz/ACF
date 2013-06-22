@@ -292,6 +292,14 @@ e2function number entity:acfTorqueOut()
 	return math.min(this.TotalReqTq or 0, this.MaxTorque or 0) / (this.GearRatio or 1)
 end
 
+-- Sets the gear ratio of a CVT, set to 0 to use built-in algorithm
+e2function number entity:acfCVTRatio( number ratio )
+	if not isGearbox(this) then return 0 end
+	if restrictInfo(self, this) then return 0 end
+	if not this.CVT then return end
+	this.CVTRatio = math.Clamp(ratio,0,1)
+end
+
 __e2setcost( 5 )
 
 -- Sets the current gear for an ACF gearbox
