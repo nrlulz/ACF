@@ -293,9 +293,9 @@ e2function number entity:acfTorqueOut()
 end
 
 -- Sets the gear ratio of a CVT, set to 0 to use built-in algorithm
-e2function number entity:acfCVTRatio( number ratio )
-	if not isGearbox(this) then return 0 end
-	if restrictInfo(self, this) then return 0 end
+e2function void entity:acfCVTRatio( number ratio )
+	if not isGearbox(this) then return end
+	if restrictInfo(self, this) then return end
 	if not this.CVT then return end
 	this.CVTRatio = math.Clamp(ratio,0,1)
 end
