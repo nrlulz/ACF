@@ -74,7 +74,7 @@ function ENT:ACF_OnDamage( Entity , Energy , FrAera , Angle , Inflictor )	--This
 			self.Inflictor = Inflictor
 		end
 		if self.Ammo > 1 then
-			ACF_AmmoExplosion( self , self:GetPos() )
+			ACF_ScaledExplosion( self )
 		else
 			ACF_HEKill( self , VectorRand() )
 		end
@@ -259,7 +259,7 @@ function ENT:Think()
 	
 	if self.Damaged then
 		if self.Damaged < CurTime() then
-			ACF_AmmoExplosion( self , self:GetPos() )
+			ACF_ScaledExplosion( self )
 		else
 			if not (self.BulletData["Type"] == "Refill") then
 				if math.Rand(0,150) > self.BulletData["RoundVolume"]^0.5 and math.Rand(0,1) < self.Ammo/math.max(self.Capacity,1) and ACF.RoundTypes[self.BulletData["Type"]] then

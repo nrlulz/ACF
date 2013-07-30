@@ -93,6 +93,7 @@ function PANEL:Init( )
 	local Mobility = self.WeaponSelect:AddNode( "Mobility" )
 	local Engines = Mobility:AddNode( "Engines" )
 	local Gearboxes = Mobility:AddNode( "Gearboxes" )
+	local FuelTanks = Mobility:AddNode( "Fuel Tanks" )
 	local EngineSubcats = {}
 	for _, MobilityTable in pairs(self.WeaponDisplay["Mobility"]) do
 		NodeAdd = Mobility
@@ -100,6 +101,8 @@ function PANEL:Init( )
 			NodeAdd = Engines
 		elseif ( MobilityTable.ent == "acf_gearbox" ) then
 			NodeAdd = Gearboxes
+		elseif ( MobilityTable.ent == "acf_fueltank" ) then
+			NodeAdd = FuelTanks
 		end
 		if((EngineSubcats["misce"] == nil) and (EngineSubcats["miscg"] == nil)) then
 			EngineSubcats["misce"] = Engines:AddNode( "Miscellaneous" )
@@ -128,6 +131,11 @@ function PANEL:Init( )
 				NodeAdd = EngineSubcats[MobilityTable.category]
 			else
 				NodeAdd = EngineSubcats["miscg"]
+			end
+		elseif MobilityTable.ent == "acf_fueltank" then
+			NodeAdd = FuelTanks
+			if (MobilityTable.category) then
+				NodeAdd = EngineSubcats[MobilityTable.category]
 			end
 		end
 		

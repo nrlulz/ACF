@@ -333,41 +333,33 @@ function ACF_APKill( Entity , HitVector , Power )
 	
 end
 
-function ACF_AmmoExplosion( Origin , Pos )
-
-	--old method, purely based on ammo count
-	--local HEWeight = Origin.Ammo/2
-	
-	--treats propellant as 1x the explosive power of TNT
-	--local BoomPower = Origin.BulletData["BoomPower"]
-	--if not BoomPower then BoomPower = 0.002 end --make sure refills are explosive
-	--local HEWeight = BoomPower * Origin.Ammo
-	
-	--treats propellant as ~1/8x the explosive power of TNT
-	local HEContent, PropContent
-	if Origin.RoundType == "Refill" then
-		HEContent = 0.001
-		PropContent = 0.001
-	else 
-		HEContent = Origin.BulletData["FillerMass"] or 0
-		PropContent = Origin.BulletData["PropMass"] or 0
-	end
-	local LastHE = 0
-	local HEWeight = (HEContent+PropContent*(ACF.PBase/ACF.HEPower))*Origin.Ammo
-	local Power = HEWeight * ACF.HEPower					--Power in KiloJoules of the filler mass of  TNT 
-	local Radius = (HEWeight)^0.33*8*39.37				--Scalling law found on the net, based on 1PSI overpressure from 1 kg of TNT at 15m
-	local Search = true
-	local Filter = {Origin}
-	
+--converts what would be multiple simultaneous cache detonations into one large explosion
+function ACF_ScaledExplosion( ent )
 	local Inflictor = nil
-	if( Origin.Inflictor ) then
-		Inflictor = Origin.Inflictor
+	if( ent.Inflictor ) then
+		Inflictor = ent.Inflictor
 	end
 	
-	Origin.IsExplosive = false
-	Origin.Exploding = true
-	Origin:Remove()
+	local HEWeight
+	if ent:GetClass() == "acf_fueltank" then
+		HEWeight = (math.max(ent.Fuel, ent.Capacity * 0.0025) / ACF.FuelDensity[ent.FuelType]) * 0.1
+	else
+		local HE, Propel
+		if ent.RoundType == "Refill" then
+			HE = 0.001
+			Propel = 0.001
+		else 
+			HE = ent.BulletData["FillerMass"] or 0
+			Propel = ent.BulletData["PropMass"] or 0
+		end
+		HEWeight = (HE+Propel*(ACF.PBase/ACF.HEPower))*ent.Ammo
+	end
+	local Radius = HEWeight^0.33*8*39.37
+	local Pos = ent:GetPos()
+	local LastHE = 0
 	
+	local Search = true
+	local Filter = {ent}
 	while Search do
 		for key,Found in pairs(ents.FindInSphere(Pos, Radius)) do
 			if Found.IsExplosive and not Found.Exploding then	
@@ -392,18 +384,21 @@ function ACF_AmmoExplosion( Origin , Pos )
 				if ( Occ.Hit and Occ.Entity:EntIndex() != Found.Entity:EntIndex() ) then 
 						--Msg("Target Occluded\n")
 				else
-				
-					local FoundHE, FoundPropel
-					if Found.RoundType == "Refill" then
-						FoundHE = 0.001
-						FoundPropel = 0.001
-					else 
-						FoundHE = Found.BulletData["FillerMass"] or 0
-						FoundPropel = Found.BulletData["PropMass"] or 0
+					local FoundHEWeight
+					if Found:GetClass() == "acf_fueltank" then
+						FoundHEWeight = (math.max(Found.Fuel, Found.Capacity * 0.0025) / ACF.FuelDensity[Found.FuelType]) * 0.1
+					else
+						local HE, Propel
+						if Found.RoundType == "Refill" then
+							HE = 0.001
+							Propel = 0.001
+						else 
+							HE = Found.BulletData["FillerMass"] or 0
+							Propel = Found.BulletData["PropMass"] or 0
+						end
+						FoundHEWeight = (HE+Propel*(ACF.PBase/ACF.HEPower))*Found.Ammo
 					end
-					local FoundHEWeight = (FoundHE+FoundPropel*(ACF.PBase/ACF.HEPower))*Found.Ammo
 	
-					--local FoundHE = Found.Ammo*2
 					HEWeight = HEWeight + FoundHEWeight
 					Found.IsExplosive = false
 					Found.DamageAction = false
@@ -425,14 +420,14 @@ function ACF_AmmoExplosion( Origin , Pos )
 		
 	end	
 	
-	ACF_HE( Pos , Vector(0,0,1) , HEWeight , HEWeight*0.5 , Inflictor , Origin, Origin.Entity )
+	ent:Remove()
+	ACF_HE( Pos , Vector(0,0,1) , HEWeight , HEWeight*0.5 , Inflictor , ent, ent )
 	
 	local Flash = EffectData()
 		Flash:SetOrigin( Pos )
 		Flash:SetNormal( Vector(0,0,-1) )
-		Flash:SetRadius( math.max( Radius, 1 ) )								--Radius of the smoke
+		Flash:SetRadius( math.max( Radius, 1 ) )
 	util.Effect( "ACF_Scaled_Explosion", Flash )
-
 end
 
 function ACF_GetHitAngle( HitNormal , HitVector )

@@ -18,6 +18,8 @@ CreateConVar("sbox_acf_e2restrictinfo", 1) -- 0=any, 1=owned
 --hit calcs ?
 --conversions ?
 
+-- #fuel
+
 
 -- [ Helper Functions ] --
 
@@ -40,6 +42,11 @@ end
 local function isAmmo(ent)
 	if not validPhysics(ent) then return false end
 	if (ent:GetClass() == "acf_ammo") then return true else return false end
+end
+
+local function isFuel(ent)
+	if not validPhysics(ent) then return false end
+	if (ent:GetClass() == "acf_fueltank") then return true else return false end
 end
 
 local function restrictInfo(ply, ent)
@@ -66,21 +73,39 @@ e2function string entity:acfNameShort()
 	if isGearbox(this) then return this.Id or "" end
 	if isGun(this) then return this.Id or "" end
 	if isAmmo(this) then return this.RoundId or "" end
+	if isFuel(this) then return this.FuelType .." ".. this.SizeId end
 	return ""
 end
 
--- Turns an ACF engine or ammo crate on or off
+-- Returns the capacity of an acf ammo crate or fuel tank
+e2function number entity:acfCapacity()
+	if not (isAmmo(this) or isFuel(this)) then return 0 end
+	if restrictInfo(self, this) then return 0 end
+	return this.Capacity or 0
+end
+
+-- Returns 1 if an ACF engine, ammo crate, or fuel tank is on
+e2function number entity:acfActive()
+	if not (isEngine(this) or isAmmo(this) or isFuel(this)) then return 0 end
+	if restrictInfo(self, this) then return 0 end
+	if (this.Active) then return 1 end
+	return 0
+end
+
+-- Turns an ACF engine, ammo crate, or fuel tank on or off
 e2function void entity:acfActive( number on )
-	if not (isEngine(this) or isAmmo(this)) then return end
+	if not (isEngine(this) or isAmmo(this) or isFuel(this)) then return end
 	if not isOwner(self, this) then return end
 	this:TriggerInput("Active", on)	
 end
+
 
 __e2setcost( 2 )
 
 -- Returns the full name of an ACF entity
 e2function string entity:acfName()
 	if isAmmo(this) then return (this.RoundId .. " " .. this.RoundType) end
+	if isFuel(this) then return this.FuelType .." ".. this.SizeId end
 	local acftype = ""
 	if isEngine(this) then acftype = "Mobility" end
 	if isGearbox(this) then acftype = "Mobility" end
@@ -101,6 +126,7 @@ e2function string entity:acfType()
 		return Classes["GunClass"][this.Class]["name"] or ""
 	end
 	if isAmmo(this) then return this.RoundType or "" end
+	if isFuel(this) then return this.FuelType or "" end
 	return ""
 end
 
@@ -185,14 +211,6 @@ e2function number entity:acfInPowerband()
 	if (this.FlyRPM < this.PeakMinRPM) then return 0 end
 	if (this.FlyRPM > this.PeakMaxRPM) then return 0 end
 	return 1
-end
-
--- Returns 1 if the ACF engine is on
-e2function number entity:acfActive()
-	if not isEngine(this) then return 0 end
-	if restrictInfo(self, this) then return 0 end
-	if (this.Active) then return 1 end
-	return 0
 end
 
 -- Returns the throttle of an ACF engine
@@ -488,13 +506,6 @@ e2function number entity:acfIsAmmo()
 	if isAmmo(this) and not restrictInfo(self, this) then return 1 else return 0 end
 end
 
--- Returns the capacity of an acf ammo crate
-e2function number entity:acfCapacity()
-	if not isAmmo(this) then return 0 end
-	if restrictInfo(self, this) then return 0 end
-	return this.Capacity or 0
-end
-
 -- Returns the rounds left in an acf ammo crate
 e2function number entity:acfRounds()
 	if not isAmmo(this) then return 0 end
@@ -605,6 +616,111 @@ e2function number entity:acfPropDuctility()
 	if restrictInfo(self, this) then return 0 end
 	if not ACF_Check(this) then return 0 end
 	return (this.ACF.Ductility or 0)*100
+end
+
+
+-- [ Fuel Functions ] --
+
+
+__e2setcost( 1 )
+
+-- Returns 1 if the entity is an ACF fuel tank
+e2function number entity:acfIsFuel()
+	if isFuel(this) and not restrictInfo(self, this) then return 1 else return 0 end
+end
+
+-- Returns 1 if the current engine requires fuel to run
+e2function number entity:acfFuelRequired()
+	if not isFuel(this) then return 0 end
+	if restrictInfo(self, this) then return 0 end
+	return (this.RequiresFuel and 1) or 0
+end
+
+__e2setcost( 2 )
+
+-- Sets the ACF fuel tank refuel duty status, which supplies fuel to other fuel tanks
+e2function void entity:acfRefuelDuty(number on)
+	if not isFuel(this) then return end
+	if not isOwner(self, this) then return end
+	this:TriggerInput("Refuel Duty", on)
+end
+
+__e2setcost( 5 )
+
+-- Returns the remaining liters or kilowatt hours of fuel in an ACF fuel tank or engine
+e2function number entity:acfFuel()
+	if restrictInfo(self, this) then return 0 end
+	if isFuel(this) then
+		return math.Round(this.Fuel, 3)
+	elseif isEngine(this) then
+		local liters = 0
+		for _,tank in pairs(this.FuelLink) do
+			if tank.Active then liters = liters + tank.Fuel end
+		end
+		return math.Round(liters, 3)
+	end
+	return 0
+end
+
+-- Returns the amount of fuel in an ACF fuel tank or linked to engine as a percentage of capacity
+e2function number entity:acfFuelLevel()
+	if restrictInfo(self, this) then return 0 end
+	if isFuel(this) then
+		return math.Round(this.Fuel / this.Capacity, 3)
+	elseif isEngine(this) then
+		local liters = 0
+		local capacity = 0
+		if not #(this.FuelLink) then return 0 end --if no tanks, return 0
+		for _,tank in pairs(this.FuelLink) do
+			if tank.Active then 
+				capacity = capacity + tank.Capacity
+				liters = liters + tank.Fuel
+			end
+		end
+		return math.Round(liters / capacity, 3)
+	end
+	return 0
+end
+
+-- Returns the current fuel consumption in liters per minute or kilowatts of an engine
+e2function number entity:acfFuelUse()
+	if not isEngine(this) then return 0 end
+	if restrictInfo(self, this) then return 0 end
+	local Tank = nil
+	for _,fueltank in pairs(self.FuelLink) do
+		if fueltank.Fuel > 0 and fueltank.Active then Tank = fueltank break end
+	end
+	if not tank then return 0 end
+	
+	local Consumption
+	if this.FuelType == "Electric" then
+		Consumption = 60 * (this.Torque * this.FlyRPM / 9548.8) * this.FuelUse
+	else
+		local Load = 0.3 + this.Throttle * 0.7
+		Consumption = 60 * Load * this.FuelUse * (this.FlyRPM / this.PeakKwRPM) / ACF.FuelDensity[tank.FuelType]
+	end
+	return math.Round(Consumption, 3)
+end
+
+-- Returns the peak fuel consumption in liters per minute or kilowatts of an engine at powerband max, for the current fuel type the engine is using
+e2function number entity:acfPeakFuelUse()
+	if not isEngine(this) then return 0 end
+	if restrictInfo(self, this) then return 0 end
+	local fuel = "Petrol"
+	local Tank = nil
+	for _,fueltank in pairs(self.FuelLink) do
+		if fueltank.Fuel > 0 and fueltank.Active then Tank = fueltank break end
+	end
+	if tank then fuel = tank.Fuel end
+	
+	local Consumption
+	if this.FuelType == "Electric" then
+		Consumption = 60 * (this.PeakTorque * this.LimitRPM / (4*9548.8)) * this.FuelUse
+	else
+		local Load = 0.3 + this.Throttle * 0.7
+		Consumption = 60 * this.FuelUse / ACF.FuelDensity[fuel]
+	end
+	return math.Round(Consumption, 3)
 end
 
 

@@ -5,6 +5,7 @@
 AddCSLuaFile()
 
 local MobilityTable = {}
+local FuelTankTable = {}
 
 -- setup base engine/gearbox tables so we're not repeating a bunch of unnecessary shit
 local engine_base = {}
@@ -19,11 +20,17 @@ gearbox_base.ent = "acf_gearbox"
 gearbox_base.type = "Mobility"
 gearbox_base.sound = "vehicles/junker/jnk_fourth_cruise_loop2.wav"
 
+local fueltank_base = {}
+fueltank_base.ent = "acf_fueltank"
+fueltank_base.type = "Mobility"
+
 if CLIENT then
 	engine_base.guicreate = function( panel, tbl ) ACFEngineGUICreate( tbl ) end or nil
 	engine_base.guiupdate = function() return end
 	gearbox_base.guicreate = function( panel, tbl ) ACFGearboxGUICreate( tbl ) end or nil
 	gearbox_base.guiupdate = function() return end
+	fueltank_base.guicreate = function( panel, tbl ) ACFFuelTankGUICreate( tbl ) end or nil
+	fueltank_base.guiupdate = function( panel, tbl ) ACFFuelTankGUIUpdate( tbl ) end or nil
 end
 
 -- some functions for defining engines and gearboxes
@@ -39,6 +46,18 @@ function ACF_DefineGearbox( id, data )
 	MobilityTable[ id ] = data
 end
 
+function ACF_DefineFuelTank( id, data )
+	data.id = id
+	table.Inherit( data, fueltank_base )
+	MobilityTable[ id ] = data
+end
+
+function ACF_DefineFuelTankSize( id, data )
+	data.id = id
+	table.Inherit( data, fueltank_base )
+	FuelTankTable[ id ] = data
+end
+
 -- search for and load a bunch of files or whatever
 local engines = file.Find( "acf/shared/engines/*.lua", "LUA" )
 for k, v in pairs( engines ) do
@@ -52,5 +71,12 @@ for k, v in pairs( gearboxes ) do
 	include( "acf/shared/gearboxes/" .. v )
 end
 
+local fueltanks = file.Find( "acf/shared/fueltanks/*.lua", "LUA" )
+for k, v in pairs( fueltanks ) do
+	AddCSLuaFile( "acf/shared/fueltanks/" .. v )
+	include( "acf/shared/fueltanks/" .. v )
+end
+
 -- now that the mobility table is populated, throw it in the acf ents list
 list.Set( "ACFEnts", "Mobility", MobilityTable )
+list.Set( "ACFEnts", "FuelTanks", FuelTankTable )

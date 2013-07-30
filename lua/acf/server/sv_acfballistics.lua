@@ -24,7 +24,7 @@ function ACF_CreateBullet( BulletData )
 			BulletData["Accel"] = Vector(0, 0, 0)
 			BulletData["DragCoef"] = 0
 		end
-		print(BulletData["TraceBackComp"])
+		--print(BulletData["TraceBackComp"])
 	end
 	BulletData["Filter"] = { BulletData["Gun"] }
 	BulletData["Index"] = ACF.CurBulletIndex

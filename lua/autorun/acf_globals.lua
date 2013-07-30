@@ -2,7 +2,7 @@ ACF = {}
 ACF.AmmoTypes = {}
 ACF.MenuFunc = {}
 ACF.AmmoBlacklist = {}
-ACF.Version = 407 -- REMEMBER TO CHANGE THIS FOR GODS SAKE, OMFG!!!!!!! -wrex
+ACF.Version = 409 -- REMEMBER TO CHANGE THIS FOR GODS SAKE, OMFG!!!!!!! -wrex
 ACF.CurrentVersion = 0 -- just defining a variable, do not change
 
 ACF.Threshold = 225	--Health Divisor
@@ -34,6 +34,27 @@ ACF.PBase = 1050		--1KG of propellant produces this much KE at the muzzle, in kj
 ACF.PScale = 1	--Gun Propellant power expotential
 ACF.MVScale = 0.5  --Propellant to MV convertion expotential
 ACF.PDensity = 1.6	--Gun propellant density (Real powders go from 0.7 to 1.6, i'm using higher densities to simulate case bottlenecking)
+
+ACF.TorqueBoost = 1.25 --torque multiplier from using fuel
+ACF.FuelRate = 5.0  --multiplier for fuel usage, 1.0 is approx real world
+ACF.ElecRate = 1.5 --multiplier for electrics
+ACF.TankVolumeMul = 1.0 -- multiplier for fuel tank volume
+
+ACF.LiIonED = 0.458 -- li-ion energy density: kw hours / liter
+ACF.CuIToLiter = 0.0163871 -- cubic inches to liters
+
+ACF.FuelDensity = {}
+ACF.FuelDensity["Diesel"] = 0.832  --kg/liter
+ACF.FuelDensity["Petrol"] = 0.745
+ACF.FuelDensity["Electric"] = 3.89 -- li-ion
+
+ACF.Efficiency = {} --how efficient various engine types are
+ACF.Efficiency["GenericPetrol"] = 0.304 --kg per kw hr, higher is worse (too high?)
+ACF.Efficiency["GenericDiesel"] = 0.243 --up to 0.274 (too low?)
+ACF.Efficiency["Turbine"] = 0.231
+ACF.Efficiency["Wankel"] = 0.335
+ACF.Efficiency["Radial"] = 0.4 --0.53 to 0.38
+ACF.Efficiency["Electric"] = 0.85 --percent efficiency converting chemical kw into mechanical kw
 
 ACF.RefillDistance = 300 --Distance in which ammo crate starts refilling.
 ACF.RefillSpeed = 700 -- (ACF.RefillSpeed / RoundMass) / Distance 

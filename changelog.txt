@@ -5,4 +5,26 @@ r398
 --Added the changelog back
 --Changed Ammo/Gearbox sliders.
 
+*r401
+--Fixed gun unloading
 
+*r403
+--Engine health reduced 87.5%
+--Engine damage degrades performance by up to 75%
+--Gun damage degrades accuracy by up to 4x
+--Debris within a certain cutoff radius is removed.
+--Restored previous ACF armor values.
+
+*r405
+--New ammo crate sizes
+
+*r406
+--Rebalanced AC, AL, and SA guns
+--Added 12.7mm RAC
+--Added 240mm and 280mm HW
+--Added 150mm and 280mm MO
+--Added 170mm C and AL
+
+*r409
+--Added high grade fuel
+--Added electric motors without attached batteries
