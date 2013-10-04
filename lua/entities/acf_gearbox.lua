@@ -1,4 +1,3 @@
-
 AddCSLuaFile()
 
 DEFINE_BASECLASS( "base_wire_entity" )
@@ -107,7 +106,6 @@ function ENT:Initialize()
 	self.CurRPM = 0
     self.CVT = false
 	self.DoubleDiff = false
-	self.Tank = false
 	self.InGear = false
 	self.CanUpdate = true
 	self.LastActive = 0
@@ -138,7 +136,6 @@ function MakeACF_Gearbox(Owner, Pos, Angle, Id, Data1, Data2, Data3, Data4, Data
 	Gearbox.Dual = List.Mobility[Id].doubleclutch
     Gearbox.CVT = List.Mobility[Id].cvt
 	Gearbox.DoubleDiff = List.Mobility[Id].doublediff
-	Gearbox.Tank = List.Mobility[Id].tank
 	
     if Gearbox.CVT then
 		Gearbox.TargetMinRPM = Data3
@@ -270,7 +267,6 @@ function ENT:Update( ArgsTable )
 		self.Dual = List.Mobility[Id].doubleclutch
         self.CVT = List.Mobility[Id].cvt
 		self.DoubleDiff = List.Mobility[Id].doublediff
-		self.Tank = List.Mobility[Id].tank
 		
 		local Inputs = {"Gear","Gear Up","Gear Down"}
 		if self.CVT then
@@ -342,7 +338,7 @@ function ENT:Update( ArgsTable )
 	
 	self:ChangeGear(1)
 	
-	if self.Dual or self.Tank then
+	if self.Dual or self.DoubleDiff then
 		self:SetBodygroup(1, 1)
 	else
 		self:SetBodygroup(1, 0)
