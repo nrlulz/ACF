@@ -1,14 +1,14 @@
 -- Double Differential 
 
 -- Weight
-local GearDDSW = 80
-local GearDDMW = 240
-local GearDDLW = 600
+local GearDDSW = 45
+local GearDDMW = 85
+local GearDDLW = 175
 
 -- Torque Rating
-local GearDDST = 240
-local GearDDMT = 850 
-local GearDDLT = 4600
+local GearDDST = 25000
+local GearDDMT = 50000 
+local GearDDLT = 100000
 
 -- general description
 local DDDesc = "\n\nA Double Differential transmission allows for a multitude of radii as well as a neutral steer."
