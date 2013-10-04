@@ -3,11 +3,11 @@
 -- Weight
 local GearDDSW = 45
 local GearDDMW = 85
-local GearDDLW = 175
+local GearDDLW = 180
 
 -- Torque Rating
-local GearDDST = 25000
-local GearDDMT = 50000 
+local GearDDST = 20000
+local GearDDMT = 45000 
 local GearDDLT = 100000
 
 -- general description
