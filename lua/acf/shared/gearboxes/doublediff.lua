@@ -11,7 +11,7 @@ local GearDDMT = 850
 local GearDDLT = 4600
 
 -- general description
-local DDDesc = "\n\nA Double Differential transmission allows for a multitude of radii aswell as a neutral steer."
+local DDDesc = "\n\nA Double Differential transmission allows for a multitude of radii as well as a neutral steer."
 
 -- Inline
 
