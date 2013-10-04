@@ -181,10 +181,6 @@ function MakeACF_Gearbox(Owner, Pos, Angle, Id, Data1, Data2, Data3, Data4, Data
 		table.insert(Inputs, "Right Clutch")
 		table.insert(Inputs, "Left Brake")
 		table.insert(Inputs, "Right Brake")
-	elseif Gearbox.TripleDiff then
-		table.insert(Inputs, "Clutch")
-		table.insert(Inputs, "Left Brake")
-		table.insert(Inputs, "Right Brake")
 	else
 		table.insert(Inputs, "Clutch")
 		table.insert(Inputs, "Brake")
@@ -272,19 +268,12 @@ function ENT:Update( ArgsTable )
 		if self.CVT then
 			table.insert(Inputs,"CVT Ratio")
 		elseif self.DoubleDiff then
-			table.remove(Inputs, "Gear")
-			table.remove(Inputs, "Gear Up")
-			table.remove(Inputs, "Gear Down")
 			table.insert(Inputs, "Steer Rate")
 		end
 	
 		if self.Dual then
 			table.insert(Inputs, "Left Clutch")
 			table.insert(Inputs, "Right Clutch")
-			table.insert(Inputs, "Left Brake")
-			table.insert(Inputs, "Right Brake")
-		elseif self.TripleDiff then
-			table.insert(Inputs, "Clutch")
 			table.insert(Inputs, "Left Brake")
 			table.insert(Inputs, "Right Brake")
 		else
