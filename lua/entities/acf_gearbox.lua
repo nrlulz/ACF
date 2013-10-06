@@ -547,10 +547,10 @@ function ENT:Calc( InputRPM, InputInertia )
 				end
 				if Link.Side == 0 then 
 						local DTq = math.Clamp( ( self.SteerRate * ( InputRPM - ( RPM * Sign) ) ) * InputInertia, -self.MaxTorque, self.MaxTorque )
-					Link.ReqTq = ( NTq + DTq )/20
+					Link.ReqTq = ( NTq + DTq )*self.GearRatio
 				elseif Link.Side == 1 then
 						local DTq = math.Clamp( ( self.SteerRate * ( InputRPM + ( RPM * Sign) ) ) * InputInertia, -self.MaxTorque, self.MaxTorque )
-					Link.ReqTq = ( NTq - DTq )/20
+					Link.ReqTq = ( NTq - DTq )*self.GearRatio
 				end
 			end
 		else
