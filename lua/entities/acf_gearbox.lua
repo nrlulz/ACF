@@ -539,7 +539,7 @@ function ENT:Calc( InputRPM, InputInertia )
 		elseif self.DoubleDiff then
 			local RPM = self:CalcWheel( Link, SelfWorld )
 			if self.GearRatio ~= 0 and ( ( InputRPM > 0 and RPM < InputRPM ) or ( InputRPM < 0 and RPM > InputRPM ) ) then
-				NTq = math.min( Clutch, ( InputRPM - RPM) * InputInertia)
+				local NTq = math.min( Clutch, ( InputRPM - RPM) * InputInertia)
 			
 				if( self.SteerRate ~= 0 ) then
 					Sign = self.SteerRate / math.abs( self.SteerRate )
@@ -547,10 +547,10 @@ function ENT:Calc( InputRPM, InputInertia )
 					Sign = 0
 				end
 				if Link.Side == 0 then 
-						DTq = math.Clamp( ( self.SteerRate * ( InputRPM - (RPM * Sign) ) ) * InputInertia, -self.MaxTorque, self.MaxTorque )
+						local DTq = math.Clamp( ( self.SteerRate * ( InputRPM - (RPM * Sign) ) ) * InputInertia, -self.MaxTorque, self.MaxTorque )
 					Link.ReqTq = ( NTq + DTq )
 				elseif Link.Side == 1 then
-						DTq = math.Clamp( ( self.SteerRate * ( InputRPM + (RPM * Sign) ) ) * InputInertia, -self.MaxTorque, self.MaxTorque )
+						local DTq = math.Clamp( ( self.SteerRate * ( InputRPM + (RPM * Sign) ) ) * InputInertia, -self.MaxTorque, self.MaxTorque )
 					Link.ReqTq = ( NTq - DTq )
 				end
 			end
