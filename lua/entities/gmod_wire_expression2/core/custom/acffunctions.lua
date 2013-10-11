@@ -455,6 +455,14 @@ e2function void entity:acfClutchRight( number clutch )
 	this:TriggerInput("Right Clutch", clutch)
 end
 
+-- Sets the steer ratio for an ACF gearbox
+e2function void entity:acfSteerRate( number rate )
+	if not isGearbox(this) then return end
+	if not isOwner(self, this) then return end
+	if (not this.DoubleDiff) then return end
+	this:TriggerInput("Steer Rate", rate)
+end
+
 
 -- [ Gun Functions ] --
 
