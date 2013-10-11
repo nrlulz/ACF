@@ -224,7 +224,7 @@ function MakeACF_Gearbox(Owner, Pos, Angle, Id, Data1, Data2, Data3, Data4, Data
 	
 	Gearbox:ChangeGear(1)
 	
-	if Gearbox.Dual or Gearbox.Tank then
+	if Gearbox.Dual or Gearbox.DoubleDiff then
 		Gearbox:SetBodygroup(1, 1)
 	else
 		Gearbox:SetBodygroup(1, 0)
