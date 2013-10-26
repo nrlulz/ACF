@@ -88,7 +88,7 @@ function TOOL:RightClick( trace )
 
 	self.CopyData = ArgTable;
 
-	PrintTable( self.CopyData );
+	--PrintTable( self.CopyData );
 
 	ACF_SendNotify( pl, true, "Gearbox copied successfully!" );
 	
