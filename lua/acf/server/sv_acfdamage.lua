@@ -5,7 +5,8 @@ function ACF_HE( Hitpos , HitNormal , FillerMass, FragMass , Inflictor, NoOcc, A
 	local MaxSphere = (4 * 3.1415 * (Radius*2.54 )^2) 		--Surface Aera of the sphere at maximum radius
 	local Amp = math.min(Power/2000,50)
 	util.ScreenShake( Hitpos, Amp, Amp, Amp/15, Radius*10 )  
-	--local Targets = ents.FindInSphere( Hitpos, Radius )
+	local Targets = ents.FindInSphere( Hitpos, Radius )
+	--[[
 	local Targets = ents.GetAll()
 	
 	for k,v in pairs (Targets) do
@@ -14,7 +15,7 @@ function ACF_HE( Hitpos , HitNormal , FillerMass, FragMass , Inflictor, NoOcc, A
 			Targets[k] = nil
 		end
 	end
-	
+	--]]
 	local Fragments = math.max(math.floor((FillerMass/FragMass)*ACF.HEFrag),2)
 	local FragWeight = FragMass/Fragments
 	local FragVel = (Power*50000/FragWeight/Fragments)^0.5
