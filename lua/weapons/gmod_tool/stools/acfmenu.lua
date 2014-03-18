@@ -1,5 +1,5 @@
 
-TOOL.Category		= "Construction"
+TOOL.Category		= "ACF"
 TOOL.Name			= "#Tool.acfmenu.listname"
 TOOL.Command		= nil
 TOOL.ConfigName		= ""

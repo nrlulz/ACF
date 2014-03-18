@@ -1,5 +1,5 @@
 
-TOOL.Category		= "Construction"
+TOOL.Category		= "ACF"
 TOOL.Name			= "#Tool.acfsound.name"
 TOOL.Command		= nil
 TOOL.ConfigName		= ""

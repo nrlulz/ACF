@@ -1,5 +1,5 @@
 
-TOOL.Category		= "Construction";
+TOOL.Category		= "ACF";
 TOOL.Name			= "#Tool.acfcopy.listname";
 TOOL.Author 		= "looter";
 TOOL.Command		= nil;

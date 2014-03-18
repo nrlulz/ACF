@@ -1,5 +1,5 @@
 
-TOOL.Category	= "Construction"
+TOOL.Category	= "ACF"
 TOOL.Name		= "#tool.acfarmorprop.name"
 TOOL.Command	= nil
 TOOL.ConfigName	= ""
