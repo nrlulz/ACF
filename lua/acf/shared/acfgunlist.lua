@@ -318,7 +318,7 @@ local SA45mm = {}
 		SA45mm.round.maxlength = 52
 		SA45mm.round.propweight = 1.8
 	SA45mm.rofmod = 1
-	SA45mm.magsize = 6
+	SA45mm.magsize = 5
 	SA45mm.magreload = 4
 	if ( CLIENT ) then
 		SA45mm.guicreate = (function( Panel, Table ) ACFGunGUICreate( Table ) end or nil)
@@ -555,7 +555,30 @@ local AL75mm = {}
 		AL75mm.guiupdate = function() return end
 	end
 GunTable["75mmAL"] = AL75mm
-	
+
+local Gun37mm = {}
+        Gun37mm.id = "37mmC"
+        Gun37mm.ent = "acf_gun"
+        Gun37mm.type = "Guns"
+        Gun37mm.name = "37mm Tank Gun"
+        Gun37mm.desc = "High velocity guns that can fire very powerful ammunition, but are rather slow to reload.  A light and fairly weak cannon with good accuracy."
+        Gun37mm.model = "models/tankgun/tankgun_37mm.mdl"
+        Gun37mm.caliber = 3.7
+        Gun37mm.gunclass = "C"
+        Gun37mm.weight = 350
+        Gun37mm.year = 1919
+        Gun37mm.rofmod = 1.4
+        Gun37mm.sound = "weapons/ACF_Gun/ac_fire4.wav"
+                Gun37mm.round = {}
+                Gun37mm.round.id = "37mmC"
+                Gun37mm.round.maxlength = 45
+                Gun37mm.round.propweight = 1.125
+        if ( CLIENT ) then
+                Gun37mm.guicreate = (function( Panel, Table ) ACFGunGUICreate( Table ) end or nil)
+                Gun37mm.guiupdate = function() return end
+        end
+GunTable["37mmC"] = Gun37mm
+
 local Gun50mm = {}
 	Gun50mm.id = "50mmC"
 	Gun50mm.ent = "acf_gun"
@@ -836,6 +859,135 @@ local How290mm = {}
 	end
 GunTable["290mmHW"] = How290mm
 ]]--	
+--our new short guns--
+
+local ShortGun37mm = {}
+	ShortGun37mm.id = "37mmSC"
+	ShortGun37mm.ent = "acf_gun"
+	ShortGun37mm.type = "Guns"
+	ShortGun37mm.name = "37mm Short Cannon"
+	ShortGun37mm.desc = "Short cannons trade muzzle velocity and accuracy for lighter weight and smaller size, with more penetration than howitzers and lighter than cannons.  Quick-firing and light, but penetration is laughable.  You're better off throwing rocks."
+	ShortGun37mm.model = "models/tankgun/tankgun_short_37mm.mdl"
+	ShortGun37mm.caliber = 3.7
+	ShortGun37mm.gunclass = "SC"
+	ShortGun37mm.weight = 200
+	ShortGun37mm.year = 1915
+	ShortGun37mm.sound = "weapons/ACF_Gun/ac_fire4.wav"
+		ShortGun37mm.round = {}
+		ShortGun37mm.round.id = "37mmSC"
+		ShortGun37mm.round.maxlength = 45
+		ShortGun37mm.round.propweight = 0.29
+	if ( CLIENT ) then
+		ShortGun37mm.guicreate = (function( Panel, Table ) ACFGunGUICreate( Table ) end or nil)
+		ShortGun37mm.guiupdate = function() return end
+	end
+GunTable["37mmSC"] = ShortGun37mm
+
+local ShortGun50mm = {}
+	ShortGun50mm.id = "50mmSC"
+	ShortGun50mm.ent = "acf_gun"
+	ShortGun50mm.type = "Guns"
+	ShortGun50mm.name = "50mm Short Cannon"
+	ShortGun50mm.desc = "Short cannons trade muzzle velocity and accuracy for lighter weight and smaller size, with more penetration than howitzers and lighter than cannons.  The 50mm is a quick-firing pea-shooter, good for scouts, and common on old interwar tanks."
+	ShortGun50mm.model = "models/tankgun/tankgun_short_50mm.mdl"
+	ShortGun50mm.caliber = 5.0
+	ShortGun50mm.gunclass = "SC"
+	ShortGun50mm.weight = 330
+	ShortGun50mm.year = 1915
+	ShortGun50mm.sound = "weapons/ACF_Gun/ac_fire4.wav"
+		ShortGun50mm.round = {}
+		ShortGun50mm.round.id = "50mmSC"
+		ShortGun50mm.round.maxlength = 63
+		ShortGun50mm.round.propweight = 0.6
+	if ( CLIENT ) then
+		ShortGun50mm.guicreate = (function( Panel, Table ) ACFGunGUICreate( Table ) end or nil)
+		ShortGun50mm.guiupdate = function() return end
+	end
+GunTable["50mmSC"] = ShortGun50mm
+
+local ShortGun75mm = {}
+	ShortGun75mm.id = "75mmSC"
+	ShortGun75mm.ent = "acf_gun"
+	ShortGun75mm.type = "Guns"
+	ShortGun75mm.name = "75mm Short Cannon"
+	ShortGun75mm.desc = "Short cannons trade muzzle velocity and accuracy for lighter weight and smaller size, with more penetration than howitzers and lighter than cannons.  The 75mm is common WW2 medium tank armament, and still useful in many other applications."
+	ShortGun75mm.model = "models/tankgun/tankgun_short_75mm.mdl"
+	ShortGun75mm.caliber = 7.5
+	ShortGun75mm.gunclass = "SC"
+	ShortGun75mm.weight = 750
+	ShortGun75mm.year = 1936
+		ShortGun75mm.round = {}
+		ShortGun75mm.round.id = "75mmSC"
+		ShortGun75mm.round.maxlength = 76
+		ShortGun75mm.round.propweight = 2
+	if ( CLIENT ) then
+		ShortGun75mm.guicreate = (function( Panel, Table ) ACFGunGUICreate( Table ) end or nil)
+		ShortGun75mm.guiupdate = function() return end
+	end
+GunTable["75mmSC"] = ShortGun75mm
+
+local ShortGun100mm = {}
+	ShortGun100mm.id = "100mmSC"
+	ShortGun100mm.ent = "acf_gun"
+	ShortGun100mm.type = "Guns"
+	ShortGun100mm.name = "100mm Short Cannon"
+	ShortGun100mm.desc = "Short cannons trade muzzle velocity and accuracy for lighter weight and smaller size, with more penetration than howitzers and lighter than cannons.  The 100mm is an effective infantry-support or antitank weapon, with a lot of uses and surprising lethality."
+	ShortGun100mm.model = "models/tankgun/tankgun_short_100mm.mdl"
+	ShortGun100mm.caliber = 10.0
+	ShortGun100mm.gunclass = "SC"
+	ShortGun100mm.weight = 1750
+	ShortGun100mm.year = 1940
+		ShortGun100mm.round = {}
+		ShortGun100mm.round.id = "100mmSC"
+		ShortGun100mm.round.maxlength = 93
+		ShortGun100mm.round.propweight = 4.5
+	if ( CLIENT ) then
+		ShortGun100mm.guicreate = (function( Panel, Table ) ACFGunGUICreate( Table ) end or nil)
+		ShortGun100mm.guiupdate = function() return end
+	end
+GunTable["100mmSC"] = ShortGun100mm
+
+local ShortGun120mm = {}
+	ShortGun120mm.id = "120mmSC"
+	ShortGun120mm.ent = "acf_gun"
+	ShortGun120mm.type = "Guns"
+	ShortGun120mm.name = "120mm Short Cannon"
+	ShortGun120mm.desc = "Short cannons trade muzzle velocity and accuracy for lighter weight and smaller size, with more penetration than howitzers and lighter than cannons.  The 120mm is a formidable yet lightweight weapon, with excellent performance against larger vehicles."
+	ShortGun120mm.model = "models/tankgun/tankgun_short_120mm.mdl"
+	ShortGun120mm.caliber = 12.0
+	ShortGun120mm.gunclass = "SC"
+	ShortGun120mm.weight = 4200
+	ShortGun120mm.year = 1944
+		ShortGun120mm.round = {}
+		ShortGun120mm.round.id = "120mmSC"
+		ShortGun120mm.round.maxlength = 110
+		ShortGun120mm.round.propweight = 8.5
+	if ( CLIENT ) then
+		ShortGun120mm.guicreate = (function( Panel, Table ) ACFGunGUICreate( Table ) end or nil)
+		ShortGun120mm.guiupdate = function() return end
+	end
+GunTable["120mmSC"] = ShortGun120mm	
+
+local ShortGun140mm = {}
+	ShortGun140mm.id = "140mmSC"
+	ShortGun140mm.ent = "acf_gun"
+	ShortGun140mm.type = "Guns"
+	ShortGun140mm.name = "140mm Short Cannon"
+	ShortGun140mm.desc = "Short cannons trade muzzle velocity and accuracy for lighter weight and smaller size, with more penetration than howitzers and lighter than cannons.  A specialized weapon, developed from dark magic and anti-heavy tank hatred.  Deal with it."
+	ShortGun140mm.model = "models/tankgun/tankgun_short_140mm.mdl"
+	ShortGun140mm.caliber = 14.0
+	ShortGun140mm.gunclass = "SC"
+	ShortGun140mm.weight = 7040
+	ShortGun140mm.year = 1999
+		ShortGun140mm.round = {}
+		ShortGun140mm.round.id = "140mmSC"
+		ShortGun140mm.round.maxlength = 127
+		ShortGun140mm.round.propweight = 12.8
+	if ( CLIENT ) then
+		ShortGun140mm.guicreate = (function( Panel, Table ) ACFGunGUICreate( Table ) end or nil)
+		ShortGun140mm.guiupdate = function() return end
+	end
+GunTable["140mmSC"] = ShortGun140mm
 
 local GL40mm = {}
 	GL40mm.id = "40mmGL"
@@ -1069,7 +1221,7 @@ local Gatling = {}
 GunClass["RAC"] = Gatling
 	
 local Cannon = {}
-	Cannon.spread = 0.12
+	Cannon.spread = 0.08
 	Cannon.name = "Cannon"
 	Cannon.muzzleflash = "120mm_muzzleflash_noscale"
 	Cannon.rofmod = 1.5
@@ -1078,8 +1230,18 @@ local Cannon = {}
 	Cannon.soundNormal = " "
 GunClass["C"] = Cannon	
 
+local ShortGun= {}
+	ShortGun.spread = 0.24
+	ShortGun.name = "Short-Barrel Cannon"
+	ShortGun.muzzleflash = "120mm_muzzleflash_noscale"
+	ShortGun.rofmod = 1.3
+	ShortGun.sound = "weapons/ACF_Gun/cannon_new.wav"
+	ShortGun.soundDistance = "Cannon.Fire"
+	ShortGun.soundNormal = " "
+GunClass["SC"] = ShortGun	
+
 local  Autoloader= {}
-	Autoloader.spread = 0.12
+	Autoloader.spread = 0.08
 	Autoloader.name = "Autoloader"
 	Autoloader.muzzleflash = "120mm_muzzleflash_noscale"
 	Autoloader.rofmod = 0.8
@@ -1089,7 +1251,7 @@ local  Autoloader= {}
 GunClass["AL"] = Autoloader
 	
 local Howitzer = {}
-	Howitzer.spread = 0.08
+	Howitzer.spread = 0.12
 	Howitzer.name = "Howitzer"
 	Howitzer.muzzleflash = "120mm_muzzleflash_noscale"
 	Howitzer.rofmod = 1.3

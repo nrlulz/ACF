@@ -37,14 +37,14 @@ ACF_DefineEngine( "11.0-R7", {
 
 ACF_DefineEngine( "24.0-R7", {
 	name = "24.0L R7 Petrol",
-	desc = "The beast of Radials, this monster was destined for fighter aircraft.",
+	desc = "Massive American radial monster, destined for fighter aircraft and heavy tanks.",
 	model = "models/engines/radial7l.mdl",
 	sound = "acf_engines/r7_petrollarge.wav",
 	category = "Radial",
 	fuel = "Petrol",
 	enginetype = "Radial",
 	weight = 800,
-	torque = 1280,
+	torque = 1425,
 	flywheelmass = 3,
 	idlerpm = 750,
 	peakminrpm = 1900,

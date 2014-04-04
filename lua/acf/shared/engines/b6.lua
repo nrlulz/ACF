@@ -44,7 +44,7 @@ ACF_DefineEngine( "10.0-B6", {
 	fuel = "Petrol",
 	enginetype = "GenericPetrol",
 	weight = 630,
-	torque = 720,
+	torque = 870,
 	flywheelmass = 1,
 	idlerpm = 620,
 	peakminrpm = 2500,

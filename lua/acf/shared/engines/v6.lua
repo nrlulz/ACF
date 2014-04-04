@@ -20,14 +20,14 @@ ACF_DefineEngine( "3.6-V6", {
 
 ACF_DefineEngine( "6.2-V6", {
 	name = "6.2L V6 Petrol",
-	desc = "Heavy duty v6, throatier than an LA whore, but loaded with torque\n\nV6s are more torquey than the Boxer and Inline 6s but suffer in power",
+	desc = "Heavy duty 6V71 v6, throatier than an LA whore, but loaded with torque\n\nV6s are more torquey than the Boxer and Inline 6s but suffer in power",
 	model = "models/engines/v6med.mdl",
 	sound = "acf_engines/v6_petrolmedium.wav",
 	category = "V6",
 	fuel = "Petrol",
 	enginetype = "GenericPetrol",
 	weight = 360,
-	torque = 420,
+	torque = 472,
 	flywheelmass = 0.45,
 	idlerpm = 800,
 	peakminrpm = 2200,
