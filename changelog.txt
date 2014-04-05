@@ -1,33 +1,5 @@
-r458
+r1
 --For an extended version history, please visit the github changelog.  https://github.com/nrlulz/ACF/commits/master
-
-*r459
---Scaled recoil and HE shove based upon the physical mass of the contraption rather than the total mass. Kinetic impacts remain unchanged.
-
-*r462
---Fuel tanks can now be persisted.
-
-*r463
---Added clientside function acf_cl_particlemul to reduce particle counts clientside for HE/HEAT explosions.
-
-*r464
---Added Flechette ammo.  See ammo description for more detail.
-
-*r465
---HP and SM rounds no longer show blacklisted weapon types in the setup menu.
---Gun reload no longer continually triggers.
---Gun reload input no longer appears for guns without clips.
---[E2]  ENT:acfFire(state) no longer causes errors, but can only attribute kills to gun owner. Use wire inputs on gun to properly attribute kills.
---[E2]  Added ENT:acfCaliber()  which returns the caliber of a weapon or ammo.
---[E2]  ENT:acfReload() optimized, op cost reduced.
-
-*r466
---Replaced the old ACF smoke effect with the XCF smoke effect, which is thicker, colorable, and affected by wind.
---Also included the convar acf_smokewind which adjusts how powerful the wind effect is.
-
-*r467
---Fixed guns failing to fire from a chip with unwired inputs
---Fixed bullet impact failing to apply force in some circumstances
 
 *r486
 --New cannon and short cannon models
@@ -42,4 +14,18 @@ r458
 --fixed something in cannon models
 
 *r489
--- Short-barrel cannons adjusted: gun weight decreased a bit to account for heavier shells, RoF changed slightly.
+--Short-barrel cannons adjusted: gun weight decreased a bit to account for heavier shells, RoF changed slightly.
+
+*r490
+--Cannon and short-barrel cannon models are now skinnier
+--CoH sounds fixed
+--Small v12 petrol/diesel and medium v8 diesel weight slightly increased
+--Large CVT torque rating increased from 3400 to 6000
+--37mm cannon name fixed
+--37mm short-barrel cannon rof adjusted
+
+*r491
+--New tank engine and misc sounds
+
+*r492
+--Resampled new sounds to 44100 hz

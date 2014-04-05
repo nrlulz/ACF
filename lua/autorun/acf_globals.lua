@@ -2,7 +2,7 @@ ACF = {}
 ACF.AmmoTypes = {}
 ACF.MenuFunc = {}
 ACF.AmmoBlacklist = {}
-ACF.Version = 489 -- REMEMBER TO CHANGE THIS FOR GODS SAKE, OMFG!!!!!!! -wrex
+ACF.Version = 492 -- REMEMBER TO CHANGE THIS FOR GODS SAKE, OMFG!!!!!!! -wrex
 ACF.CurrentVersion = 0 -- just defining a variable, do not change
 
 ACF.Threshold = 225	--Health Divisor

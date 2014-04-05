@@ -81,7 +81,7 @@ ACF_DefineEngine( "7.8-V8", {
 	category = "V8",
 	fuel = "Diesel",
 	enginetype = "GenericDiesel",
-	weight = 500,
+	weight = 550,
 	torque = 689,
 	flywheelmass = 1.5,
 	idlerpm = 650,
