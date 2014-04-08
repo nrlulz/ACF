@@ -1,4 +1,4 @@
-r1
+r400
 --For an extended version history, please visit the github changelog.  https://github.com/nrlulz/ACF/commits/master
 
 *r486
@@ -29,3 +29,7 @@ r1
 
 *r492
 --Resampled new sounds to 44100 hz
+
+*r493
+--Diesel engines now have much more hp
+--Diesels can take a bit more damage before performance starts to degrade

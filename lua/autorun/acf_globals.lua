@@ -2,7 +2,7 @@ ACF = {}
 ACF.AmmoTypes = {}
 ACF.MenuFunc = {}
 ACF.AmmoBlacklist = {}
-ACF.Version = 492 -- REMEMBER TO CHANGE THIS FOR GODS SAKE, OMFG!!!!!!! -wrex
+ACF.Version = 493 -- REMEMBER TO CHANGE THIS FOR GODS SAKE, OMFG!!!!!!! -wrex
 ACF.CurrentVersion = 0 -- just defining a variable, do not change
 
 ACF.Threshold = 225	--Health Divisor
@@ -63,11 +63,14 @@ ACF.RefillSpeed = 700 -- (ACF.RefillSpeed / RoundMass) / Distance
 ACF.Year = 1945
 
 ACF.DebrisScale = 20 -- Ignore debris that is less than this bounding radius.
-ACF.TorqueScale = 1/4
 ACF.SpreadScale = 4		-- The maximum amount that damage can decrease a gun's accuracy.  Default 4x
 ACF.GunInaccuracyScale = 1 -- A multiplier for gun accuracy.
 ACF.GunInaccuracyBias = 2  -- Higher numbers make shots more likely to be inaccurate.  Choose between 0.5 to 4. Default is 2 (unbiased).
+
+ACF.TorqueScale = 1/4
+ACF.DieselTorqueScale = 1/10
 ACF.EngineHPMult = 1/8
+ACF.DieselEngineHPMult = 1/2
 
 ACF.EnableDefaultDP = false -- Enable the inbuilt damage protection system.
 

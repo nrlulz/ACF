@@ -135,6 +135,12 @@ function MakeACF_Engine(Owner, Pos, Angle, Id)
 	Engine.SoundPitch = Lookup.pitch or 1
 	Engine.SpecialHealth = true
 	
+	if Engine.EngineType == "GenericDiesel" then
+		Engine.TorqueScale = ACF.DieselTorqueScale
+	else
+		Engine.TorqueScale = ACF.TorqueScale
+	end
+	
 	--calculate boosted peak kw
 	if Engine.EngineType == "Turbine" or Engine.EngineType == "Electric" then
 		Engine.peakkw = Engine.PeakTorque * Engine.LimitRPM / (4 * 9548.8)
@@ -227,6 +233,12 @@ function ENT:Update( ArgsTable )
 	self.RequiresFuel = Lookup.requiresfuel
 	self.SoundPitch = Lookup.pitch or 1
 	self.SpecialHealth = true
+	
+	if self.EngineType == "GenericDiesel" then
+		self.TorqueScale = ACF.DieselTorqueScale
+	else
+		self.TorqueScale = ACF.TorqueScale
+	end
 	
 	--calculate boosted peak kw
 	if self.EngineType == "Turbine" or self.EngineType == "Electric" then
@@ -350,8 +362,13 @@ function ENT:ACF_Activate()
 		Percent = Entity.ACF.Health/Entity.ACF.MaxHealth
 	end
 	
-	Entity.ACF.Health = Health * Percent * ACF.EngineHPMult
-	Entity.ACF.MaxHealth = Health * ACF.EngineHPMult
+	if self.EngineType == "GenericDiesel" then
+		Entity.ACF.Health = Health * Percent * ACF.DieselEngineHPMult
+		Entity.ACF.MaxHealth = Health * ACF.DieselEngineHPMult
+	else
+		Entity.ACF.Health = Health * Percent * ACF.EngineHPMult
+		Entity.ACF.MaxHealth = Health * ACF.EngineHPMult
+	end
 	Entity.ACF.Armour = Armour * (0.5 + Percent/2)
 	Entity.ACF.MaxArmour = Armour * ACF.ArmorMod
 	Entity.ACF.Type = nil
@@ -489,14 +506,14 @@ function ENT:CalcRPM()
 		Wire_TriggerOutput(self, "Fuel Use", 0)
 	end
 	
-	-- Calculate the current torque from flywheel RPM
-	local TorqueScale = ACF.TorqueScale
+	--calculate damaged engine performance
 	local TorqueMult = 1
 	if (self.ACF.Health and self.ACF.MaxHealth) then
-		TorqueMult = math.Clamp(((1 - TorqueScale) / (0.5)) * ((self.ACF.Health/self.ACF.MaxHealth) - 1) + 1, TorqueScale, 1)
+		TorqueMult = math.Clamp(((1 - self.TorqueScale) / (0.5)) * ((self.ACF.Health/self.ACF.MaxHealth) - 1) + 1, self.TorqueScale, 1)
 	end
 	self.PeakTorque = self.PeakTorqueHeld * TorqueMult
 
+	-- Calculate the current torque from flywheel RPM
 	self.Torque = boost * self.Throttle * math.max( self.PeakTorque * math.min( self.FlyRPM / self.PeakMinRPM, (self.LimitRPM - self.FlyRPM) / (self.LimitRPM - self.PeakMaxRPM), 1 ), 0 )
 	
 	local Drag 
