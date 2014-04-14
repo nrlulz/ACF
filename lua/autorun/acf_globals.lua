@@ -2,7 +2,7 @@ ACF = {}
 ACF.AmmoTypes = {}
 ACF.MenuFunc = {}
 ACF.AmmoBlacklist = {}
-ACF.Version = 493 -- REMEMBER TO CHANGE THIS FOR GODS SAKE, OMFG!!!!!!! -wrex
+ACF.Version = 494 -- REMEMBER TO CHANGE THIS FOR GODS SAKE, OMFG!!!!!!! -wrex
 ACF.CurrentVersion = 0 -- just defining a variable, do not change
 
 ACF.Threshold = 225	--Health Divisor
@@ -52,7 +52,7 @@ ACF.FuelDensity["Electric"] = 3.89 -- li-ion
 ACF.Efficiency = {} --how efficient various engine types are
 ACF.Efficiency["GenericPetrol"] = 0.304 --kg per kw hr, higher is worse (too high?)
 ACF.Efficiency["GenericDiesel"] = 0.243 --up to 0.274 (too low?)
-ACF.Efficiency["Turbine"] = 0.231
+ACF.Efficiency["Turbine"] = 0.46 --0.231
 ACF.Efficiency["Wankel"] = 0.335
 ACF.Efficiency["Radial"] = 0.4 --0.53 to 0.38
 ACF.Efficiency["Electric"] = 0.85 --percent efficiency converting chemical kw into mechanical kw

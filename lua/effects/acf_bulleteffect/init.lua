@@ -118,16 +118,17 @@ function EFFECT:ApplyMovement( Bullet )
 		local DeltaTime = CurTime() - Bullet.LastThink
 		local DeltaPos = Bullet.SimFlight*DeltaTime
 		local Length =  math.max(DeltaPos:Length()*2,1)
-		for i=1, 5 do
-			local Light = Bullet.Tracer:Add( "sprites/light_glow02_add.vmt", Bullet.SimPos - (DeltaPos*i/5) )
+		for i=1, 1 do
+			--local Light = Bullet.Tracer:Add( "sprites/light_glow02_add.vmt", Bullet.SimPos - (DeltaPos*i/5) )
+			local Light = Bullet.Tracer:Add( "sprites/acf_tracer.vmt", Bullet.SimPos - (DeltaPos*i/5) )
 			if (Light) then		
 				Light:SetAngles( Bullet.SimFlight:Angle() )
 				Light:SetVelocity( Bullet.SimFlight:GetNormalized() )
 				Light:SetColor( Bullet.TracerColour.x, Bullet.TracerColour.y, Bullet.TracerColour.z )
-				Light:SetDieTime( 0.1 )
+				Light:SetDieTime( 0.075 ) -- 0.1
 				Light:SetStartAlpha( 255 )
 				Light:SetEndAlpha( 155 )
-				Light:SetStartSize( 5*Bullet.Caliber )
+				Light:SetStartSize( 15*Bullet.Caliber ) -- 5
 				Light:SetEndSize( 1 )
 				Light:SetStartLength( Length )
 				Light:SetEndLength( 1 )
@@ -137,7 +138,7 @@ function EFFECT:ApplyMovement( Bullet )
 				Smoke:SetAngles( Bullet.SimFlight:Angle() )
 				--Smoke:SetVelocity( Vector(0,0,0) )
 				Smoke:SetColor( 200 , 200 , 200 )
-				Smoke:SetDieTime( 1.2 )
+				Smoke:SetDieTime( 0.6 ) -- 1.2
 				Smoke:SetStartAlpha( 10 )
 				Smoke:SetEndAlpha( 0 )
 				Smoke:SetStartSize( 1 )

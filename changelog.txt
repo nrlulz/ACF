@@ -33,3 +33,9 @@ r400
 *r493
 --Diesel engines now have much more hp
 --Diesels can take a bit more damage before performance starts to degrade
+
+*r494
+--New tracers that are a bit brighter and much easier on older systems, courtesy of Techa
+--Turbine fuel consumption doubled
+--Diesel fuel is no longer explosive
+--Refuel sound is much quieter

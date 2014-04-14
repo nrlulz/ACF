@@ -268,7 +268,7 @@ function ENT:UpdateFuelTank(Id, Data1, Data2)
 	self.Capacity = self.Volume * ACF.CuIToLiter * ACF.TankVolumeMul * 0.125 --internal volume available for fuel in liters
 	self.EmptyMass = ((self.Size - self.Volume)*16.387)*7.9/1000  -- total wall volume * cu in to cc * density of steel (kg/cc)
 	self.FuelType = Data2
-	self.IsExplosive = self.FuelType ~= "Electric" and lookup[Data1].explosive ~= false
+	self.IsExplosive = (self.FuelType ~= "Electric" or self.FuelType ~= "Diesel") and lookup[Data1].explosive ~= false
 	self.NoLinks = lookup[Data1].nolinks == true
 	
 	if self.FuelType == "Electric" then
@@ -381,9 +381,9 @@ function ENT:Think()
 						self.Fuel = self.Fuel - exchange
 						Tank.Fuel = Tank.Fuel + exchange
 						if Tank.FuelType == "Electric" then
-							Tank:EmitSound( "ambient/energy/newspark04.wav", 500, 100 )
+							sound.Play("ambient/energy/newspark04.wav",Tank:GetPos(),75,100,0.5)
 						else
-							Tank:EmitSound( "vehicles/jetski/jetski_no_gas_start.wav", 500, 120 )
+							sound.Play("vehicles/jetski/jetski_no_gas_start.wav",Tank:GetPos(),75,120,0.5)
 						end
 					end
 				end
