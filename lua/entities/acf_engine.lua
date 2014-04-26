@@ -134,6 +134,8 @@ function MakeACF_Engine(Owner, Pos, Angle, Id)
 	Engine.RequiresFuel = Lookup.requiresfuel
 	Engine.SoundPitch = Lookup.pitch or 1
 	Engine.SpecialHealth = true
+	Engine.SpecialDamage = true
+	Engine.TorqueMult = 1
 	
 	if Engine.EngineType == "GenericDiesel" then
 		Engine.TorqueScale = ACF.DieselTorqueScale
@@ -233,6 +235,8 @@ function ENT:Update( ArgsTable )
 	self.RequiresFuel = Lookup.requiresfuel
 	self.SoundPitch = Lookup.pitch or 1
 	self.SpecialHealth = true
+	self.SpecialDamage = true
+	self.TorqueMult = self.TorqueMult or 1
 	
 	if self.EngineType == "GenericDiesel" then
 		self.TorqueScale = ACF.DieselTorqueScale
@@ -379,6 +383,14 @@ function ENT:ACF_Activate()
 	--print(Entity.ACF.Health)
 end
 
+function ENT:ACF_OnDamage( Entity, Energy, FrAera, Angle, Inflictor, Bone, Type )	--This function needs to return HitRes
+
+	local Mul = ((Type == "HEAT" and 6.6) or 1) --Heat penetrators deal bonus damage to engines, roughly half an AP round
+	local HitRes = ACF_PropDamage( Entity, Energy, FrAera * Mul, Angle, Inflictor )	--Calling the standard damage prop function
+	
+	return HitRes --This function needs to return HitRes
+end
+
 function ENT:Think()
 
 	local Time = CurTime()
@@ -506,12 +518,9 @@ function ENT:CalcRPM()
 		Wire_TriggerOutput(self, "Fuel Use", 0)
 	end
 	
-	--calculate damaged engine performance
-	local TorqueMult = 1
-	if (self.ACF.Health and self.ACF.MaxHealth) then
-		TorqueMult = math.Clamp(((1 - self.TorqueScale) / (0.5)) * ((self.ACF.Health/self.ACF.MaxHealth) - 1) + 1, self.TorqueScale, 1)
-	end
-	self.PeakTorque = self.PeakTorqueHeld * TorqueMult
+	--adjusting performance based on damage
+	self.TorqueMult = math.Clamp(((1 - self.TorqueScale) / (0.5)) * ((self.ACF.Health/self.ACF.MaxHealth) - 1) + 1, self.TorqueScale, 1)
+	self.PeakTorque = self.PeakTorqueHeld * self.TorqueMult
 
 	-- Calculate the current torque from flywheel RPM
 	self.Torque = boost * self.Throttle * math.max( self.PeakTorque * math.min( self.FlyRPM / self.PeakMinRPM, (self.LimitRPM - self.FlyRPM) / (self.LimitRPM - self.PeakMaxRPM), 1 ), 0 )

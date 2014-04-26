@@ -39,3 +39,14 @@ r400
 --Turbine fuel consumption doubled
 --Diesel fuel is no longer explosive
 --Refuel sound is much quieter
+
+*r495
+-HEAT rebalanced: 
+--HEAT HE reduced, 22% (down from 33%) of a HE shell of same caliber.
+--HE effect is correctly sized
+--penetrator loses less energy on initial penetration, but loses massive amounts on successive penetrations. End effect is layered armor is much more effective at stopping penetrator.
+--penetrator deals 13.2x more damage to crates, roughly equal to an AP shell of the same caliber as the HEAT shell.
+--penetrator deals 6.6x more damage to engines and fuel tanks, roughly half of an AP shell.
+--penetrator damage to everything else is unchanged.
+-Diesel explosions can be triggered by HE or HEAT.
+-HE blast radius and blast energy is now correctly displayed on the tool and overlays.

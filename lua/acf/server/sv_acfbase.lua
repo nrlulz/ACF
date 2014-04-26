@@ -100,7 +100,7 @@ function ACF_Check ( Entity )
 	
 end
 
-function ACF_Damage ( Entity , Energy , FrAera , Angle , Inflictor , Bone, Gun ) 
+function ACF_Damage ( Entity , Energy , FrAera , Angle , Inflictor , Bone, Gun, Type ) 
 	
 	local Activated = ACF_Check( Entity )
 	local CanDo = hook.Run("ACF_BulletDamage", Activated, Entity, Energy, FrAera, Angle, Inflictor, Bone, Gun )
@@ -109,7 +109,7 @@ function ACF_Damage ( Entity , Energy , FrAera , Angle , Inflictor , Bone, Gun )
 	end
 	
 	if Entity.SpecialDamage then
-		return Entity:ACF_OnDamage( Entity , Energy , FrAera , Angle , Inflictor , Bone )
+		return Entity:ACF_OnDamage( Entity , Energy , FrAera , Angle , Inflictor , Bone, Type )
 	elseif Activated == "Prop" then	
 		
 		return ACF_PropDamage( Entity , Energy , FrAera , Angle , Inflictor , Bone )

@@ -6,6 +6,8 @@ function ACF_HE( Hitpos , HitNormal , FillerMass, FragMass , Inflictor, NoOcc, A
 	local Amp = math.min(Power/2000,50)
 	util.ScreenShake( Hitpos, Amp, Amp, Amp/15, Radius*10 )  
 	--local Targets = ents.FindInSphere( Hitpos, Radius )
+	--debugoverlay.Sphere(Hitpos, Radius, 15, Color(255,0,0,32), 1) --developer 1   in console to see
+
 	local Targets = ents.GetAll()
 	
 	for k,v in pairs (Targets) do
@@ -101,12 +103,10 @@ function ACF_HE( Hitpos , HitNormal , FillerMass, FragMass , Inflictor, NoOcc, A
 			local PowerFraction = Power * AeraFraction										--How much of the total power goes to that prop
 			--print("ACF_HE Target: "..Tar:GetModel() or "unknown")
 			--print("ACF_HE Power: "..PowerFraction or "nill")
-			
 			local Blast = {}
 				Blast.Momentum = PowerFraction/(math.max(1,Table.Dist/200)^0.05)
 				Blast.Penetration = PowerFraction^ACF.HEBlastPen*Tar.ACF.MaxHealth
-			local BlastRes = ACF_Damage ( Tar , Blast , Tar.ACF.MaxHealth , 0 , Inflictor ,0 , Ammo )--Vel is just the speed of sound in air
-			PowerSpent = PowerSpent + PowerFraction*BlastRes.Loss/2--Removing the energy spent killing props
+			local BlastRes = ACF_Damage ( Tar , Blast , Tar.ACF.MaxHealth , 0 , Inflictor ,0 , Ammo, "HE" )--Vel is just the speed of sound in air
 			
 			local FragHit = Fragments * AeraFraction
 			local FragVel = math.max(FragVel - ( (Table.Dist/FragVel) * FragVel^2 * FragWeight^0.33/10000 )/ACF.DragDiv,0)
@@ -115,7 +115,7 @@ function ACF_HE( Hitpos , HitNormal , FillerMass, FragMass , Inflictor, NoOcc, A
 				if math.Rand(0,1) > FragHit then FragHit = 1 else FragHit = 0 end
 			end
 			
-			local FragRes = ACF_Damage ( Tar , FragKE , (FragWeight/7.8)^0.33*FragHit , 0 , Inflictor , 0, Ammo )
+			local FragRes = ACF_Damage ( Tar , FragKE , (FragWeight/7.8)^0.33*FragHit , 0 , Inflictor , 0, Ammo, "Frag" )
 			
 			if (BlastRes and BlastRes.Kill) or (FragRes and FragRes.Kill) then
 				local Debris = ACF_HEKill( Tar , Table.Vec , PowerFraction )
@@ -132,6 +132,7 @@ function ACF_HE( Hitpos , HitNormal , FillerMass, FragMass , Inflictor, NoOcc, A
 					phys:ApplyForceOffset( Table.Vec * PowerFraction * 100 * physratio ,  Hitpos )	--Assuming about a tenth of the energy goes to propelling the target prop (Power in KJ * 1000 to get J then divided by 10)
 				end
 			end
+			PowerSpent = PowerSpent + PowerFraction*BlastRes.Loss/2--Removing the energy spent killing props
 			
 		end
 		Power = math.max(Power - PowerSpent,0)	
@@ -189,7 +190,7 @@ function ACF_SpallTrace( HitVec , SpallTr , SpallEnergy , SpallAera , Inflictor 
 end
 
 function ACF_RoundImpact( Bullet, Speed, Energy, Target, HitPos, HitNormal , Bone  )	--Simulate a round impacting on a prop
-
+	--if (Bullet.Type == "HEAT") then print("Pen: "..((Energy.Penetration / Bullet["PenAera"]) * ACF.KEtoRHA)) end
 	local Angle = ACF_GetHitAngle( HitNormal , Bullet["Flight"] )
 		
 	local Ricochet = 0
@@ -198,7 +199,7 @@ function ACF_RoundImpact( Bullet, Speed, Energy, Target, HitPos, HitNormal , Bon
 		Ricochet = (Angle/100)			--If ricocheting, calculate how much of the energy is dumped into the plate and how much is carried by the ricochet
 		Energy.Penetration = Energy.Penetration - Energy.Penetration*Ricochet/4 --Ricocheting can save plates that would theorically get penetrated, can add up to 1/4 rating
 	end
-	local HitRes = ACF_Damage ( Target , Energy , Bullet["PenAera"] , Angle , Bullet["Owner"] , Bone, Bullet["Gun"] )  --DAMAGE !!
+	local HitRes = ACF_Damage ( Target , Energy , Bullet["PenAera"] , Angle , Bullet["Owner"] , Bone, Bullet["Gun"], Bullet["Type"] )  --DAMAGE !!
 	
 	ACF_KEShove(Target, HitPos, Bullet["Flight"]:GetNormal(), Energy.Kinetic*HitRes.Loss*1000*Bullet["ShovePower"] )
 	

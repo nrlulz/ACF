@@ -182,11 +182,13 @@ function ENT:ACF_Activate( Recalc )
 	
 end
 
-function ENT:ACF_OnDamage( Entity, Energy, FrAera, Angle, Inflictor )	--This function needs to return HitRes
+function ENT:ACF_OnDamage( Entity, Energy, FrAera, Angle, Inflictor, Bone, Type )	--This function needs to return HitRes
 
-	local HitRes = ACF_PropDamage( Entity, Energy, FrAera, Angle, Inflictor )	--Calling the standard damage prop function
+	local Mul = ((Type == "HEAT" and 6.6) or 1) --Heat penetrators deal bonus damage to fuel, roughly half an AP round
+	local HitRes = ACF_PropDamage( Entity, Energy, FrAera * Mul, Angle, Inflictor )	--Calling the standard damage prop function
 	
-	if self.Exploding or not self.IsExplosive then return HitRes end
+	local NoExplode = self.FuelType == "Diesel" and not (Type == "HE" or Type == "HEAT")
+	if self.Exploding or NoExplode or not self.IsExplosive then return HitRes end
 	
 	if HitRes.Kill then
 		if hook.Run( "ACF_FuelExplode", self ) == false then return HitRes end
@@ -268,7 +270,7 @@ function ENT:UpdateFuelTank(Id, Data1, Data2)
 	self.Capacity = self.Volume * ACF.CuIToLiter * ACF.TankVolumeMul * 0.125 --internal volume available for fuel in liters
 	self.EmptyMass = ((self.Size - self.Volume)*16.387)*7.9/1000  -- total wall volume * cu in to cc * density of steel (kg/cc)
 	self.FuelType = Data2
-	self.IsExplosive = (self.FuelType ~= "Electric" or self.FuelType ~= "Diesel") and lookup[Data1].explosive ~= false
+	self.IsExplosive = self.FuelType ~= "Electric" and lookup[Data1].explosive ~= false
 	self.NoLinks = lookup[Data1].nolinks == true
 	
 	if self.FuelType == "Electric" then

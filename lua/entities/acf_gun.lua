@@ -283,7 +283,9 @@ function ENT:Link( Target )
 	
 	-- Don't link if it's not the right ammo type
 	if Target.BulletData.Id ~= self.Id then
-		return false, "Wrong ammo type!"
+		--if not (self.Class == "AL" and string.find(Target.BulletData.Id, "mmC", 1, true)) then --allows AL to load cannon ammo
+			return false, "Wrong ammo type!"
+		--end
 	end
 	
 	-- Don't link if it's a refill crate
