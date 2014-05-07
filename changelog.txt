@@ -50,3 +50,10 @@ r400
 --penetrator damage to everything else is unchanged.
 -Diesel explosions can be triggered by HE or HEAT.
 -HE blast radius and blast energy is now correctly displayed on the tool and overlays.
+
+*r496
+-Large volume crates (2x4x4+) have bonus ammo and confer a bonus to fire rate or reload time.
+-2x4x4 is +10% ammo, +2% fire rate / reload speed bonus
+-4x8x8 is +50% ammo, +10% fire rate / reload speed bonus
+-Guns without clips get a fire rate bonus, guns with clips have a reload speed bonus instead
+-Updated gun definitions so they are defined similarly to engines -- each gun class has its own file

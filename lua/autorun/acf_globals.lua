@@ -2,7 +2,7 @@ ACF = {}
 ACF.AmmoTypes = {}
 ACF.MenuFunc = {}
 ACF.AmmoBlacklist = {}
-ACF.Version = 495 -- REMEMBER TO CHANGE THIS FOR GODS SAKE, OMFG!!!!!!! -wrex
+ACF.Version = 496 -- REMEMBER TO CHANGE THIS FOR GODS SAKE, OMFG!!!!!!! -wrex
 ACF.CurrentVersion = 0 -- just defining a variable, do not change
 
 ACF.Threshold = 225	--Health Divisor
@@ -144,9 +144,9 @@ include("acf/shared/rounds/roundsmoke.lua")
 include("acf/shared/rounds/roundrefill.lua")
 include("acf/shared/rounds/roundfunctions.lua")
 
-include("acf/shared/acfgunlist.lua")
-include("acf/shared/acfmobilitylist.lua")
-include("acf/shared/acfmissilelist.lua")
+include("acf/shared/acfloader.lua")
+include("acf/shared/acfcratelist.lua")
+--include("acf/shared/acfmissilelist.lua")
 
 ACF.Weapons = list.Get("ACFEnts")
 	
