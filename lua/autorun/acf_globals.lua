@@ -162,6 +162,26 @@ game.AddParticles("particles/rocket_motor.pcf")
 
 game.AddDecal("GunShot1", "decals/METAL/shot5")
 
+-- Add the ACF tool category
+if CLIENT then
+
+	ACF.CustomToolCategory = CreateClientConVar( "acf_tool_category", 1, true, false );
+
+	if( ACF.CustomToolCategory:GetBool() ) then
+
+		language.Add( "spawnmenu.tools.acf", "ACF" );
+
+		-- We use this hook so that the ACF category is always at the top
+		hook.Add( "AddToolMenuTabs", "CreateACFCategory", function()
+
+			spawnmenu.AddToolCategory( "Main", "ACF", "#spawnmenu.tools.acf" );
+
+		end );
+
+	end
+
+end
+
 timer.Simple( 0, function()
 	for Class,Table in pairs(ACF.Classes["GunClass"]) do
 		PrecacheParticleSystem(Table["muzzleflash"])
