@@ -168,6 +168,23 @@ timer.Simple( 0, function()
 	end
 end)
 
+if CLIENT then
+
+	-- Returns whether or not a sound actually exists, fixes client timeout issues
+	function IsValidSound( path )
+
+		if( file.Exists( string.format( "sound/%s", tostring( path ) ), "GAME" ) ) then
+
+			return true;
+
+		end
+
+		return false;
+
+	end
+
+end
+
 -- changes here will be automatically reflected in the armor properties tool
 function ACF_CalcArmor( Area, Ductility, Mass )
 	
