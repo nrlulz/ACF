@@ -165,14 +165,20 @@ game.AddDecal("GunShot1", "decals/METAL/shot5")
 -- Add the ACF tool category
 if CLIENT then
 
-	language.Add( "spawnmenu.tools.acf", "ACF" );
+	ACF.CustomToolCategory = CreateClientConVar( "acf_tool_category", 1, true, false );
 
-	-- We use this hook so that the ACF category is always at the top
-	hook.Add( "AddToolMenuTabs", "CreateACFCategory", function()
+	if( ACF.CustomToolCategory:GetBool() ) then
 
-		spawnmenu.AddToolCategory( "Main", "ACF", "#spawnmenu.tools.acf" );
+		language.Add( "spawnmenu.tools.acf", "ACF" );
 
-	end );
+		-- We use this hook so that the ACF category is always at the top
+		hook.Add( "AddToolMenuTabs", "CreateACFCategory", function()
+
+			spawnmenu.AddToolCategory( "Main", "ACF", "#spawnmenu.tools.acf" );
+
+		end );
+
+	end
 
 end
 
