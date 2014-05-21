@@ -306,8 +306,14 @@ function ENT:TriggerInput( iname, value )
 			
 			if HasFuel then
 				self.Active = true
-				self.Sound = CreateSound(self, self.SoundPath)
-				self.Sound:PlayEx(0.5,100)
+
+				if( CLIENT and IsValidSound( self.SoundPath ) ) then
+
+					self.Sound = CreateSound(self, self.SoundPath)
+					self.Sound:PlayEx(0.5,100)
+
+				end
+
 				self:ACFInit()
 			end
 		elseif (value <= 0 and self.Active) then
