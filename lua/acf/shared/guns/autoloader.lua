@@ -20,8 +20,8 @@ ACF_defineGun("75mmAL", { --id
 	weight = 2420,
 	year = 1946,
 	rofmod = 0.8,
-	magsize = 6,
-	magreload = 14,
+	magsize = 8,
+	magreload = 15,
 	round = {
 		maxlength = 78,
 		propweight = 3.8
@@ -38,7 +38,7 @@ ACF_defineGun("100mmAL", {
 	year = 1956,
 	rofmod = 0.8,
 	magsize = 6,
-	magreload = 18,
+	magreload = 21,
 	round = {
 		maxlength = 93,
 		propweight = 9.5

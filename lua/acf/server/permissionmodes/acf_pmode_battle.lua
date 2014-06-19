@@ -44,7 +44,7 @@ local function modepermission(owner, attacker, ent)
 		if perms.IsInSafezone(entpos) or perms.IsInSafezone(attpos) then return false end
 	end
 	
-	return true
+	return 
 end
 
 

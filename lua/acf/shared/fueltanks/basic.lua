@@ -322,19 +322,18 @@ ACF_DefineFuelTankSize( "Tank_8x8x4", {
 	dims = { 83.5, 83.1, 40.8 }
 } )
 
+ACF_DefineFuelTankSize( "Fuel_Drum", {
+	name = "Fuel Drum",
+	desc = "Tends to explode when shot.",
+	model = "models/props_c17/oildrum001_explosive.mdl",
+	dims = { 29, 29, 45.6 }
+} )
+
 ACF_DefineFuelTankSize( "Jerry_Can", {
 	name = "Jerry Can",
 	desc = "Handy portable fuel container.",
 	model = "models/props_junk/gascan001a.mdl",
 	dims = { 8.6, 20.2, 30.2 },
-	nolinks = true
-} )
-
-ACF_DefineFuelTankSize( "Fuel_Drum", {
-	name = "Fuel Drum",
-	desc = "Tends to explode when shot.",
-	model = "models/props_c17/oildrum001_explosive.mdl",
-	dims = { 29, 29, 45.6 },
 	nolinks = true
 } )
 

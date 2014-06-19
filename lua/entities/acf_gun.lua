@@ -145,33 +145,37 @@ function MakeACF_Gun(Owner, Pos, Angle, Id)
 	Gun:SetAngles(Angle)
 	Gun:SetPos(Pos)
 	Gun:Spawn()
+	
+	local EID
+	if List.Guns[Id] then EID = Id else EID = "50mmC" end
+	local Lookup = List.Guns[EID]
 
 	Gun:SetPlayer(Owner)
 	Gun.Owner = Owner
 	Gun.Id = Id
-	Gun.Caliber	= List.Guns[Id].caliber
-	Gun.Model = List.Guns[Id].model
-	Gun.Mass = List.Guns[Id].weight
-	Gun.Class = List.Guns[Id].gunclass
+	Gun.Caliber	= Lookup.caliber
+	Gun.Model = Lookup.model
+	Gun.Mass = Lookup.weight
+	Gun.Class = Lookup.gunclass
 	-- Custom BS for karbine. Per Gun ROF.
 	Gun.PGRoFmod = 1
-	if(List.Guns[Id].rofmod) then
-		Gun.PGRoFmod = math.max(0, List.Guns[Id].rofmod)
+	if(Lookup.rofmod) then
+		Gun.PGRoFmod = math.max(0, Lookup.rofmod)
 	end
 	-- Custom BS for karbine. Magazine Size, Mag reload Time
 	Gun.CurrentShot = 0
 	Gun.MagSize = 1
-	if(List.Guns[Id].magsize) then
-		Gun.MagSize = math.max(Gun.MagSize, List.Guns[Id].magsize)
+	if(Lookup.magsize) then
+		Gun.MagSize = math.max(Gun.MagSize, Lookup.magsize)
 	else
 		Gun.Inputs = Wire_AdjustInputs( Gun, { "Fire", "Unload" } )
 	end
 	Gun.MagReload = 0
-	if(List.Guns[Id].magreload) then
-		Gun.MagReload = math.max(Gun.MagReload, List.Guns[Id].magreload)
+	if(Lookup.magreload) then
+		Gun.MagReload = math.max(Gun.MagReload, Lookup.magreload)
 	end
 	
-	Gun:SetNetworkedString( "WireName", List.Guns[Id].name )
+	Gun:SetNetworkedString( "WireName", Lookup.name )
 	Gun:SetNWString( "Class", Gun.Class )
 	Gun:SetNWString( "ID", Gun.Id )
 	Gun.Muzzleflash = Classes.GunClass[Gun.Class].muzzleflash

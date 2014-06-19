@@ -34,7 +34,8 @@ local function modepermission(owner, attacker, ent)
 	
 	if not (owner.SteamID or attacker.SteamID) then
 		--print("ACF ERROR: owner or attacker is not a player!", tostring(owner), tostring(attacker), "\n", debug.traceback())
-		return DefaultPermission
+		if DefaultPermission then return
+		else return DefaultPermission end
 	end	
 	
 	local ownerid = owner:SteamID()
@@ -43,7 +44,7 @@ local function modepermission(owner, attacker, ent)
 	
 	if ownerperms[attackerid] then
 		--print("permitted")
-		return true
+		return
 	end
 	
 	--print("disallowed")

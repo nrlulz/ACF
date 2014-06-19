@@ -393,7 +393,7 @@ concommand.Add( "ACF_ReloadPermissionModes", function(ply, cmd, args, str)
 		local mode = table.KeyFromValue(this.Modes, this.DamagePermission)
 		
 		if not mode then
-			this.DamagePermission = function() return true end
+			this.DamagePermission = function() end
 			hook.Call("ACF_ProtectionModeChanged", GAMEMODE, "default", nil)
 			mode = "default"
 		end
@@ -462,12 +462,14 @@ function this.CanDamage(Type, Entity, Energy, FrAera, Angle, Inflictor, Bone, Gu
 		if IsValid(Entity) and Entity:IsPlayer() then
 			owner = Entity
 		else
-			return this.DefaultCanDamage
+			if this.DefaultCanDamage then return
+			else return this.DefaultCanDamage end
 		end
 	end
 	
 	if not (IsValid(Inflictor) and Inflictor:IsPlayer()) then
-		return this.DefaultCanDamage
+		if this.DefaultCanDamage then return
+		else return this.DefaultCanDamage end
 	end
 	
 	return this.DamagePermission(owner, Inflictor, Entity)
@@ -657,7 +659,7 @@ hook.Add("ACF_ProtectionModeChanged", "ACF_ResendPermissionsOnChanged", this.Res
 -- -- -- -- -- Initial DP mode load -- -- -- -- --
 
 if not aaa_IncludeHere then
-	this.DamagePermission = function() return true end
+	this.DamagePermission = function() end
 	hook.Call("ACF_ProtectionModeChanged", GAMEMODE, "default", nil)
 	mode = "default"
 else
@@ -666,7 +668,7 @@ else
 	local mode = table.KeyFromValue(this.Modes, this.DamagePermission)
 
 	if not mode then
-		this.DamagePermission = function() return true end
+		this.DamagePermission = function() end
 		hook.Call("ACF_ProtectionModeChanged", GAMEMODE, "default", nil)
 		mode = "default"
 	end

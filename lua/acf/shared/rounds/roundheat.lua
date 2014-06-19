@@ -1,7 +1,7 @@
 
 AddCSLuaFile()
 
-ACF.AmmoBlacklist.HEAT = { "MG", "HMG", "RAC", "AC", "SA" }
+ACF.AmmoBlacklist.HEAT = { "MG", "HMG", "RAC", "AC" }
 
 local Round = {}
 

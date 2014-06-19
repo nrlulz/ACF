@@ -57,3 +57,19 @@ r400
 -4x8x8 is +50% ammo, +10% fire rate / reload speed bonus
 -Guns without clips get a fire rate bonus, guns with clips have a reload speed bonus instead
 -Updated gun definitions so they are defined similarly to engines -- each gun class has its own file
+
+*r497
+-Built-in damage protection now won't override other hooks
+
+*r500
+-Crate RoF bonus doubled (maximum 20% bonus with 4x8x8, up from 10%)
+-Made 50mm cannon default gun if trying to spawn a custom gun that doesn't exist
+-SC no longer compatible with smoke rounds
+-SL fire rate increased 33% (now ~25 seconds reload)
+-75mm AL clip increased from 6 to 8 rounds
+-75mm AL reload increased from 14 to 15 seconds
+-100mm AL reload increased from 18 to 21 seconds
+-SA can now load HEAT rounds
+-Engines now save adjusted pitch, instead of using the value currently in sound tool
+-Fuel drum can now be linked to engines
+-5.2l v6 special: torque slightly nerfed, fuel efficiency increased 25%
