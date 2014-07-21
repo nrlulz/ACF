@@ -17,7 +17,7 @@ ACF_defineGun("75mmAL", { --id
 	model = "models/tankgun/tankgun_al_75mm.mdl",
 	gunclass = "AL",
 	caliber = 7.5,
-	weight = 2420,
+	weight = 2125,
 	year = 1946,
 	rofmod = 0.8,
 	magsize = 8,

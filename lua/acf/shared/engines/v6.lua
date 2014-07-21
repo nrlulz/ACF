@@ -51,3 +51,21 @@ ACF_DefineEngine( "12.0-V6", {
 	peakmaxrpm = 2950,
 	limitrpm = 3500
 } )
+
+ACF_DefineEngine( "5.2-V6", {
+	name = "5.2L V6 Diesel",
+	desc = "Light AFV-grade two-stroke multifuel, high output but heavy",
+	model = "models/engines/v6med.mdl",
+	sound = "acf_engines/i5_dieselmedium.wav",
+	category = "V6",
+	fuel = "Any",
+	enginetype = "GenericDiesel",
+	weight = 500,
+	torque = 490,
+	flywheelmass = 0.8,
+	idlerpm = 650,
+	peakminrpm = 1800,
+	peakmaxrpm = 4200,
+	limitrpm = 4300
+} )
+

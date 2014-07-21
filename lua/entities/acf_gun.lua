@@ -667,7 +667,13 @@ function ENT:LoadAmmo( AddTime, Reload )
 		self.BulletData = AmmoEnt.BulletData
 		self.BulletData.Crate = AmmoEnt:EntIndex()
 		
-		self.ReloadTime = ((self.BulletData.RoundVolume/500)^0.60)*self.RoFmod*self.PGRoFmod * (self.MagReload == 0 and self.CrateBonus or 1)
+		local cb = 1
+		if(self.CrateBonus and (self.MagReload == 0)) then
+			cb = self.CrateBonus
+			if (cb == 0) then cb = 1 end
+		end
+		
+		self.ReloadTime = ((self.BulletData.RoundVolume/500)^0.60)*self.RoFmod*self.PGRoFmod * cb
 		Wire_TriggerOutput(self, "Loaded", self.BulletData.Type)
 		
 		self.RateOfFire = (60/self.ReloadTime)

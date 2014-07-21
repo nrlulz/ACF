@@ -29,7 +29,7 @@ ACF_DefineEngine( "7.0-V12", {
 	fuel = "Petrol",
 	enginetype = "GenericPetrol",
 	weight = 360,
-	torque = 420,
+	torque = 500,
 	flywheelmass = 0.45,
 	idlerpm = 800,
 	peakminrpm = 3600,
@@ -105,4 +105,21 @@ ACF_DefineEngine( "21.0-V12", {
 	peakminrpm = 500,
 	peakmaxrpm = 1500,
 	limitrpm = 2500
+} )
+
+ACF_DefineEngine( "13.0-V12", {
+	name = "13.0L V12 Petrol",
+	desc = "Thirsty gasoline v12, good torque and power for medium applications.",
+	model = "models/engines/v12m.mdl",
+	sound = "acf_engines/v12_special.wav",
+	category = "V12",
+	fuel = "Petrol",
+	enginetype = "GenericPetrol",
+	weight = 520,
+	torque = 660,
+	flywheelmass = 1,
+	idlerpm = 700,
+	peakminrpm = 2500,
+	peakmaxrpm = 4000,
+	limitrpm = 4250
 } )

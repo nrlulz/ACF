@@ -1,35 +1,6 @@
 r400
 --For an extended version history, please visit the github changelog.  https://github.com/nrlulz/ACF/commits/master
 
-*r486
---New cannon and short cannon models
---Short cannons added, which trade penetration and accuracy for size and light weight
---37mm cannon added
---Large b6, v8, v12 engines buffed
---Small v12, v12 special slightly buffed
---New multifuel v6 special added
---Turbines have much more power, but now require fuel
-
-*r487
---fixed something in cannon models
-
-*r489
---Short-barrel cannons adjusted: gun weight decreased a bit to account for heavier shells, RoF changed slightly.
-
-*r490
---Cannon and short-barrel cannon models are now skinnier
---CoH sounds fixed
---Small v12 petrol/diesel and medium v8 diesel weight slightly increased
---Large CVT torque rating increased from 3400 to 6000
---37mm cannon name fixed
---37mm short-barrel cannon rof adjusted
-
-*r491
---New tank engine and misc sounds
-
-*r492
---Resampled new sounds to 44100 hz
-
 *r493
 --Diesel engines now have much more hp
 --Diesels can take a bit more damage before performance starts to degrade
@@ -73,3 +44,12 @@ r400
 -Engines now save adjusted pitch, instead of using the value currently in sound tool
 -Fuel drum can now be linked to engines
 -5.2l v6 special: torque slightly nerfed, fuel efficiency increased 25%
+
+*r501
+-Fix for guns firing all ammo at once in certain circumstances. Ty Sestze
+-Moved 13L v12 and 5.2L v6 from special to v12 and v6 category, respectively.  Dupes are unaffected
+-75mm AL weight lowered from 2420 to 2125
+
+*r502
+-Added i5 and v10 engines, and a v10 special. Thanks to Beckett for the models.
+-Buffed 7.0 v12
