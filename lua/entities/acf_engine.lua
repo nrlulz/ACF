@@ -551,7 +551,7 @@ function ENT:CalcRPM()
 	end
 
 	-- This is the presently available torque from the engine
-	local TorqueDiff = math.max( self.FlyRPM - self.IdleRPM, 0 ) * self.Inertia
+	local TorqueDiff = math.max( self.FlyRPM - 1, 0 ) * self.Inertia
 	
 	-- Calculate the ratio of total requested torque versus what's avaliable
 	local AvailRatio = math.min( TorqueDiff / TotalReqTq / Boxes, 1 )
@@ -567,6 +567,14 @@ function ENT:CalcRPM()
 
 	self.FlyRPM = self.FlyRPM - math.min( TorqueDiff, TotalReqTq ) / self.Inertia
 
+	if self.FlyRPM < self.IdleRPM/10 then
+	
+		self:TriggerInput( "Active", 0 )
+		
+		return 0
+		
+	end
+	
 	-- Then we calc a smoothed RPM value for the sound effects
 	table.remove( self.RPM, 10 )
 	table.insert( self.RPM, 1, self.FlyRPM )
@@ -585,7 +593,7 @@ function ENT:CalcRPM()
 		self.Sound:ChangePitch( math.min( 20 + (SmoothRPM * self.SoundPitch) / 50, 255 ), 0 )
 		self.Sound:ChangeVolume( 0.25 + (0.1 + 0.9 * ((SmoothRPM / self.LimitRPM) ^ 1.5)) * self.Throttle / 1.5, 0 )
 	end
-	
+
 	return RPM
 end
 
