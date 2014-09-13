@@ -64,7 +64,7 @@ ACF_DefineEngine( "Electric-Large", {
 ACF_DefineEngine( "Electric-Small-NoBatt", {
 	name = "Electric motor, Small, Standalone",
 	desc = "A small electric motor, loads of torque, but low power\n\nElectric motors provide huge amounts of torque, but are very heavy.\n\nStandalone electric motors don't have integrated batteries, saving on weight and volume, but require you to supply your own batteries.",
-	model = "models/engines/emotorsmall2.mdl",
+	model = "models/engines/emotor-standalone-sml.mdl",
 	sound = "acf_engines/electric_small.wav",
 	category = "Electric",
 	fuel = "Electric",
@@ -85,7 +85,7 @@ ACF_DefineEngine( "Electric-Small-NoBatt", {
 ACF_DefineEngine( "Electric-Medium-NoBatt", {
 	name = "Electric motor, Medium, Standalone",
 	desc = "A medium electric motor, loads of torque, but low power\n\nElectric motors provide huge amounts of torque, but are very heavy.\n\nStandalone electric motors don't have integrated batteries, saving on weight and volume, but require you to supply your own batteries.",
-	model = "models/engines/emotormed2.mdl",
+	model = "models/engines/emotor-standalone-mid.mdl",
 	sound = "acf_engines/electric_medium.wav",
 	category = "Electric",
 	fuel = "Electric",
@@ -106,7 +106,7 @@ ACF_DefineEngine( "Electric-Medium-NoBatt", {
 ACF_DefineEngine( "Electric-Large-NoBatt", {
 	name = "Electric motor, Large, Standalone",
 	desc = "A huge electric motor, loads of torque, but low power\n\nElectric motors provide huge amounts of torque, but are very heavy.\n\nStandalone electric motors don't have integrated batteries, saving on weight and volume, but require you to supply your own batteries.",
-	model = "models/engines/emotorlarge2.mdl",
+	model = "models/engines/emotor-standalone-big.mdl",
 	sound = "acf_engines/electric_large.wav",
 	category = "Electric",
 	fuel = "Electric",

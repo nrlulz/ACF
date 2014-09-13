@@ -4,7 +4,7 @@
 ACF_DefineEngine( "0.25-I1", {
 	name = "250cc Single",
 	desc = "Tiny bike engine",
-	model = "models/engines/1cyls.mdl",
+	model = "models/engines/1cylsml.mdl",
 	sound = "acf_engines/i1_small.wav",
 	category = "Single",
 	fuel = "Petrol",
@@ -21,7 +21,7 @@ ACF_DefineEngine( "0.25-I1", {
 ACF_DefineEngine( "0.5-I1", {
 	name = "500cc Single",
 	desc = "Large single cylinder bike engine",
-	model = "models/engines/1cylm.mdl",
+	model = "models/engines/1cylmed.mdl",
 	sound = "acf_engines/i1_medium.wav",
 	category = "Single",
 	fuel = "Petrol",
@@ -38,7 +38,7 @@ ACF_DefineEngine( "0.5-I1", {
 ACF_DefineEngine( "1.3-I1", {
 	name = "1300cc Single",
 	desc = "Ridiculously large single cylinder engine, seriously what the fuck",
-	model = "models/engines/1cylb.mdl",
+	model = "models/engines/1cylbig.mdl",
 	sound = "acf_engines/i1_large.wav",
 	category = "Single",
 	fuel = "Petrol",

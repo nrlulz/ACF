@@ -13,11 +13,29 @@ ACF_DefineEngine( "1.0L-I4", {
 	requiresfuel = true,
 	weight = 63,
 	torque = 68,
-	flywheelmass = 0.05,
+	flywheelmass = 0.035,
 	idlerpm = 1200,
 	peakminrpm = 7500,
 	peakmaxrpm = 11500,
 	limitrpm = 12000
+} )
+
+ACF_DefineEngine( "2.4L-V6", {
+	name = "2.4L V6 Petrol",
+	desc = "Although the cast iron engine block is fairly weighty, it allows this tiny v6 to put out impressive power.  The unique design allows uncharacteristically high RPM for a V6.",
+	model = "models/engines/v6small.mdl",
+	sound = "acf_extra/vehiclefx/engines/l6/capri_onmid.WAV",
+	category = "Special",
+	fuel = "Petrol",
+	enginetype = "GenericPetrol",
+	requiresfuel = true,
+	weight = 134,
+	torque = 172,
+	flywheelmass = 0.075,
+	idlerpm = 950,
+	peakminrpm = 4500,
+	peakmaxrpm = 7100,
+	limitrpm = 8000
 } )
 
 ACF_DefineEngine( "1.9L-I4", {
@@ -103,7 +121,7 @@ ACF_DefineEngine( "5.3-V10", {
 	weight = 300,
 	torque = 320,
 	requiresfuel = true,
-	flywheelmass = 0.2,
+	flywheelmass = 0.15,
 	idlerpm = 1100,
 	peakminrpm = 5750,
 	peakmaxrpm = 8000,
@@ -126,5 +144,24 @@ ACF_DefineEngine( "7.2-V8", {
 	peakminrpm = 5000,
 	peakmaxrpm = 8000,
 	limitrpm = 8500
+} )
+
+ACF_DefineEngine( "3.0-V12", {
+	name = "3.0L V12 Petrol",
+	desc = "A purpose-built racing v12, not known for longevity.",
+	model = "models/engines/v12s.mdl",
+	sound = "acf_extra/vehiclefx/engines/v12/gtb4_onmid.WAV",
+	pitch = 0.85,
+	category = "Special",
+	fuel = "Petrol",
+	enginetype = "GenericPetrol",
+	requiresfuel = true,
+	weight = 175,
+	torque = 248,
+	flywheelmass = 0.175,
+	idlerpm = 1200,
+	peakminrpm = 6875,
+	peakmaxrpm = 11000,
+	limitrpm = 12500
 } )
 

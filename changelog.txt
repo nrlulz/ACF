@@ -53,3 +53,33 @@ r400
 *r502
 -Added i5 and v10 engines, and a v10 special. Thanks to Beckett for the models.
 -Buffed 7.0 v12
+
+*r503
+-Partial workaround for HE bug; doesn't eliminate the problem, but helps catch some cases.
+-Added 20mm machinegun
+-20mm AC weight decreased to 225 kg, round length increased
+-20mm and 30mm HMG rounds/min halved; round length increased to compensate.  20mm clip reduced from 120 to 75. Overall damage output is similar.
+-Fix for quiet 203 howitzer
+-Fix for ACF sound tool not resetting 1.0L i4 special to proper pitch
+-Updated descriptions for i5/v10
+-Slightly reduced torque for 3.9L i5
+-Reduced flywheel inertia for 1.0L i4 special
+-Reduced flywheel inertia for 5.3L v10 special
+-Added 2.4L v6 special
+-Added 3.0L v12 special
+-Added gamerpaddy's new single, vtwin, and standalone electric models
+-Added Lazermaniac's new MG and HMG models
+
+*r504
+-Updated emotor standalone and single cylinder model bodygroups
+-Fixed 7.62mm MG model size
+-Fixed 20mm AC firing too fast
+
+*r506
+-Added per-bullet callbacks OnPenetrated, OnRicochet, OnEndFlight, PreCalcFlight, PostCalcFlight.
+-HandlesOwnIteration bullet key to disable bullet iteration.
+-Battle DP mode can now optionally disable noclip.
+
+*r507
+-Fixed v10 model physbox
+-Added i3 engines

@@ -69,6 +69,7 @@ ACF_CanRefill( Refill, Ammo )
 	
 	
 	
+------------------------
 Damage Protection hooks:
 
 ACF_PlayerChangedZone
@@ -87,3 +88,31 @@ Args;
 	mode	String:	The name of the newly activated damage protection mode.
 	oldmode	String:	The name of the damage protection mode which has just been deactivated.
 	
+	
+
+-----------------------
+Bullet table callbacks:
+
+For the argument list (Index, Bullet, FlightRes):
+	Index: Index of the bullet in the bullet-list.
+	Bullet: The bullet data table.
+	FlightRes: The results of the bullet trace.
+- - - - - -
+
+OnEndFlight(Index, Bullet, FlightRes)
+	called when a bullet ends its flight (explodes etc)
+	
+OnPenetrated(Index, Bullet, FlightRes)
+	when a bullet pierces the world or an entity
+
+OnRicochet(Index, Bullet, FlightRes)
+	when a bullet bounces off an entity
+
+PreCalcFlight(Bullet)
+	just before the bullet performs a flight step
+
+PostCalcFlight(Bullet)
+	just after the bullet performs a flight step
+
+HandlesOwnIteration 
+	this is just a key: put it into the bullet table to prevent ACF from iterating the bullet.  You can then iterate it yourself in different places.

@@ -72,8 +72,9 @@ function TOOL:Reload( trace )
 	if trace.Entity:GetClass() == "acf_engine" then
 		local Id = trace.Entity.Id
 		local List = list.Get("ACFEnts")
-		self:GetOwner():ConCommand("acfsound_pitch " ..(List["Mobility"][Id]["pitch"] or 1));
-		ReplaceSound( self:GetOwner(), trace.Entity, {List["Mobility"][Id]["sound"]} )
+		local pitch = List["Mobility"][Id]["pitch"] or 1
+		self:GetOwner():ConCommand("acfsound_pitch " ..pitch);
+		ReplaceSound( self:GetOwner(), trace.Entity, {List["Mobility"][Id]["sound"], pitch} )
 	elseif trace.Entity:GetClass() == "acf_gun" then
 		local Class = trace.Entity.Class
 		local Classes = list.Get("ACFClasses")

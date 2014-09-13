@@ -13,18 +13,18 @@ ACF_defineGunClass("AC", {
 --add a gun to the class
 ACF_defineGun("20mmAC", { --id
 	name = "20mm Autocannon",
-	desc = "The 20mm AC is the smallest of the family; having a good rate of fire but a tiny shell, it's still infinitely more effective than the 20mm when firing AP.",
+	desc = "The 20mm AC is the smallest of the family; having a good rate of fire but a tiny shell.",
 	model = "models/autocannon/autocannon_20mm.mdl",
-	gunclass = "AC",
 	caliber = 2.0,
-	weight = 360,
+	gunclass = "AC",
+	weight = 225,
 	year = 1930,
-	rofmod = 2,
+	rofmod = 1.8,
 	magsize = 100,
 	magreload = 3,
 	round = {
-		maxlength = 28,
-		propweight = 0.12
+		maxlength = 32,
+		propweight = 0.13
 	}
 } )
 	

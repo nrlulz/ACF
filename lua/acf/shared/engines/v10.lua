@@ -2,7 +2,7 @@
 
 ACF_DefineEngine( "4.3-V10", {
 	name = "4.3L V10 Petrol",
-	desc = "A low displacement V10",
+	desc = "Small-block V-10 gasoline engine, great for powering a hot rod lincoln",
 	model = "models/engines/v10sml.mdl",
 	sound = "acf_engines/v10_petrolsmall.wav",
 	category = "V10",
@@ -19,7 +19,7 @@ ACF_DefineEngine( "4.3-V10", {
 
 ACF_DefineEngine( "8.0-V10", {
 	name = "8.0L V10 Petrol",
-	desc = "High performance v10",
+	desc = "Beefy 10-cylinder gas engine, gets 9 kids to soccer practice",
 	model = "models/engines/v10med.mdl",
 	sound = "acf_engines/v10_petrolmedium.wav",
 	category = "V10",
@@ -36,7 +36,7 @@ ACF_DefineEngine( "8.0-V10", {
 
 ACF_DefineEngine( "22.0-V10", {
 	name = "22.0L V10 Multifuel",
-	desc = "Large displacement multifuel V10",
+	desc = "Heavy multifuel V-10, gearbox-shredding torque but very heavy.",
 	model = "models/engines/v10big.mdl",
 	sound = "acf_engines/v10_diesellarge.wav",
 	category = "V10",

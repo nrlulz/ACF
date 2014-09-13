@@ -18,6 +18,7 @@ local modedescription = "Enables safe-zones and battlefield.  No ACF damage can 
 // battle-mode specifics: how much hp/armour should the players have?
 local MAX_HP = 100
 local MAX_Armour = 50
+local ShouldDisableNoclip = false
 
 // if the attacker or victim can't be identified, what should we do?  true allows damage, false blocks it.
 local DefaultPermission = false
@@ -57,11 +58,25 @@ hook.Add("ACF_PlayerChangedZone", "ACF_TellPlyAboutSafezoneBattle", tellPlyAbout
 
 
 
+local function DisableNoclipPressInBattle( ply, wantsNoclipOn )
+	if not (ShouldDisableNoclip and wantsNoclipOn and table.KeyFromValue(perms.Modes, perms.DamagePermission) == modename) then return end
+	
+	return (perms.IsInSafezone(ply:GetPos()) ~= false)
+end
+hook.Add( "PlayerNoClip", "ACF_DisableNoclipPressInBattle", DisableNoclipPressInBattle )
+
+
+
 local function modethink()
 	for k, ply in pairs(player.GetAll()) do
 		--print(ply:GetPos(), perms.IsInSafezone(ply:GetPos()))
 		if not perms.IsInSafezone(ply:GetPos()) then
 			ply:GodDisable()
+			
+			if ShouldDisableNoclip and ply:GetMoveType() ~= MOVETYPE_WALK then
+				ply:SetMoveType(MOVETYPE_WALK)
+			end
+			
 			local HP = ply:Health()
 			local AR = ply:Armor()
 			

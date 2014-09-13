@@ -14,7 +14,7 @@ ACF_defineGunClass("MG", {
 ACF_defineGun("7.62mmMG", { --id
 	name = "7.62mm Machinegun",
 	desc = "The 7.62mm is effective against infantry, but its usefulness against armor is laughable at best.",
-	model = "models/machinegun/machinegun_127mm.mdl",
+	model = "models/machinegun/machinegun_762mm.mdl",
 	gunclass = "MG",
 	caliber = 0.762,
 	weight = 15,
@@ -54,3 +54,17 @@ ACF_defineGun("14.5mmMG", {
 	}
 } )
 	
+ACF_defineGun("20mmMG", {
+	name = "20mm Machinegun",
+	desc = "The 20mm MG is practically a cannon in its own right; the weight and recoil made it difficult to mount on light land vehicles, though it was adapted for use on both aircraft and ships.",
+	model = "models/machinegun/machinegun_20mm.mdl",
+	gunclass = "MG",
+	caliber = 2.0,
+	weight = 95,
+	year = 1935,
+	rofmod = 0.55,
+	round = {
+		maxlength = 22,
+		propweight = 0.09
+	}
+} )
