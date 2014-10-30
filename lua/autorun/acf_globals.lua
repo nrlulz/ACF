@@ -162,11 +162,48 @@ game.AddParticles("particles/rocket_motor.pcf")
 
 game.AddDecal("GunShot1", "decals/METAL/shot5")
 
+-- Add the ACF tool category
+if CLIENT then
+
+	ACF.CustomToolCategory = CreateClientConVar( "acf_tool_category", 0, true, false );
+
+	if( ACF.CustomToolCategory:GetBool() ) then
+
+		language.Add( "spawnmenu.tools.acf", "ACF" );
+
+		-- We use this hook so that the ACF category is always at the top
+		hook.Add( "AddToolMenuTabs", "CreateACFCategory", function()
+
+			spawnmenu.AddToolCategory( "Main", "ACF", "#spawnmenu.tools.acf" );
+
+		end );
+
+	end
+
+end
+
 timer.Simple( 0, function()
 	for Class,Table in pairs(ACF.Classes["GunClass"]) do
 		PrecacheParticleSystem(Table["muzzleflash"])
 	end
 end)
+
+if CLIENT then
+
+	-- Returns whether or not a sound actually exists, fixes client timeout issues
+	function IsValidSound( path )
+
+		if( file.Exists( string.format( "sound/%s", tostring( path ) ), "GAME" ) ) then
+
+			return true;
+
+		end
+
+		return false;
+
+	end
+
+end
 
 -- changes here will be automatically reflected in the armor properties tool
 function ACF_CalcArmor( Area, Ductility, Mass )
