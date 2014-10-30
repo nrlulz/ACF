@@ -165,7 +165,7 @@ game.AddDecal("GunShot1", "decals/METAL/shot5")
 -- Add the ACF tool category
 if CLIENT then
 
-	ACF.CustomToolCategory = CreateClientConVar( "acf_tool_category", 1, true, false );
+	ACF.CustomToolCategory = CreateClientConVar( "acf_tool_category", 0, true, false );
 
 	if( ACF.CustomToolCategory:GetBool() ) then
 
