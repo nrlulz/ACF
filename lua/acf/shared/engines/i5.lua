@@ -65,7 +65,7 @@ ACF_DefineEngine( "4.1-I5", {
 	fuel = "Diesel",
 	enginetype = "GenericDiesel",
 	weight = 400,
-	torque = 490,
+	torque = 440,
 	flywheelmass = 1.5,
 	idlerpm = 650,
 	peakminrpm = 1000,

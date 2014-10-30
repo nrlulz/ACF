@@ -171,18 +171,14 @@ function TOOL:Reload( trace )
 	if not IsValid( ent ) or ent:IsPlayer() then return false end
 	if CLIENT then return true end
 	
-	local total = 0
+	ACF_CalcMassRatio(ent)
 	
-	for k, v in pairs( constraint.GetAllConstrainedEntities( ent ) ) do
-		if not IsValid( v ) then continue end
-		
-		local phys = v:GetPhysicsObject()
-		if not IsValid( phys ) then continue end
-		
-		total = total + phys:GetMass()
-	end
+	local total = math.Round( ent.acftotal, 1 )
+	local phystotal = math.Round( ent.acfphystotal, 1 )
+	local parenttotal = math.Round( ent.acftotal - ent.acfphystotal, 1 )
+	local physratio = math.Round(100 * ent.acfphystotal / ent.acftotal, 1)
 	
-	self:GetOwner():ChatPrint( "Total mass is " .. math.Round( total, 2 ) .. "kg" )
+	self:GetOwner():ChatPrint( "Total mass is " .. total .. " kg  ("..phystotal.." kg physical, "..parenttotal.." kg parented, "..physratio.."% physical)" )
 	
 end
 

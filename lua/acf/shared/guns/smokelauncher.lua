@@ -16,8 +16,9 @@ ACF_defineGun("40mmSL", { --id
 	desc = "",
 	model = "models/launcher/40mmgl.mdl",
 	gunclass = "SL",
+	canparent = true,
 	caliber = 4.0,
-	weight = 55,
+	weight = 25,
 	year = 1941,
 	round = {
 		maxlength = 15,

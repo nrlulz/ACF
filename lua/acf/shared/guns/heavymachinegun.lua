@@ -51,9 +51,9 @@ ACF_defineGun("40mmHMG", {
 	model = "models/machinegun/machinegun_40mm_compact.mdl",
 	gunclass = "HMG",
 	caliber = 4.0,
-	weight = 960,
+	weight = 600,
 	year = 1935,
-	magsize = 30,
+	magsize = 35,
 	magreload = 10,
 	round = {
 		maxlength = 28,

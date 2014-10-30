@@ -88,7 +88,11 @@ end
 e2function number entity:acfActive()
 	if not (isEngine(this) or isAmmo(this) or isFuel(this)) then return 0 end
 	if restrictInfo(self, this) then return 0 end
-	if (this.Active) then return 1 end
+	if not isAmmo(this) then
+		if (this.Active) then return 1 end
+	else
+		if (this.Load) then return 1 end
+	end
 	return 0
 end
 
@@ -676,9 +680,9 @@ e2function number entity:acfBlastRadius()
 	if restrictInfo(self, this) then return 0 end
 	local Type = this.BulletData["Type"] or ""
 	if Type == "HE" or Type == "APHE" then
-		return math.Round(this.BulletData["FillerMass"]^0.33*5,3)
+		return math.Round(this.BulletData["FillerMass"]^0.33*8,3)
 	elseif Type == "HEAT" then
-		return math.Round((this.BulletData["FillerMass"]/2)^0.33*5,3)
+		return math.Round((this.BulletData["FillerMass"]/3)^0.33*8,3)
 	end
 	return 0
 end

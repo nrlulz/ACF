@@ -85,7 +85,7 @@ function ACF_HE( Hitpos , HitNormal , FillerMass, FragMass , Inflictor, NoOcc, A
 							Table.Dist = Hitpos:Distance(Tar:GetPos())
 							Table.Vec = (Tar:GetPos() - Hitpos):GetNormal()
 							local Sphere = math.max(4 * 3.1415 * (Table.Dist*2.54 )^2,1) --Surface Aera of the sphere at the range of that prop
-							Table.Aera = math.min((Tar.ACF.MaxHealth*ACF.Threshold)/Sphere,0.5)*MaxSphere --Project the aera of the prop to the aera of the shadow it projects at the explosion max radius
+							Table.Aera = math.min(Tar.ACF.Aera/Sphere,0.5)*MaxSphere --Project the aera of the prop to the aera of the shadow it projects at the explosion max radius
 						table.insert(Damage, Table)	--Add it to the Damage table so we know to damage it once we tallied everything
 						TotalAera = TotalAera + Table.Aera
 					end
@@ -105,7 +105,7 @@ function ACF_HE( Hitpos , HitNormal , FillerMass, FragMass , Inflictor, NoOcc, A
 			local BlastRes
 			local Blast = {
 				Momentum = PowerFraction/(math.max(1,Table.Dist/200)^0.05),
-				Penetration = PowerFraction^ACF.HEBlastPen*Tar.ACF.MaxHealth
+				Penetration = PowerFraction^ACF.HEBlastPen*Tar.ACF.Aera/ACF.Threshold
 			}
 			
 			local FragRes
@@ -122,7 +122,7 @@ function ACF_HE( Hitpos , HitNormal , FillerMass, FragMass , Inflictor, NoOcc, A
 				timer.Simple(0.015*4, function() 
 					if not IsValid(Tar) then return end
 					
-					--recreate the hitpos and hitat, add slight jitter to hitpos and move it away some
+					--recreate the hitpos and hitat, add slight jitter to hitpos and move it away some (local pos *2 is intentional)
 					local NewHitpos = LocalToWorld(Table.LocalHitpos*2, Angle(math.random(),math.random(),math.random()), Tar:GetPos(), Tar:GetAngles())
 					local NewHitat = Tar:NearestPoint( NewHitpos )
 					
@@ -157,46 +157,30 @@ function ACF_HE( Hitpos , HitNormal , FillerMass, FragMass , Inflictor, NoOcc, A
 					else
 						--confirmed proper hit, apply damage
 						--print("No HE bug on "..Tar:GetClass())
-						BlastRes = ACF_Damage ( Tar , Blast , Tar.ACF.MaxHealth , 0 , Inflictor ,0 , Ammo, "HE" )--Vel is just the speed of sound in air
+						BlastRes = ACF_Damage ( Tar , Blast , Tar.ACF.Aera / ACF.Threshold , 0 , Inflictor ,0 , Ammo, "HE" )
 						FragRes = ACF_Damage ( Tar , FragKE , (FragWeight/7.8)^0.33*FragHit , 0 , Inflictor , 0, Ammo, "Frag" )
 						
 						if (BlastRes and BlastRes.Kill) or (FragRes and FragRes.Kill) then
-							local Debris = ACF_HEKill( Tar , Table.Vec , PowerFraction )
+							local Debris = ACF_HEKill( Tar, (Tar:GetPos() - NewHitpos):GetNormal(), PowerFraction )
 						else
-							local phys = Tar:GetPhysicsObject() 
-							if (phys:IsValid()) then 
-								if(!Tar.acflastupdatemass) or (Tar.acflastupdatemass < (CurTime() + 10)) then
-									ACF_CalcMassRatio(Tar)
-								end
-								local scalepush = GetConVarNumber("acf_hepush") or 1
-								local physratio = (Tar.acfphystotal / Tar.acftotal) * scalepush
-								phys:ApplyForceOffset( Table.Vec * PowerFraction * 100 * physratio ,  NewHitpos )	--Assuming about a tenth of the energy goes to propelling the target prop (Power in KJ * 1000 to get J then divided by 10)
-							end
+							ACF_KEShove(Tar, NewHitpos, (Tar:GetPos() - NewHitpos):GetNormal(), PowerFraction * 33.3 * (GetConVarNumber("acf_hepush") or 1) )
 						end
 					end
 				end)
 				
 				--calculate damage that would be applied (without applying it), so HE deals correct damage to other props
-				BlastRes = ACF_CalcDamage( Tar, Blast, Tar.ACF.MaxHealth, 0 )
-				--FragRes = ACF_CalcDamage( Tar , FragKE , (FragWeight/7.8)^0.33*FragHit , 0 )
+				BlastRes = ACF_CalcDamage( Tar, Blast, Tar.ACF.Aera / ACF.Threshold, 0 )
+				--FragRes = ACF_CalcDamage( Tar , FragKE , (FragWeight/7.8)^0.33*FragHit , 0 ) --not used for anything in this case
 			else
-				BlastRes = ACF_Damage ( Tar , Blast , Tar.ACF.MaxHealth , 0 , Inflictor ,0 , Ammo, "HE" )--Vel is just the speed of sound in air
+				BlastRes = ACF_Damage ( Tar , Blast , Tar.ACF.Aera / ACF.Threshold , 0 , Inflictor ,0 , Ammo, "HE" )
 				FragRes = ACF_Damage ( Tar , FragKE , (FragWeight/7.8)^0.33*FragHit , 0 , Inflictor , 0, Ammo, "Frag" )
 			
 				if (BlastRes and BlastRes.Kill) or (FragRes and FragRes.Kill) then
 					local Debris = ACF_HEKill( Tar , Table.Vec , PowerFraction )
 					table.insert( OccFilter , Debris )						--Add the debris created to the ignore so we don't hit it in other rounds
-					LoopKill = true
+					LoopKill = true --look for fresh targets since we blew a hole somewhere
 				else
-					local phys = Tar:GetPhysicsObject() 
-					if (phys:IsValid()) then 
-						if(!Tar.acflastupdatemass) or (Tar.acflastupdatemass < (CurTime() + 10)) then
-							ACF_CalcMassRatio(Tar)
-						end
-						local scalepush = GetConVarNumber("acf_hepush") or 1
-						local physratio = (Tar.acfphystotal / Tar.acftotal) * scalepush
-						phys:ApplyForceOffset( Table.Vec * PowerFraction * 100 * physratio ,  Hitpos )	--Assuming about a tenth of the energy goes to propelling the target prop (Power in KJ * 1000 to get J then divided by 10)
-					end
+					ACF_KEShove(Tar, Hitpos, Table.Vec, PowerFraction * 33.3 * (GetConVarNumber("acf_hepush") or 1) ) --Assuming about 1/30th of the explosive energy goes to propelling the target prop (Power in KJ * 1000 to get J then divided by 33)
 				end
 			end
 			PowerSpent = PowerSpent + PowerFraction*BlastRes.Loss/2--Removing the energy spent killing props
@@ -268,7 +252,7 @@ function ACF_RoundImpact( Bullet, Speed, Energy, Target, HitPos, HitNormal , Bon
 	end
 	local HitRes = ACF_Damage ( Target , Energy , Bullet["PenAera"] , Angle , Bullet["Owner"] , Bone, Bullet["Gun"], Bullet["Type"] )  --DAMAGE !!
 	
-	ACF_KEShove(Target, HitPos, Bullet["Flight"]:GetNormal(), Energy.Kinetic*HitRes.Loss*1000*Bullet["ShovePower"] )
+	ACF_KEShove(Target, HitPos, Bullet["Flight"]:GetNormal(), Energy.Kinetic*HitRes.Loss*1000*Bullet["ShovePower"]*(GetConVarNumber("acf_recoilpush") or 1) )
 	
 	if HitRes.Kill then
 		local Debris = ACF_APKill( Target , (Bullet["Flight"]):GetNormalized() , Energy.Kinetic )
@@ -336,10 +320,13 @@ function ACF_KEShove(Target, Pos, Vec, KE )
 		phys = parent:GetPhysicsObject()
 	end
 	
-	if (phys:IsValid()) then	
-		phys:ApplyForceOffset( Vec:GetNormal() * KE, Pos )
+	if (phys:IsValid()) then
+		if(!Target.acflastupdatemass) or (Target.acflastupdatemass < (CurTime() + 10)) then
+			ACF_CalcMassRatio(Target)
+		end
+		local physratio = Target.acfphystotal / Target.acftotal
+		phys:ApplyForceOffset( Vec:GetNormal() * KE * physratio, Pos )
 	end
-	
 end
 
 

@@ -83,3 +83,34 @@ r400
 *r507
 -Fixed v10 model physbox
 -Added i3 engines
+
+*r508
+-Fuel is now drained from all active tanks, instead of sequentially
+-Slightly nerfed 4.1L i5 diesel torque
+-Dropped 40mm HMG weight from 960 to 600, increased mag size from 30 to 35
+-MG/HMG recoloring fixed
+-Removed a few redundant sounds
+
+*r509
+-Fixed engine bug in r508
+
+*r514
+-ACF E2 funcs ported to starfall, courtesy of EpicG
+-Fixed acfRPM() not reporting 0 rpm on inactive engine
+-Fixed acfActive() not reporting the correct value for ammo
+
+*r515
+-Fixed update checker failing
+-Fixed refill crates not spawning correctly
+-Fixed ACF_CalcMassRatio not working when called on a non-physical child
+-Fixed E2/Starfall acfBlastRadius() returning incorrect values
+-Fixed armor tool not handling unconstrained parenting
+-Added physical mass, parented mass, and mass ratio output to armor tool reload
+-Smoke launcher weight dropped from 55kg to 25kg
+-Smoke launcher is now parentable
+-Flechettes now use radial spread instead of square
+-HE now takes ductility properly into account when dealing blast damage
+-HE shove no longer ignores the scale convar "acf_hepush"
+-HE now applies force to all props, not just physical props
+-HE shove is less potent
+-AP shove now takes parented mass into account
