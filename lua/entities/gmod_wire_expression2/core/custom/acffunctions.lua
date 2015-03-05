@@ -268,6 +268,20 @@ e2function number entity:acfTorque()
 	return math.floor(this.Torque or 0)
 end
 
+-- Returns the inertia of an ACF engine's flywheel
+e2function number entity:acfFlyInertia( )
+	if not isEngine(this) then return 0 end
+	if restrictInfo(self, this ) then return 0 end
+	return this.Inertia or 0
+end
+
+-- Returns the mass of an ACF engine's flywheel
+e2function number entity:acfFlyMass( )
+	if not isEngine(this) then return 0 end
+	if restrictInfo(self, this ) then return 0 end
+	return this.Inertia / (3.1416)^2 or 0
+end
+
 -- Returns the current power of an ACF engine
 e2function number entity:acfPower()
 	if not isEngine(this) then return 0 end

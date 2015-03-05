@@ -296,6 +296,26 @@ function ents_methods:acfTorque( )
 	return math.floor( this.Torque or 0 )
 end
 
+-- Returns the inertia of an ACF engine's flywheel
+function ents_methods:acfFlyInertia( )
+	SF.CheckType( self, ents_metatable )
+	local this = unwrap( self )
+	
+	if not isEngine( this ) then return nil end
+	if restrictInfo( SF.instance.player, this ) then return 0 end
+	return this.Inertia or 0
+end
+
+-- Returns the mass of an ACF engine's flywheel
+function ents_methods:acfFlyMass( )
+	SF.CheckType( self, ents_metatable )
+	local this = unwrap( self )
+	
+	if not isEngine( this ) then return nil end
+	if restrictInfo( SF.instance.player, this ) then return 0 end
+	return this.Inertia / (3.1416)^2 or 0
+end
+
 -- Returns the current power of an ACF engine
 function ents_methods:acfPower( )
 	SF.CheckType( self, ents_metatable )
