@@ -138,6 +138,8 @@ function ACF_DoBulletsFlight( Index, Bullet )
 		--print("Hit entity ", tostring(FlightRes.Entity), " on ", SERVER and "server" or "client")
 		ACF_BulletPropImpact = ACF.RoundTypes[Bullet.Type]["propimpact"]		
 		local Retry = ACF_BulletPropImpact( Index, Bullet, FlightRes.Entity , FlightRes.HitNormal , FlightRes.HitPos , FlightRes.HitGroup )				--If we hit stuff then send the resolution to the damage function	
+		if((tostring(FlightRes.Entity:GetClass()) == "func_door" or (tostring(FlightRes.Entity:GetClass()) == "debris") or tostring(FlightRes.Entity:GetClass()) == "prop_ragdoll")) then FlightRes.Entity:Remove() return end 
+
 		if Retry == "Penetrated" then		--If we should do the same trace again, then do so
 			if Bullet.OnPenetrated then Bullet.OnPenetrated(Index, Bullet, FlightRes) end
 			ACF_BulletClient( Index, Bullet, "Update" , 2 , FlightRes.HitPos  )
@@ -225,4 +227,3 @@ end
 function ACF_BulletEndFlight( Bullet, Index, HitPos )
 	--You overwrite this with your own function, defined in the ammo definition file
 end
-
