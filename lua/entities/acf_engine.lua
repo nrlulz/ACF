@@ -9,27 +9,27 @@ ENT.WireDebugName = "ACF Engine"
 if CLIENT then
 
 	local ACF_EngineInfoWhileSeated = CreateClientConVar("ACF_EngineInfoWhileSeated", 0, true, false)
-	
+
 	-- copied from base_wire_entity: DoNormalDraw's notip arg isn't accessible from ENT:Draw defined there.
 	function ENT:Draw()
-	
+
 		local lply = LocalPlayer()
 		local hideBubble = not GetConVar("ACF_EngineInfoWhileSeated"):GetBool() and IsValid(lply) and lply:InVehicle()
-		
+
 		self.BaseClass.DoNormalDraw(self, false, hideBubble)
 		Wire_Render(self)
-		
-		if self.GetBeamLength and (not self.GetShowBeam or self:GetShowBeam()) then 
+
+		if self.GetBeamLength and (not self.GetShowBeam or self:GetShowBeam()) then
 			-- Every SENT that has GetBeamLength should draw a tracer. Some of them have the GetShowBeam boolean
-			Wire_DrawTracerBeam( self, 1, self.GetBeamHighlight and self:GetBeamHighlight() or false ) 
+			Wire_DrawTracerBeam( self, 1, self.GetBeamHighlight and self:GetBeamHighlight() or false )
 		end
-		
+
 	end
-	
+
 	function ACFEngineGUICreate( Table )
-		
+
 		acfmenupanel:CPanelText("Name", Table.name)
-		
+
 		acfmenupanel.CData.DisplayModel = vgui.Create( "DModelPanel", acfmenupanel.CustomDisplay )
 			acfmenupanel.CData.DisplayModel:SetModel( Table.model )
 			acfmenupanel.CData.DisplayModel:SetCamPos( Vector( 250, 500, 250 ) )
@@ -38,15 +38,15 @@ if CLIENT then
 			acfmenupanel.CData.DisplayModel:SetSize(acfmenupanel:GetWide(),acfmenupanel:GetWide())
 			acfmenupanel.CData.DisplayModel.LayoutEntity = function( panel, entity ) end
 		acfmenupanel.CustomDisplay:AddItem( acfmenupanel.CData.DisplayModel )
-			
+
 		acfmenupanel:CPanelText("Desc", Table.desc)
-		
+
 		local peakkw
 		local peakkwrpm
 		if (Table.iselec == true )then --elecs and turbs get peak power in middle of rpm range
 			peakkw = Table.torque * Table.limitrpm / (4*9548.8)
 			peakkwrpm = math.floor(Table.limitrpm / 2)
-		else	
+		else
 			peakkw = Table.torque * Table.peakmaxrpm / 9548.8
 			peakkwrpm = Table.peakmaxrpm
 		end
@@ -60,10 +60,10 @@ if CLIENT then
 
 		acfmenupanel:CPanelText("RPM", "Idle : "..(Table.idlerpm).." RPM\nIdeal RPM Range : "..(Table.peakminrpm).."-"..(Table.peakmaxrpm).." RPM\nRedline : "..(Table.limitrpm).." RPM")
 		acfmenupanel:CPanelText("Weight", "Weight : "..(Table.weight).." kg")
-		
-		
+
+
 		acfmenupanel:CPanelText("FuelType", "\nFuel Type : "..(Table.fuel))
-		
+
 		if Table.fuel == "Electric" then
 			local cons = ACF.ElecRate * peakkw / ACF.Efficiency[Table.enginetype]
 			acfmenupanel:CPanelText("FuelCons", "Peak energy use : "..math.Round(cons,1).." kW / "..math.Round(0.06*cons,1).." MJ/min")
@@ -76,20 +76,20 @@ if CLIENT then
 			local fuelcons = ACF.FuelRate * ACF.Efficiency[Table.enginetype] * ACF.TorqueBoost * peakkw / (60 * ACF.FuelDensity[Table.fuel])
 			acfmenupanel:CPanelText("FuelCons", (Table.fuel).." Use at "..peakkwrpm.." rpm : "..math.Round(fuelcons,2).." liters/min / "..math.Round(0.264*fuelcons,2).." gallons/min")
 		end
-		
+
 		if Table.requiresfuel then
 			acfmenupanel:CPanelText("Fuelreq", "REQUIRES FUEL")
 		else
 			acfmenupanel:CPanelText("FueledPower", "\nWhen supplied with fuel:\nPeak Power : "..math.floor(peakkw*ACF.TorqueBoost).." kW / "..math.Round(peakkw*ACF.TorqueBoost*1.34).." HP @ "..peakkwrpm.." RPM")
 			acfmenupanel:CPanelText("FueledTorque", "Peak Torque : "..(Table.torque*ACF.TorqueBoost).." n/m  / "..math.Round(Table.torque*ACF.TorqueBoost*0.73).." ft-lb")
 		end
-		
+
 		acfmenupanel.CustomDisplay:PerformLayout()
-		
+
 	end
-	
+
 	return
-	
+
 end
 
 function ENT:Initialize()
@@ -113,7 +113,7 @@ function ENT:Initialize()
 	Wire_TriggerOutput( self, "Entity", self )
 	self.WireDebugName = "ACF Engine"
 
-end  
+end
 
 function MakeACF_Engine(Owner, Pos, Angle, Id)
 
@@ -121,19 +121,19 @@ function MakeACF_Engine(Owner, Pos, Angle, Id)
 
 	local Engine = ents.Create( "acf_engine" )
 	if not IsValid( Engine ) then return false end
-	
+
 	local EID
 	local List = list.Get("ACFEnts")
 	if List.Mobility[Id] then EID = Id else EID = "5.7-V8" end
 	local Lookup = List.Mobility[EID]
-	
+
 	Engine:SetAngles(Angle)
 	Engine:SetPos(Pos)
 	Engine:Spawn()
 	Engine:SetPlayer(Owner)
 	Engine.Owner = Owner
 	Engine.Id = EID
-	
+
 	Engine.Model = Lookup.model
 	Engine.SoundPath = Lookup.sound
 	Engine.Weight = Lookup.weight
@@ -155,13 +155,13 @@ function MakeACF_Engine(Owner, Pos, Angle, Id)
 	Engine.SpecialHealth = true
 	Engine.SpecialDamage = true
 	Engine.TorqueMult = 1
-	
+
 	if Engine.EngineType == "GenericDiesel" then
 		Engine.TorqueScale = ACF.DieselTorqueScale
 	else
 		Engine.TorqueScale = ACF.TorqueScale
 	end
-	
+
 	--calculate boosted peak kw
 	if Engine.EngineType == "Turbine" or Engine.EngineType == "Electric" then
 		Engine.peakkw = Engine.PeakTorque * Engine.LimitRPM / (4 * 9548.8)
@@ -170,7 +170,7 @@ function MakeACF_Engine(Owner, Pos, Angle, Id)
 		Engine.peakkw = Engine.PeakTorque * Engine.PeakMaxRPM / 9548.8
 		Engine.PeakKwRPM = Engine.PeakMaxRPM
 	end
-	
+
 	--calculate base fuel usage
 	if Engine.EngineType == "Electric" then
 		Engine.FuelUse = ACF.ElecRate / (ACF.Efficiency[Engine.EngineType] * 60 * 60) --elecs use current power output, not max
@@ -179,27 +179,29 @@ function MakeACF_Engine(Owner, Pos, Angle, Id)
 	end
 
 	Engine.FlyRPM = 0
-	Engine:SetModel( Engine.Model )	
+	Engine:SetModel( Engine.Model )
 	Engine.Sound = nil
 	Engine.RPM = {}
 
-	Engine:PhysicsInit( SOLID_VPHYSICS )      	
-	Engine:SetMoveType( MOVETYPE_VPHYSICS )     	
+	Engine:PhysicsInit( SOLID_VPHYSICS )
+	Engine:SetMoveType( MOVETYPE_VPHYSICS )
 	Engine:SetSolid( SOLID_VPHYSICS )
 
 	Engine.Out = Engine:WorldToLocal(Engine:GetAttachment(Engine:LookupAttachment( "driveshaft" )).Pos)
 
-	local phys = Engine:GetPhysicsObject()  	
+	local phys = Engine:GetPhysicsObject()
 	if IsValid( phys ) then
-		phys:SetMass( Engine.Weight ) 
+		if ACF.Weightable:GetBool() == false then
+			phys:SetMass( Engine.Weight )
+		end
 	end
 
 	Engine:SetNWString( "WireName", Lookup.name )
 	Engine:UpdateOverlayText()
-	
+
 	Owner:AddCount("_acf_engine", Engine)
 	Owner:AddCleanup( "acfmenu", Engine )
-	
+
 	ACF_Activate( Engine, 0 )
 
 	return Engine
@@ -207,14 +209,14 @@ end
 list.Set( "ACFCvars", "acf_engine", {"id"} )
 duplicator.RegisterEntityClass("acf_engine", MakeACF_Engine, "Pos", "Angle", "Id")
 
-function ENT:Update( ArgsTable )	
-	-- That table is the player data, as sorted in the ACFCvars above, with player who shot, 
+function ENT:Update( ArgsTable )
+	-- That table is the player data, as sorted in the ACFCvars above, with player who shot,
 	-- and pos and angle of the tool trace inserted at the start
 
 	if self.Active then
 		return false, "Turn off the engine before updating it!"
 	end
-	
+
 	if ArgsTable[1] ~= self.Owner then -- Argtable[1] is the player that shot the tool
 		return false, "You don't own that engine!"
 	end
@@ -225,7 +227,7 @@ function ENT:Update( ArgsTable )
 	if Lookup.model ~= self.Model then
 		return false, "The new engine must have the same model!"
 	end
-	
+
 	local Feedback = ""
 	if Lookup.fuel != self.FuelType then
 		Feedback = " Fuel type changed, fuel tanks unlinked."
@@ -257,7 +259,7 @@ function ENT:Update( ArgsTable )
 	self.SpecialDamage = true
 	self.TorqueMult = self.TorqueMult or 1
 	self.FuelTank = 1
-	
+
 	if self.EngineType == "GenericDiesel" then
 		self.TorqueScale = ACF.DieselTorqueScale
 	elseif self.EngineType == "Electric" then
@@ -265,7 +267,7 @@ function ENT:Update( ArgsTable )
 	else
 		self.TorqueScale = ACF.TorqueScale
 	end
-	
+
 	--calculate boosted peak kw
 	if self.EngineType == "Turbine" or self.EngineType == "Electric" then
 		self.peakkw = self.PeakTorque * self.LimitRPM / (4 * 9548.8)
@@ -274,7 +276,7 @@ function ENT:Update( ArgsTable )
 		self.peakkw = self.PeakTorque * self.PeakMaxRPM / 9548.8
 		self.PeakKwRPM = self.PeakMaxRPM
 	end
-	
+
 	--calculate base fuel usage
 	if self.EngineType == "Electric" then
 		self.FuelUse = ACF.ElecRate / (ACF.Efficiency[self.EngineType] * 60 * 60) --elecs use current power output, not max
@@ -282,20 +284,22 @@ function ENT:Update( ArgsTable )
 		self.FuelUse = ACF.TorqueBoost * ACF.FuelRate * ACF.Efficiency[self.EngineType] * self.peakkw / (60 * 60)
 	end
 
-	self:SetModel( self.Model )	
+	self:SetModel( self.Model )
 	self:SetSolid( SOLID_VPHYSICS )
 	self.Out = self:WorldToLocal(self:GetAttachment(self:LookupAttachment( "driveshaft" )).Pos)
 
-	local phys = self:GetPhysicsObject()  	
-	if IsValid( phys ) then 
-		phys:SetMass( self.Weight ) 
+	local phys = self:GetPhysicsObject()
+	if IsValid( phys ) then
+		if ACF.Weightable:GetBool() == false then
+			phys:SetMass( self.Weight )
+		end
 	end
-	
+
 	self:SetNWString( "WireName", Lookup.name )
 	self:UpdateOverlayText()
-	
+
 	ACF_Activate( self, 1 )
-	
+
 	return true, "Engine updated successfully!"..Feedback
 end
 
@@ -305,9 +309,9 @@ function ENT:UpdateOverlayText()
 	text = text .. "Torque: " .. math.Round( self.PeakTorque * SpecialBoost ) .. " Nm / " .. math.Round( self.PeakTorque * SpecialBoost * 0.73 ) .. " ft-lb\n"
 	text = text .. "Powerband: " .. self.PeakMinRPM .. " - " .. self.PeakMaxRPM .. " RPM\n"
 	text = text .. "Redline: " .. self.LimitRPM .. " RPM"
-	
+
 	self:SetOverlayText( text )
-	
+
 end
 
 function ENT:TriggerInput( iname, value )
@@ -320,12 +324,12 @@ function ENT:TriggerInput( iname, value )
 			local HasFuel
 			if not self.RequiresFuel then
 				HasFuel = true
-			else 
+			else
 				for _,fueltank in pairs(self.FuelLink) do
 					if fueltank.Fuel > 0 and fueltank.Active then HasFuel = true break end
 				end
 			end
-			
+
 			if HasFuel then
 				self.Active = true
 				self.Sound = CreateSound(self, self.SoundPath)
@@ -352,8 +356,8 @@ end
 function ENT:ACF_Activate()
 	--Density of steel = 7.8g cm3 so 7.8kg for a 1mx1m plate 1m thick
 	local Entity = self
-	Entity.ACF = Entity.ACF or {} 
-	
+	Entity.ACF = Entity.ACF or {}
+
 	local Count
 	local PhysObj = Entity:GetPhysicsObject()
 	if PhysObj:GetMesh() then Count = #PhysObj:GetMesh() end
@@ -374,21 +378,21 @@ function ENT:ACF_Activate()
 		--	Entity.ACF.Volume = Size.x * Size.y * Size.z * 16.38
 		--end
 	end
-	
+
 	Entity.ACF.Ductility = Entity.ACF.Ductility or 0
 	--local Area = (Entity.ACF.Aera+Entity.ACF.Aera*math.Clamp(Entity.ACF.Ductility,-0.8,0.8))
 	local Area = (Entity.ACF.Aera)
 	--local Armour = (Entity:GetPhysicsObject():GetMass()*1000 / Area / 0.78) / (1 + math.Clamp(Entity.ACF.Ductility, -0.8, 0.8))^(1/2)	--So we get the equivalent thickness of that prop in mm if all it's weight was a steel plate
-	local Armour = (Entity:GetPhysicsObject():GetMass()*1000 / Area / 0.78) 
+	local Armour = (Entity:GetPhysicsObject():GetMass()*1000 / Area / 0.78)
 	--local Health = (Area/ACF.Threshold) * (1 + math.Clamp(Entity.ACF.Ductility, -0.8, 0.8))												--Setting the threshold of the prop aera gone
 	local Health = (Area/ACF.Threshold)
-	
-	local Percent = 1 
-	
+
+	local Percent = 1
+
 	if Recalc and Entity.ACF.Health and Entity.ACF.MaxHealth then
 		Percent = Entity.ACF.Health/Entity.ACF.MaxHealth
 	end
-	
+
 	if self.EngineType == "GenericDiesel" then
 		Entity.ACF.Health = Health * Percent * ACF.DieselEngineHPMult
 		Entity.ACF.MaxHealth = Health * ACF.DieselEngineHPMult
@@ -404,7 +408,7 @@ function ENT:ACF_Activate()
 	Entity.ACF.Type = nil
 	Entity.ACF.Mass = PhysObj:GetMass()
 	--Entity.ACF.Density = (PhysObj:GetMass()*1000)/Entity.ACF.Volume
-	
+
 	Entity.ACF.Type = "Prop"
 	--print(Entity.ACF.Health)
 end
@@ -413,7 +417,7 @@ function ENT:ACF_OnDamage( Entity, Energy, FrAera, Angle, Inflictor, Bone, Type 
 
 	local Mul = ((Type == "HEAT" and ACF.HEATMulEngine) or 1) --Heat penetrators deal bonus damage to engines
 	local HitRes = ACF_PropDamage( Entity, Energy, FrAera * Mul, Angle, Inflictor )	--Calling the standard damage prop function
-	
+
 	return HitRes --This function needs to return HitRes
 end
 
@@ -443,67 +447,70 @@ function ENT:Think()
 end
 
 function ENT:CheckLegal()
-	
+
 	-- make sure weight is not below stock
-	if self:GetPhysicsObject():GetMass() < self.Weight then return false end
-	
+	if self:GetPhysicsObject():GetMass() < self.Weight and ACF.Weightable:GetBool() == false then return false end
+
+	-- parenting restriction should apply to all entities
+	if ACF.Parentable:GetBool() then return true end
+
 	-- if it's not parented we're fine
 	if not IsValid( self:GetParent() ) then return true end
-	
+
 	-- but not if it's parented to a parented prop
 	if IsValid( self:GetParent():GetParent() ) then return false end
-	
+
 	-- parenting is only legal if it's also welded
 	for k, v in pairs( constraint.FindConstraints( self, "Weld" ) ) do
-		
+
 		if v.Ent1 == self:GetParent() or v.Ent2 == self:GetParent() then return true end
-		
+
 	end
-	
+
 	return false
-	
+
 end
 
 function ENT:CalcMassRatio()
-	
+
 	local Mass = 0
 	local PhysMass = 0
-	
+
 	-- get the shit that is physically attached to the vehicle
 	local PhysEnts = ACF_GetAllPhysicalConstraints( self )
-	
+
 	-- add any parented but not constrained props you sneaky bastards
 	local AllEnts = table.Copy( PhysEnts )
 	for k, v in pairs( PhysEnts ) do
-		
+
 		table.Merge( AllEnts, ACF_GetAllChildren( v ) )
-	
+
 	end
-	
+
 	for k, v in pairs( AllEnts ) do
-		
+
 		if not IsValid( v ) then continue end
-		
+
 		local phys = v:GetPhysicsObject()
 		if not IsValid( phys ) then continue end
-		
+
 		Mass = Mass + phys:GetMass()
-		
+
 		if PhysEnts[ v ] then
 			PhysMass = PhysMass + phys:GetMass()
 		end
-		
+
 	end
 
 	self.MassRatio = PhysMass / Mass
-	
+
 	Wire_TriggerOutput( self, "Mass", math.Round( Mass, 2 ) )
 	Wire_TriggerOutput( self, "Physical Mass", math.Round( PhysMass, 2 ) )
-	
+
 end
 
 function ENT:ACFInit()
-	
+
 	self:CalcMassRatio()
 
 	self.LastThink = CurTime()
@@ -517,13 +524,13 @@ function ENT:CalcRPM()
 	local DeltaTime = CurTime() - self.LastThink
 	-- local AutoClutch = math.min(math.max(self.FlyRPM-self.IdleRPM,0)/(self.IdleRPM+self.LimitRPM/10),1)
 	--local ClutchRatio = math.min(Clutch/math.max(TorqueDiff,0.05),1)
-	
+
 	--find next active tank with fuel
 	local Tank = nil
 	local boost = 1
 	local i = 0
 	local MaxTanks = #self.FuelLink
-	
+
 	while i <= MaxTanks  and not (Tank and Tank:IsValid() and Tank.Fuel > 0) do
 		self.FuelTank = self.FuelTank % MaxTanks + 1
 		Tank = self.FuelLink[self.FuelTank]
@@ -533,7 +540,7 @@ function ENT:CalcRPM()
 		Tank = nil
 		i = i + 1
 	end
-	
+
 	--calculate fuel usage
 	if Tank then
 		local Consumption
@@ -552,52 +559,52 @@ function ENT:CalcRPM()
 	else
 		Wire_TriggerOutput(self, "Fuel Use", 0)
 	end
-	
+
 	--adjusting performance based on damage
 	self.TorqueMult = math.Clamp(((1 - self.TorqueScale) / (0.5)) * ((self.ACF.Health/self.ACF.MaxHealth) - 1) + 1, self.TorqueScale, 1)
 	self.PeakTorque = self.PeakTorqueHeld * self.TorqueMult
 
 	-- Calculate the current torque from flywheel RPM
 	self.Torque = boost * self.Throttle * math.max( self.PeakTorque * math.min( self.FlyRPM / self.PeakMinRPM, (self.LimitRPM - self.FlyRPM) / (self.LimitRPM - self.PeakMaxRPM), 1 ), 0 )
-	
-	local Drag 
+
+	local Drag
 	if self.iselec == true then
 		 Drag = self.PeakTorque * (math.max( self.FlyRPM - self.IdleRPM, 0) / self.FlywheelOverride) * (1 - self.Throttle) / self.Inertia
 	else
 		 Drag = self.PeakTorque * (math.max( self.FlyRPM - self.IdleRPM, 0) / self.PeakMaxRPM) * ( 1 - self.Throttle) / self.Inertia
 	end
-	
+
 	-- Let's accelerate the flywheel based on that torque
 	self.FlyRPM = math.max( self.FlyRPM + self.Torque / self.Inertia - Drag, 1 )
-	
+
 	-- The gearboxes don't think on their own, it's the engine that calls them, to ensure consistent execution order
 	local Boxes = table.Count( self.GearLink )
-	
+
 	local TotalReqTq = 0
-	
+
 	-- Get the requirements for torque for the gearboxes (Max clutch rating minus any wheels currently spinning faster than the Flywheel)
 	for Key, Link in pairs( self.GearLink ) do
-	
+
 		if not Link.Ent.Legal then continue end
-		
+
 		Link.ReqTq = Link.Ent:Calc( self.FlyRPM, self.Inertia )
 		TotalReqTq = TotalReqTq + Link.ReqTq
-		
+
 	end
 
 	-- This is the presently available torque from the engine
 	local TorqueDiff = math.max( self.FlyRPM - self.IdleRPM, 0 ) * self.Inertia
-	
+
 	-- Calculate the ratio of total requested torque versus what's avaliable
 	local AvailRatio = math.min( TorqueDiff / TotalReqTq / Boxes, 1 )
-	
+
 	-- Split the torque fairly between the gearboxes who need it
 	for Key, Link in pairs( self.GearLink ) do
-		
+
 		if not Link.Ent.Legal then continue end
-		
+
 		Link.Ent:Act( Link.ReqTq * AvailRatio * self.MassRatio, DeltaTime, self.MassRatio )
-		
+
 	end
 
 	self.FlyRPM = self.FlyRPM - math.min( TorqueDiff, TotalReqTq ) / self.Inertia
@@ -615,45 +622,45 @@ function ENT:CalcRPM()
 	Wire_TriggerOutput(self, "Torque", math.floor(self.Torque))
 	Wire_TriggerOutput(self, "Power", math.floor(Power))
 	Wire_TriggerOutput(self, "RPM", self.FlyRPM)
-	
+
 	if self.Sound then
 		self.Sound:ChangePitch( math.min( 20 + (SmoothRPM * self.SoundPitch) / 50, 255 ), 0 )
 		self.Sound:ChangeVolume( 0.25 + (0.1 + 0.9 * ((SmoothRPM / self.LimitRPM) ^ 1.5)) * self.Throttle / 1.5, 0 )
 	end
-	
+
 	return RPM
 end
 
 function ENT:CheckRopes()
-	
+
 	for Key, Link in pairs( self.GearLink ) do
-		
+
 		local Ent = Link.Ent
-		
+
 		-- make sure the rope is still there
-		if not IsValid( Link.Rope ) then 
+		if not IsValid( Link.Rope ) then
 			self:Unlink( Ent )
 		continue end
-		
+
 		local OutPos = self:LocalToWorld( self.Out )
 		local InPos = Ent:LocalToWorld( Ent.In )
-		
+
 		-- make sure it is not stretched too far
 		if OutPos:Distance( InPos ) > Link.RopeLen * 1.5 then
 			self:Unlink( Ent )
 		continue end
-		
+
 		-- make sure the angle is not excessive
 		local Direction
 		if self.IsTrans then Direction = -self:GetRight() else Direction = self:GetForward() end
-		
+
 		local DrvAngle = ( OutPos - InPos ):GetNormalized():DotProduct( Direction )
 		if DrvAngle < 0.7 then
 			self:Unlink( Ent )
 		end
-		
+
 	end
-	
+
 end
 
 --unlink fuel tanks out of range
@@ -672,42 +679,42 @@ function ENT:Link( Target )
 	if not IsValid( Target ) or (Target:GetClass() ~= "acf_gearbox" and Target:GetClass() ~= "acf_fueltank") then
 		return false, "Can only link to gearboxes or fuel tanks!"
 	end
-	
-	if Target:GetClass() == "acf_fueltank" then 
+
+	if Target:GetClass() == "acf_fueltank" then
 		return self:LinkFuel( Target )
 	end
-	
+
 	-- Check if target is already linked
 	for Key, Link in pairs( self.GearLink ) do
 		if Link.Ent == Target then
 			return false, "That is already linked to this engine!"
 		end
 	end
-	
+
 	-- make sure the angle is not excessive
 	local InPos = Target:LocalToWorld( Target.In )
 	local OutPos = self:LocalToWorld( self.Out )
-	
+
 	local Direction
 	if self.IsTrans then Direction = -self:GetRight() else Direction = self:GetForward() end
-	
+
 	local DrvAngle = ( OutPos - InPos ):GetNormalized():DotProduct( Direction )
 	if DrvAngle < 0.7 then
 		return false, "Cannot link due to excessive driveshaft angle!"
 	end
-	
+
 	local Rope = constraint.CreateKeyframeRope( OutPos, 1, "cable/cable2", nil, self, self.Out, 0, Target, Target.In, 0 )
-	
+
 	local Link = {
 		Ent = Target,
 		Rope = Rope,
 		RopeLen = ( OutPos - InPos ):Length(),
 		ReqTq = 0
 	}
-	
+
 	table.insert( self.GearLink, Link )
 	table.insert( Target.Master, self )
-	
+
 	return true, "Link successful!"
 end
 
@@ -716,74 +723,74 @@ function ENT:Unlink( Target )
 	if Target:GetClass() == "acf_fueltank" then
 		return self:UnlinkFuel( Target )
 	end
-	
+
 	for Key, Link in pairs( self.GearLink ) do
-		
+
 		if Link.Ent == Target then
-			
+
 			-- Remove any old physical ropes leftover from dupes
 			for Key, Rope in pairs( constraint.FindConstraints( Link.Ent, "Rope" ) ) do
 				if Rope.Ent1 == self or Rope.Ent2 == self then
 					Rope.Constraint:Remove()
 				end
 			end
-			
+
 			if IsValid( Link.Rope ) then
 				Link.Rope:Remove()
 			end
-			
+
 			table.remove( self.GearLink,Key )
-			
+
 			return true, "Unlink successful!"
-			
+
 		end
-		
+
 	end
-	
+
 	return false, "That gearbox is not linked to this engine!"
-	
+
 end
 
 function ENT:LinkFuel( Target )
-	
+
 	if not (self.FuelType == "Multifuel" and not (Target.FuelType == "Electric")) then
 		if self.FuelType ~= Target.FuelType then
 			return false, "Cannot link because fuel type is incompatible."
 		end
 	end
-	
+
 	if Target.NoLinks then
 		return false, "This fuel tank doesn\'t allow linking."
 	end
-	
+
 	for Key,Value in pairs(self.FuelLink) do
-		if Value == Target then 
+		if Value == Target then
 			return false, "That fuel tank is already linked to this engine!"
 		end
 	end
-	
+
 	if self:GetPos():Distance( Target:GetPos() ) > 512 then
 		return false, "Fuel tank is too far away."
 	end
-	
+
 	table.insert( self.FuelLink, Target )
 	table.insert( Target.Master, self )
-	
+
 	return true, "Link successful!"
-	
+
 end
 
 function ENT:UnlinkFuel( Target )
-	
+
 	for Key, Value in pairs( self.FuelLink ) do
 		if Value == Target then
 			table.remove( self.FuelLink, Key )
 			return true, "Unlink successful!"
 		end
 	end
-	
+
 	return false, "That fuel tank is not linked to this engine!"
-	
+
 end
 
 function ENT:PreEntityCopy()
@@ -804,7 +811,7 @@ function ENT:PreEntityCopy()
 	if info.entities then
 		duplicator.StoreEntityModifier( self, "GearLink", info )
 	end
-	
+
 	--fuel tank link saving
 	local fuel_info = {}
 	local fuel_entids = {}
@@ -816,7 +823,7 @@ function ENT:PreEntityCopy()
 	for Key, Value in pairs(self.FuelLink) do					--Then save it
 		table.insert(fuel_entids, Value:EntIndex())
 	end
-	
+
 	fuel_info.entities = fuel_entids
 	if fuel_info.entities then
 		duplicator.StoreEntityModifier( self, "FuelLink", fuel_info )
@@ -858,7 +865,7 @@ function ENT:PostEntityPaste( Player, Ent, CreatedEntities )
 		end
 		Ent.EntityMods.FuelLink = nil
 	end
-	
+
 	//Wire dupe info
 	self.BaseClass.PostEntityPaste( self, Player, Ent, CreatedEntities )
 
