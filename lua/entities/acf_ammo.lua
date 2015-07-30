@@ -7,38 +7,38 @@ ENT.PrintName = "ACF Ammo Crate"
 ENT.WireDebugName = "ACF Ammo Crate"
 
 if CLIENT then
-	
+
 	/*-------------------------------------
 	Shamefully stolen from lua rollercoaster. I'M SO SORRY. I HAD TO.
 	-------------------------------------*/
 
 	local function Bezier( a, b, c, d, t )
-		local ab,bc,cd,abbc,bccd 
-		
+		local ab,bc,cd,abbc,bccd
+
 		ab = LerpVector(t, a, b)
 		bc = LerpVector(t, b, c)
 		cd = LerpVector(t, c, d)
 		abbc = LerpVector(t, ab, bc)
 		bccd = LerpVector(t, bc, cd)
 		dest = LerpVector(t, abbc, bccd)
-		
+
 		return dest
 	end
 
 
 	local function BezPoint(perc, Table)
 		perc = perc or self.Perc
-		
+
 		local vec = Vector(0, 0, 0)
-		
+
 		vec = Bezier(Table[1], Table[2], Table[3], Table[4], perc)
-		
+
 		return vec
 	end
-	
+
 	function ACF_DrawRefillAmmo( Table )
-    
-		for k,v in pairs( Table ) do        
+
+		for k,v in pairs( Table ) do
 			local St, En = v.EntFrom:LocalToWorld(v.EntFrom:OBBCenter()), v.EntTo:LocalToWorld(v.EntTo:OBBCenter())
 			local Distance = (En - St):Length()
 			local Amount = math.Clamp((Distance/50),2,100)
@@ -57,63 +57,63 @@ if CLIENT then
 				render.Model( MdlTbl )
 			end
 		end
-        
+
 	end
 
     function ACF_TrimInvalidRefillEffects(effectsTbl)
-        
+
         local effect
-    
+
         for i=1, #effectsTbl do
             effect = effectsTbl[i]
-            
-            if not (IsValid(effect.EntFrom) and IsValid(effect.EntTo)) then 
+
+            if not (IsValid(effect.EntFrom) and IsValid(effect.EntTo)) then
                 effectsTbl[i] = nil
             end
         end
-        
+
     end
-	
+
 	local ACF_AmmoInfoWhileSeated = CreateClientConVar("ACF_AmmoInfoWhileSeated", 0, true, false)
-	
+
 	function ENT:Draw()
-		
+
 		local lply = LocalPlayer()
 		local hideBubble = not GetConVar("ACF_AmmoInfoWhileSeated"):GetBool() and IsValid(lply) and lply:InVehicle()
-		
+
 		self.BaseClass.DoNormalDraw(self, false, hideBubble)
 		Wire_Render(self)
-		
-		if self.GetBeamLength and (not self.GetShowBeam or self:GetShowBeam()) then 
+
+		if self.GetBeamLength and (not self.GetShowBeam or self:GetShowBeam()) then
 			-- Every SENT that has GetBeamLength should draw a tracer. Some of them have the GetShowBeam boolean
-			Wire_DrawTracerBeam( self, 1, self.GetBeamHighlight and self:GetBeamHighlight() or false ) 
+			Wire_DrawTracerBeam( self, 1, self.GetBeamHighlight and self:GetBeamHighlight() or false )
 		end
 		--self.BaseClass.Draw( self )
-		
+
 		if self.RefillAmmoEffect then
             ACF_TrimInvalidRefillEffects(self.RefillAmmoEffect)
 			ACF_DrawRefillAmmo( self.RefillAmmoEffect )
 		end
-		
+
 	end
-	
+
 	usermessage.Hook("ACF_RefillEffect", function( msg )
 		local EntFrom, EntTo, Weapon = ents.GetByIndex( msg:ReadFloat() ), ents.GetByIndex( msg:ReadFloat() ), msg:ReadString()
 		if not IsValid( EntFrom ) or not IsValid( EntTo ) then return end
-		//local List = list.Get( "ACFRoundTypes")	
+		//local List = list.Get( "ACFRoundTypes")
 		-- local Mdl = ACF.Weapons.Guns[Weapon].round.model or "models/munitions/round_100mm_shot.mdl"
 		local Mdl = "models/munitions/round_100mm_shot.mdl"
 		EntFrom.RefillAmmoEffect = EntFrom.RefillAmmoEffect or {}
 		table.insert( EntFrom.RefillAmmoEffect, {EntFrom = EntFrom, EntTo = EntTo, Model = Mdl, StTime = SysTime()} )
 	end)
-	
+
 	usermessage.Hook("ACF_StopRefillEffect", function( msg )
 		local EntFrom, EntTo = ents.GetByIndex( msg:ReadFloat() ), ents.GetByIndex( msg:ReadFloat() )
         //print("stop", EntFrom, EntTo)
 		if not IsValid( EntFrom ) or not IsValid( EntTo )or not EntFrom.RefillAmmoEffect then return end
 		for k,v in pairs( EntFrom.RefillAmmoEffect ) do
 			if v.EntTo == EntTo then
-				if #EntFrom.RefillAmmoEffect<=1 then 
+				if #EntFrom.RefillAmmoEffect<=1 then
 					EntFrom.RefillAmmoEffect = nil
 					return
 				end
@@ -121,13 +121,13 @@ if CLIENT then
 			end
 		end
 	end)
-	
+
 	return
-	
+
 end
 
 function ENT:Initialize()
-	
+
 	self.SpecialHealth = true	--If true needs a special ACF_Activate function
 	self.SpecialDamage = true	--If true needs a special ACF_OnDamage function
 	self.IsExplosive = true
@@ -137,25 +137,25 @@ function ENT:Initialize()
 	self.Load = false
 	self.EmptyMass = 0
 	self.Ammo = 0
-	
+
 	self.Master = {}
 	self.Sequence = 0
-	
+
 	self.Inputs = Wire_CreateInputs( self, { "Active" } ) --, "Fuse Length"
 	self.Outputs = Wire_CreateOutputs( self, { "Munitions", "On Fire" } )
-		
+
 	self.NextThink = CurTime() +  1
-	
+
 	ACF.AmmoCrates = ACF.AmmoCrates or {}
-	
+
 end
 
 function ENT:ACF_Activate( Recalc )
-	
+
 	local EmptyMass = math.max(self.EmptyMass, self:GetPhysicsObject():GetMass() - self:AmmoMass())
 
-	self.ACF = self.ACF or {} 
-	
+	self.ACF = self.ACF or {}
+
 	local PhysObj = self:GetPhysicsObject()
 	if not self.ACF.Aera then
 		self.ACF.Aera = PhysObj:GetSurfaceArea() * 6.45
@@ -163,15 +163,15 @@ function ENT:ACF_Activate( Recalc )
 	if not self.ACF.Volume then
 		self.ACF.Volume = PhysObj:GetVolume() * 16.38
 	end
-	
+
 	local Armour = EmptyMass*1000 / self.ACF.Aera / 0.78 --So we get the equivalent thickness of that prop in mm if all it's weight was a steel plate
-	local Health = self.ACF.Volume/ACF.Threshold							--Setting the threshold of the prop aera gone 
-	local Percent = 1 
-	
+	local Health = self.ACF.Volume/ACF.Threshold							--Setting the threshold of the prop aera gone
+	local Percent = 1
+
 	if Recalc and self.ACF.Health and self.ACF.MaxHealth then
 		Percent = self.ACF.Health/self.ACF.MaxHealth
 	end
-	
+
 	self.ACF.Health = Health * Percent
 	self.ACF.MaxHealth = Health
 	self.ACF.Armour = Armour * (0.5 + Percent/2)
@@ -180,16 +180,16 @@ function ENT:ACF_Activate( Recalc )
 	self.ACF.Mass = self.Mass
 	self.ACF.Density = (self:GetPhysicsObject():GetMass()*1000) / self.ACF.Volume
 	self.ACF.Type = "Prop"
-	
+
 end
 
 function ENT:ACF_OnDamage( Entity, Energy, FrAera, Angle, Inflictor, Bone, Type )	--This function needs to return HitRes
 
 	local Mul = ((Type == "HEAT" and ACF.HEATMulAmmo) or 1) --Heat penetrators deal bonus damage to ammo
 	local HitRes = ACF_PropDamage( Entity, Energy, FrAera * Mul, Angle, Inflictor )	--Calling the standard damage prop function
-	
+
 	if self.Exploding or not self.IsExplosive then return HitRes end
-	
+
 	if HitRes.Kill then
 		if hook.Run("ACF_AmmoExplode", self, self.BulletData ) == false then return HitRes end
 		self.Exploding = true
@@ -202,23 +202,23 @@ function ENT:ACF_OnDamage( Entity, Energy, FrAera, Angle, Inflictor, Bone, Type 
 			ACF_HEKill( self, VectorRand() )
 		end
 	end
-	
+
 	if self.Damaged then return HitRes end
 	local Ratio = (HitRes.Damage/self.BulletData.RoundVolume)^0.2
 	--print(Ratio)
-	if ( Ratio * self.Capacity/self.Ammo ) > math.Rand(0,1) then  
+	if ( Ratio * self.Capacity/self.Ammo ) > math.Rand(0,1) then
 		self.Inflictor = Inflictor
 		self.Damaged = CurTime() + (5 - Ratio*3)
 		Wire_TriggerOutput(self, "On Fire", 1)
 	end
-	
+
 	return HitRes --This function needs to return HitRes
 end
 
 function MakeACF_Ammo(Owner, Pos, Angle, Id, Data1, Data2, Data3, Data4, Data5, Data6, Data7, Data8, Data9, Data10)
 
 	if not Owner:CheckLimit("_acf_ammo") then return false end
-	
+
 	local Ammo = ents.Create("acf_ammo")
 	if not Ammo:IsValid() then return false end
 	Ammo:SetAngles(Angle)
@@ -226,52 +226,54 @@ function MakeACF_Ammo(Owner, Pos, Angle, Id, Data1, Data2, Data3, Data4, Data5, 
 	Ammo:Spawn()
 	Ammo:SetPlayer(Owner)
 	Ammo.Owner = Owner
-	
+
 	Ammo.Model = ACF.Weapons.Ammo[Id].model
-	Ammo:SetModel( Ammo.Model )	
-	
-	Ammo:PhysicsInit( SOLID_VPHYSICS )      	
-	Ammo:SetMoveType( MOVETYPE_VPHYSICS )     	
+	Ammo:SetModel( Ammo.Model )
+
+	Ammo:PhysicsInit( SOLID_VPHYSICS )
+	Ammo:SetMoveType( MOVETYPE_VPHYSICS )
 	Ammo:SetSolid( SOLID_VPHYSICS )
-	
+
 	Ammo.Id = Id
 	Ammo:CreateAmmo(Id, Data1, Data2, Data3, Data4, Data5, Data6, Data7, Data8, Data9, Data10)
-	
+
 	Ammo.Ammo = Ammo.Capacity
 	Ammo.EmptyMass = ACF.Weapons.Ammo[Ammo.Id].weight
 	Ammo.Mass = Ammo.EmptyMass + Ammo:AmmoMass()
-	
-	local phys = Ammo:GetPhysicsObject()  	
-	if (phys:IsValid()) then 
-		phys:SetMass( Ammo.Mass ) 
+
+	local phys = Ammo:GetPhysicsObject()
+	if (phys:IsValid()) then
+		if ACF.Weightable:GetBool() == false then
+			phys:SetMass( Ammo.Mass )
+		end
 	end
-	
+
 	Owner:AddCount( "_acf_ammo", Ammo )
 	Owner:AddCleanup( "acfmenu", Ammo )
-	
+
 	table.insert(ACF.AmmoCrates, Ammo)
-	
-	
+
+
 	return Ammo
 end
 list.Set( "ACFCvars", "acf_ammo", {"id", "data1", "data2", "data3", "data4", "data5", "data6", "data7", "data8", "data9", "data10"} )
 duplicator.RegisterEntityClass("acf_ammo", MakeACF_Ammo, "Pos", "Angle", "Id", "RoundId", "RoundType", "RoundPropellant", "RoundProjectile", "RoundData5", "RoundData6", "RoundData7", "RoundData8", "RoundData9", "RoundData10" )
 
 function ENT:Update( ArgsTable )
-	
-	-- That table is the player data, as sorted in the ACFCvars above, with player who shot, 
+
+	-- That table is the player data, as sorted in the ACFCvars above, with player who shot,
 	-- and pos and angle of the tool trace inserted at the start
 
 	local msg = "Ammo crate updated successfully!"
-	
+
 	if ArgsTable[1] ~= self.Owner then -- Argtable[1] is the player that shot the tool
 		return false, "You don't own that ammo crate!"
 	end
-	
+
 	if ArgsTable[6] == "Refill" then -- Argtable[6] is the round type. If it's refill it shouldn't be loaded into guns, so we refuse to change to it
 		return false, "Refill ammo type is only avaliable for new crates!"
 	end
-	
+
 	if ArgsTable[5] ~= self.RoundId then -- Argtable[5] is the weapon ID the new ammo loads into
 		for Key, Gun in pairs( self.Master ) do
 			if IsValid( Gun ) then
@@ -281,7 +283,7 @@ function ENT:Update( ArgsTable )
 		msg = "New ammo type loaded, crate unlinked."
 	else -- ammotype wasn't changed, but let's check if new roundtype is blacklisted
 		local Blacklist = ACF.AmmoBlacklist[ ArgsTable[6] ] or {}
-		
+
 		for Key, Gun in pairs( self.Master ) do
 			if IsValid( Gun ) and table.HasValue( Blacklist, Gun.Class ) then
 				Gun:Unlink( self )
@@ -289,39 +291,41 @@ function ENT:Update( ArgsTable )
 			end
 		end
 	end
-	
+
 	local AmmoPercent = self.Ammo/math.max(self.Capacity,1)
-	
+
 	self:CreateAmmo(ArgsTable[4], ArgsTable[5], ArgsTable[6], ArgsTable[7], ArgsTable[8], ArgsTable[9], ArgsTable[10], ArgsTable[11], ArgsTable[12], ArgsTable[13], ArgsTable[14])
-	
+
 	self.Ammo = math.floor(self.Capacity*AmmoPercent)
 	local AmmoMass = self:AmmoMass()
 	self.Mass = math.min(self.EmptyMass, self:GetPhysicsObject():GetMass() - AmmoMass) + AmmoMass*(self.Ammo/math.max(self.Capacity,1)) --min is intentional, cause think to set it appropriately
-	self:GetPhysicsObject():SetMass(self.Mass) 
-	
+	if ACF.Weightable:GetBool() == false then
+		self:GetPhysicsObject():SetMass(self.Mass)
+	end
+
 	return true, msg
-	
+
 end
 
 function ENT:UpdateOverlayText()
-	
+
 	local roundType = self.RoundType
-	
-	if self.BulletData.Tracer and self.BulletData.Tracer > 0 then 
+
+	if self.BulletData.Tracer and self.BulletData.Tracer > 0 then
 		roundType = roundType .. "-T"
 	end
-	
+
 	local text = roundType .. " - " .. self.Ammo .. " / " .. self.Capacity
 	--text = text .. "\nRound Type: " .. self.RoundType
-	
+
 	local RoundData = ACF.RoundTypes[ self.RoundType ]
-	
+
 	if RoundData and RoundData.cratetxt then
 		text = text .. "\n" .. RoundData.cratetxt( self.BulletData )
 	end
-	
+
 	self:SetOverlayText( text )
-	
+
 end
 
 function ENT:CreateAmmo(Id, Data1, Data2, Data3, Data4, Data5, Data6, Data7, Data8, Data9, Data10)
@@ -337,7 +341,7 @@ function ENT:CreateAmmo(Id, Data1, Data2, Data3, Data4, Data5, Data6, Data7, Dat
 	self.RoundData8 = ( Data8 or 0 )
 	self.RoundData9 = ( Data9 or 0 )
 	self.RoundData10 = ( Data10 or 0 )
-	
+
 	local PlayerData = {}
 		PlayerData.Id = self.RoundId
 		PlayerData.Type = self.RoundType
@@ -351,26 +355,26 @@ function ENT:CreateAmmo(Id, Data1, Data2, Data3, Data4, Data5, Data6, Data7, Dat
 		PlayerData.Data10 = self.RoundData10
 	self.ConvertData = ACF.RoundTypes[self.RoundType].convert
 	self.BulletData = self:ConvertData( PlayerData )
-	
+
 	local Size = (self:OBBMaxs() - self:OBBMins())
 	local Efficiency = 0.11 * ACF.AmmoMod			--This is the part of space that's actually useful, the rest is wasted on interround gaps, loading systems ..
 	local vol = math.floor(Size.x * Size.y * Size.z)
-	self.Volume = vol*Efficiency	
+	self.Volume = vol*Efficiency
 	local CapMul = (vol > 46000) and ((math.log(vol*0.00066)/math.log(2)-4)*0.125+1) or 1
 	self.Capacity = math.floor(CapMul*self.Volume*16.38/self.BulletData.RoundVolume)
 	self.Caliber = list.Get("ACFEnts").Guns[self.RoundId].caliber
 	self.RoFMul = (vol > 46000) and (1-(math.log(vol*0.00066)/math.log(2)-4)*0.05) or 1 --*0.0625 for 25% @ 4x8x8, 0.025 10%, 0.0375 15%, 0.05 20%
 
 	local List = list.Get("ACFEnts")
-	
+
 	self:SetNWString( "Ammo", self.Ammo )
 	self:SetNWString( "WireName", List.Guns[self.RoundId].name .. " Ammo" )
-	
+
 	self.NetworkData = ACF.RoundTypes[self.RoundType].network
 	self:NetworkData( self.BulletData )
-	
+
 	self:UpdateOverlayText()
-	
+
 end
 
 function ENT:AmmoMass() --Returns what the ammo mass would be if the crate was full
@@ -383,12 +387,12 @@ function ENT:GetInaccuracy()
 	local SpreadScale = ACF.SpreadScale
 	local inaccuracy = 0
 	local Gun = list.Get("ACFEnts").Guns[self.RoundId]
-	
+
 	if Gun then
 		local Classes = list.Get("ACFClasses")
 		inaccuracy = (Classes.GunClass[Gun.gunclass] or {spread = 0}).spread
 	end
-	
+
 	local coneAng = inaccuracy * ACF.GunInaccuracyScale
 	return coneAng
 end
@@ -417,43 +421,45 @@ function ENT:FirstLoad()
 			self.Master[Key]:UnloadAmmo()
 		end
 	end
-	
+
 end
 
 function ENT:Think()
 	local AmmoMass = self:AmmoMass()
 	self.Mass = math.max(self.EmptyMass, self:GetPhysicsObject():GetMass() - AmmoMass) + AmmoMass*(self.Ammo/math.max(self.Capacity,1))
-	self:GetPhysicsObject():SetMass(self.Mass) 
-	
+	if ACF.Weightable:GetBool() == false then
+		self:GetPhysicsObject():SetMass(self.Mass)
+	end
+
 	if self.Ammo ~= self.AmmoLast then
 		self:UpdateOverlayText()
 		self.AmmoLast = self.Ammo
 	end
-	
+
 	local color = self:GetColor()
 	self:SetNWVector("TracerColour", Vector( color.r, color.g, color.b ) )
-	
+
 	local cvarGrav = GetConVar("sv_gravity")
 	local vec = Vector(0,0,cvarGrav:GetInt()*-1)
 	if( self.sitp_inspace ) then
 		vec = Vector(0, 0, 0)
 	end
-		
+
 	self:SetNWVector("Accel", vec)
-		
+
 	self:NextThink( CurTime() +  1 )
-	
+
 	if self.Damaged then
 		if self.Damaged < CurTime() then
 			ACF_ScaledExplosion( self )
 		else
 			if not (self.BulletData.Type == "Refill") then
 				if math.Rand(0,150) > self.BulletData.RoundVolume^0.5 and math.Rand(0,1) < self.Ammo/math.max(self.Capacity,1) and ACF.RoundTypes[self.BulletData.Type] then
-					self:EmitSound( "ambient/explosions/explode_4.wav", 350, math.max(255 - self.BulletData.PropMass*100,60)  )	
+					self:EmitSound( "ambient/explosions/explode_4.wav", 350, math.max(255 - self.BulletData.PropMass*100,60)  )
 					local MuzzlePos = self:GetPos()
 					local MuzzleVec = VectorRand()
 					local Speed = ACF_MuzzleVelocity( self.BulletData.PropMass, self.BulletData.ProjMass/2, self.Caliber )
-					
+
 					self.BulletData.Pos = MuzzlePos
 					self.BulletData.Flight = (MuzzleVec):GetNormalized() * Speed * 39.37 + self:GetVelocity()
 					self.BulletData.Owner = self.Inflictor or self.Owner
@@ -461,9 +467,9 @@ function ENT:Think()
 					self.BulletData.Crate = self:EntIndex()
 					self.CreateShell = ACF.RoundTypes[self.BulletData.Type].create
 					self:CreateShell( self.BulletData )
-					
+
 					self.Ammo = self.Ammo - 1
-					
+
 				end
 			end
 			self:NextThink( CurTime() + 0.01 + self.BulletData.RoundVolume^0.5/100 )
@@ -474,20 +480,20 @@ function ENT:Think()
 				if Ammo.RoundType ~= "Refill" then
 					local dist = self:GetPos():Distance(Ammo:GetPos())
 					if dist < ACF.RefillDistance then
-					
+
 						if Ammo.Capacity > Ammo.Ammo then
 							self.SupplyingTo = self.SupplyingTo or {}
 							if not table.HasValue( self.SupplyingTo, Ammo:EntIndex() ) then
 								table.insert(self.SupplyingTo, Ammo:EntIndex())
 								self:RefillEffect( Ammo )
 							end
-									
+
 							local Supply = math.ceil((50000/((Ammo.BulletData.ProjMass+Ammo.BulletData.PropMass)*1000))/dist)
 							--Msg(tostring(50000).."/"..((Ammo.BulletData.ProjMass+Ammo.BulletData.PropMass)*1000).."/"..dist.."="..Supply.."\n")
 							local Transfert = math.min(Supply, Ammo.Capacity - Ammo.Ammo)
 							Ammo.Ammo = Ammo.Ammo + Transfert
 							self.Ammo = self.Ammo - Transfert
-								
+
 							Ammo.Supplied = true
 							Ammo.Entity:EmitSound( "items/ammo_pickup.wav", 500, 80 )
 						end
@@ -496,11 +502,11 @@ function ENT:Think()
 			end
 		end
 	end
-	
+
 	if self.SupplyingTo then
 		for k, EntID in pairs( self.SupplyingTo ) do
 			local Ammo = ents.GetByIndex(EntID)
-			if not IsValid( Ammo ) then 
+			if not IsValid( Ammo ) then
 				table.remove(self.SupplyingTo, k)
 				self:StopRefillEffect( EntID )
 			else
@@ -512,7 +518,7 @@ function ENT:Think()
 			end
 		end
 	end
-	
+
 	Wire_TriggerOutput(self, "Munitions", self.Ammo)
 	return true
 
@@ -542,7 +548,7 @@ function ENT:NetworkData()
 end
 
 function ENT:OnRemove()
-	
+
 	for Key,Value in pairs(self.Master) do
 		if self.Master[Key] and self.Master[Key]:IsValid() then
 			self.Master[Key]:Unlink( self )
@@ -554,5 +560,5 @@ function ENT:OnRemove()
 			table.remove(ACF.AmmoCrates,k)
 		end
 	end
-	
+
 end
