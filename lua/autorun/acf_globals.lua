@@ -4,8 +4,8 @@ ACF.MenuFunc = {}
 ACF.AmmoBlacklist = {}
 ACF.Version = 554 -- REMEMBER TO CHANGE THIS FOR GODS SAKE, OMFG!!!!!!! -wrex   Update the changelog too! -Ferv
 ACF.CurrentVersion = 0 -- just defining a variable, do not change
-ACF.Parentable = CreateConVar("acf_parentable", "1", {FCVAR_ARCHIVE})
-ACF.Weightable = CreateConVar("acf_weightable", "1", {FCVAR_ARCHIVE}) -- I don't know if the word "Weightable" exists but whatever
+ACF.Parentable = CreateConVar("acf_parentable", "0", {FCVAR_ARCHIVE})
+ACF.Weightable = CreateConVar("acf_weightable", "0", {FCVAR_ARCHIVE}) -- I don't know if the word "Weightable" exists but whatever
 
 ACF.Year = 1945
 
