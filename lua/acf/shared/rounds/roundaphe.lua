@@ -36,7 +36,7 @@ function Round.convert( Crate, PlayerData )
 	Data.MuzzleVel = ACF_MuzzleVelocity( Data.PropMass, Data.ProjMass, Data.Caliber )
 	local Energy = ACF_Kinetic( Data.MuzzleVel*39.37 , Data.ProjMass, Data.LimitVel )
 		
-	local MaxVol = ACF_RoundShellCapacity( Energy.Momentum, Data.FrAera, Data.Caliber, Data.ProjLength )
+	local MaxVol = ACF_RoundShellCapacity( Energy.Momentum, Data.FrArea, Data.Caliber, Data.ProjLength )
 	GUIData.MinFillerVol = 0
 	GUIData.MaxFillerVol = math.min(GUIData.ProjVolume,MaxVol*0.9)
 	GUIData.FillerVol = math.min(PlayerData.Data5,GUIData.MaxFillerVol)
@@ -47,8 +47,8 @@ function Round.convert( Crate, PlayerData )
 	
 	--Random bullshit left
 	Data.ShovePower = 0.1
-	Data.PenAera = Data.FrAera^ACF.PenAreaMod
-	Data.DragCoef = ((Data.FrAera/10000)/Data.ProjMass)
+	Data.PenArea = Data.FrArea^ACF.PenAreaMod
+	Data.DragCoef = ((Data.FrArea/10000)/Data.ProjMass)
 	Data.LimitVel = 700										--Most efficient penetration speed in m/s
 	Data.KETransfert = 0.1									--Kinetic energy transfert to the target for movement purposes
 	Data.Ricochet = 75										--Base ricochet angle
@@ -72,7 +72,7 @@ end
 function Round.getDisplayData(Data)
 	local GUIData = {}
 	local Energy = ACF_Kinetic( Data.MuzzleVel*39.37 , Data.ProjMass, Data.LimitVel )
-	GUIData.MaxPen = (Energy.Penetration/Data.PenAera)*ACF.KEtoRHA
+	GUIData.MaxPen = (Energy.Penetration/Data.PenArea)*ACF.KEtoRHA
 	
 	GUIData.BlastRadius = (Data.FillerMass)^0.33*8
 	local FragMass = Data.ProjMass - Data.FillerMass
@@ -263,8 +263,8 @@ function Round.guiupdate( Panel, Table )
 	--local RicoAngs = ACF_RicoProbability( Data.Ricochet, Data.MuzzleVel*ACF.VelScale )
 	--acfmenupanel:CPanelText("RicoDisplay", "Ricochet probability vs impact angle:\n".."    0% @ "..RicoAngs.Min.." degrees\n  50% @ "..RicoAngs.Mean.." degrees\n100% @ "..RicoAngs.Max.." degrees")
 	
-	local R1V, R1P = ACF_PenRanging( Data.MuzzleVel, Data.DragCoef, Data.ProjMass, Data.PenAera, Data.LimitVel, 300 )
-	local R2V, R2P = ACF_PenRanging( Data.MuzzleVel, Data.DragCoef, Data.ProjMass, Data.PenAera, Data.LimitVel, 800 )
+	local R1V, R1P = ACF_PenRanging( Data.MuzzleVel, Data.DragCoef, Data.ProjMass, Data.PenArea, Data.LimitVel, 300 )
+	local R2V, R2P = ACF_PenRanging( Data.MuzzleVel, Data.DragCoef, Data.ProjMass, Data.PenArea, Data.LimitVel, 800 )
 	
 	acfmenupanel:CPanelText("PenetrationRanging", "\n300m pen: "..math.Round(R1P,0).."mm @ "..math.Round(R1V,0).." m\\s\n800m pen: "..math.Round(R2P,0).."mm @ "..math.Round(R2V,0).." m\\s\n\nThe range data is an approximation and may not be entirely accurate.")	--Proj muzzle penetration (Name, Desc)
 	

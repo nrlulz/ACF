@@ -37,7 +37,7 @@ function Round.convert( Crate, PlayerData )
 	Data.MuzzleVel = ACF_MuzzleVelocity( Data.PropMass, Data.ProjMass, Data.Caliber )
 	local Energy = ACF_Kinetic( Data.MuzzleVel*39.37 , Data.ProjMass, Data.LimitVel )
 		
-	local MaxVol = ACF_RoundShellCapacity( Energy.Momentum, Data.FrAera, Data.Caliber, Data.ProjLength )
+	local MaxVol = ACF_RoundShellCapacity( Energy.Momentum, Data.FrArea, Data.Caliber, Data.ProjLength )
 	GUIData.MinFillerVol = 0
 	GUIData.MaxFillerVol = math.min(GUIData.ProjVolume,MaxVol)
 	
@@ -56,8 +56,8 @@ function Round.convert( Crate, PlayerData )
 	
 	--Random bullshit left
 	Data.ShovePower = 0.1
-	Data.PenAera = Data.FrAera^ACF.PenAreaMod
-	Data.DragCoef = ((Data.FrAera/10000)/Data.ProjMass)
+	Data.PenArea = Data.FrArea^ACF.PenAreaMod
+	Data.DragCoef = ((Data.FrArea/10000)/Data.ProjMass)
 	Data.LimitVel = 100										--Most efficient penetration speed in m/s
 	Data.KETransfert = 0.1									--Kinetic energy transfert to the target for movement purposes
 	Data.Ricochet = 60										--Base ricochet angle
