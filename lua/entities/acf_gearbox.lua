@@ -115,14 +115,15 @@ if CLIENT then
 				acfmenupanel.CData.ShiftGenPanel = vgui.Create( "DPanel" )
 					acfmenupanel.CData.ShiftGenPanel:SetPaintBackground( false )
 					acfmenupanel.CData.ShiftGenPanel:DockPadding( 4, 0, 4, 0 )
-					acfmenupanel.CData.ShiftGenPanel:SetTall( 40 )
+					acfmenupanel.CData.ShiftGenPanel:SetTall( 70 )
 					acfmenupanel.CData.ShiftGenPanel:SizeToContentsX()
 					acfmenupanel.CData.ShiftGenPanel.Gears = Table.gears
+
 					
 				acfmenupanel.CData.ShiftGenPanel.Calc = acfmenupanel.CData.ShiftGenPanel:Add( "DButton" )
 					acfmenupanel.CData.ShiftGenPanel.Calc:SetText( "Calculate" )
 					acfmenupanel.CData.ShiftGenPanel.Calc:Dock( RIGHT )
-					acfmenupanel.CData.ShiftGenPanel.Calc:SetWide( 80 )
+					acfmenupanel.CData.ShiftGenPanel.Calc:SetWide( 60 )
 					acfmenupanel.CData.ShiftGenPanel.Calc.DoClick = function()
 						local str, factor = acfmenupanel.CData.UnitsInput:GetSelected()
 						local mul = math.pi * acfmenupanel.CData.ShiftGenPanel.RPM:GetValue() * acfmenupanel.CData.ShiftGenPanel.Ratio:GetValue() * acfmenupanel.CData[10]:GetValue() * acfmenupanel.CData.ShiftGenPanel.Wheel:GetValue() / (60 * factor)
@@ -134,64 +135,73 @@ if CLIENT then
 					end
 					
 					acfmenupanel.CData.WheelPanel = acfmenupanel.CData.ShiftGenPanel:Add( "DPanel" )
+						acfmenupanel.CData.WheelPanel:SetTall( 20 )
+						acfmenupanel.CData.WheelPanel:SetWide( 160 )
 						acfmenupanel.CData.WheelPanel:SetPaintBackground( false )
-						acfmenupanel.CData.WheelPanel:DockMargin( 4, 0, 4, 0 )
-						acfmenupanel.CData.WheelPanel:Dock( RIGHT )
-						acfmenupanel.CData.WheelPanel:SetWide( 80 )
+						acfmenupanel.CData.WheelPanel:DockMargin( 0, 0, 4, 0 )
+						acfmenupanel.CData.WheelPanel:Dock( TOP )
 						acfmenupanel.CData.WheelPanel:SetTooltip( "If you use default spherical settings, add 0.5 to your wheel diameter.\nFor treaded vehicles, use the diameter of road wheels, not drive wheels." )
 
 						acfmenupanel.CData.ShiftGenPanel.WheelLabel = acfmenupanel.CData.WheelPanel:Add( "DLabel" )
-							acfmenupanel.CData.ShiftGenPanel.WheelLabel:Dock( TOP )
+							acfmenupanel.CData.ShiftGenPanel.WheelLabel:Dock( LEFT )
 							acfmenupanel.CData.ShiftGenPanel.WheelLabel:SetDark( true )
 							acfmenupanel.CData.ShiftGenPanel.WheelLabel:SetText( "Wheel Diameter:" )
+
 						
 						acfmenupanel.CData.ShiftGenPanel.Wheel = acfmenupanel.CData.WheelPanel:Add( "DNumberWang" )
 							acfmenupanel.CData.ShiftGenPanel.Wheel:HideWang()
 							acfmenupanel.CData.ShiftGenPanel.Wheel:SetDrawBorder( false )
-							acfmenupanel.CData.ShiftGenPanel.Wheel:Dock( BOTTOM )
+							acfmenupanel.CData.ShiftGenPanel.Wheel:Dock( RIGHT )
 							acfmenupanel.CData.ShiftGenPanel.Wheel:SetDecimals( 2 )
 							acfmenupanel.CData.ShiftGenPanel.Wheel:SetMinMax( 0, 9999 )
 							acfmenupanel.CData.ShiftGenPanel.Wheel:SetValue( 30 )
 					
 					acfmenupanel.CData.RatioPanel = acfmenupanel.CData.ShiftGenPanel:Add( "DPanel" )
+						acfmenupanel.CData.WheelPanel:SetTall( 20 )
+						acfmenupanel.CData.WheelPanel:SetWide( 160 )
 						acfmenupanel.CData.RatioPanel:SetPaintBackground( false )
-						acfmenupanel.CData.RatioPanel:DockMargin( 4, 0, 4, 0 )
-						acfmenupanel.CData.RatioPanel:Dock( RIGHT )
+						acfmenupanel.CData.RatioPanel:DockMargin( 0, 0, 4, 0 )
+						acfmenupanel.CData.RatioPanel:Dock( TOP )
 						acfmenupanel.CData.RatioPanel:SetWide( 80 )
 						acfmenupanel.CData.RatioPanel:SetTooltip( "Total ratio is the ratio of all gearboxes (exluding this one) multiplied together.\nFor example, if you use engine to automatic to diffs to wheels, your total ratio would be (diff gear ratio * diff final ratio)." )
 
+
 						acfmenupanel.CData.ShiftGenPanel.RatioLabel = acfmenupanel.CData.RatioPanel:Add( "DLabel" )
-							acfmenupanel.CData.ShiftGenPanel.RatioLabel:Dock( TOP )
+							acfmenupanel.CData.ShiftGenPanel.RatioLabel:Dock( LEFT )
 							acfmenupanel.CData.ShiftGenPanel.RatioLabel:SetDark( true )
 							acfmenupanel.CData.ShiftGenPanel.RatioLabel:SetText( "Total ratio:" )
 					
 						acfmenupanel.CData.ShiftGenPanel.Ratio = acfmenupanel.CData.RatioPanel:Add( "DNumberWang" )
 							acfmenupanel.CData.ShiftGenPanel.Ratio:HideWang()
 							acfmenupanel.CData.ShiftGenPanel.Ratio:SetDrawBorder( false )
-							acfmenupanel.CData.ShiftGenPanel.Ratio:Dock( BOTTOM )
+							acfmenupanel.CData.ShiftGenPanel.Ratio:Dock( RIGHT )
 							acfmenupanel.CData.ShiftGenPanel.Ratio:SetDecimals( 2 )
 							acfmenupanel.CData.ShiftGenPanel.Ratio:SetMinMax( 0, 9999 )
 							acfmenupanel.CData.ShiftGenPanel.Ratio:SetValue( 0.1 )
 					
 					acfmenupanel.CData.RPMPanel = acfmenupanel.CData.ShiftGenPanel:Add( "DPanel" )
+						acfmenupanel.CData.WheelPanel:SetTall( 20 )
+						acfmenupanel.CData.WheelPanel:SetWide( 160 )
 						acfmenupanel.CData.RPMPanel:SetPaintBackground( false )
-						acfmenupanel.CData.RPMPanel:DockMargin( 4, 0, 4, 0 )
-						acfmenupanel.CData.RPMPanel:Dock( RIGHT )
+						acfmenupanel.CData.RPMPanel:DockMargin( 0, 0, 4, 0 )
+						acfmenupanel.CData.RPMPanel:Dock( TOP )
 						acfmenupanel.CData.RPMPanel:SetWide( 80 )
 						acfmenupanel.CData.RPMPanel:SetTooltip( "Target engine RPM to upshift at." )
+
 				
 						acfmenupanel.CData.ShiftGenPanel.RPMLabel = acfmenupanel.CData.RPMPanel:Add( "DLabel" )
-							acfmenupanel.CData.ShiftGenPanel.RPMLabel:Dock( TOP )
+							acfmenupanel.CData.ShiftGenPanel.RPMLabel:Dock( LEFT )
 							acfmenupanel.CData.ShiftGenPanel.RPMLabel:SetDark( true )
 							acfmenupanel.CData.ShiftGenPanel.RPMLabel:SetText( "Upshift RPM:" )
 				
 						acfmenupanel.CData.ShiftGenPanel.RPM = acfmenupanel.CData.RPMPanel:Add( "DNumberWang" )
 							acfmenupanel.CData.ShiftGenPanel.RPM:HideWang()
 							acfmenupanel.CData.ShiftGenPanel.RPM:SetDrawBorder( false )
-							acfmenupanel.CData.ShiftGenPanel.RPM:Dock( BOTTOM )
+							acfmenupanel.CData.ShiftGenPanel.RPM:Dock( RIGHT )
 							acfmenupanel.CData.ShiftGenPanel.RPM:SetDecimals( 2 )
 							acfmenupanel.CData.ShiftGenPanel.RPM:SetMinMax( 0, 9999 )
 							acfmenupanel.CData.ShiftGenPanel.RPM:SetValue( 5000 )
+							
 				
 				acfmenupanel.CustomDisplay:AddItem(acfmenupanel.CData.ShiftGenPanel)
 			end
