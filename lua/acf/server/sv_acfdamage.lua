@@ -289,8 +289,8 @@ function ACF_PenetrateGround( Bullet, Energy, HitPos, HitNormal )
 		local Ricochet = 0
 		local Speed = Bullet.Flight:Length() / ACF.VelScale
 		local Angle = ACF_GetHitAngle( HitNormal, Bullet.Flight )
-		local MinAngle = math.min(Bullet.Ricochet - Speed/39.37/30 + 20,89.9)	--Making the chance of a ricochet get higher as the speeds increase
-		if Angle > math.random(MinAngle,90) and Angle < 89.9 then	--Checking for ricochet
+		local MinAngle = math.min(Bullet.Ricochet - Speed/39.37/30 + 25,89.9)	--Making the chance of a ricochet get higher as the speeds increase
+		if Angle > math.random(MinAngle,90) and Angle < 89.9 and math.random(0, 1) == 1 then	--Checking for ricochet
 			Ricochet = Angle/90*0.75
 		end
 		
