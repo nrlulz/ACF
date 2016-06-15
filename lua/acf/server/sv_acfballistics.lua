@@ -126,7 +126,7 @@ function ACF_DoBulletsFlight( Index, Bullet )
 	end
 	
 	if Bullet.SkyLvL then
-		if CurTime() - Bullet.LifeTime > 500 then			 -- We don't want to calculate bullets that will never come back to map.
+		if CurTime() - Bullet.LifeTime > 30 then			 -- We don't want to calculate bullets that will never come back to map.
 			ACF_RemoveBullet( Index )
 			return
 		end
