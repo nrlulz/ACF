@@ -2,80 +2,81 @@ ACF.Bullet = {}
 ACF.CurBulletIndex = 0
 ACF.BulletIndexLimt = 1000  --The maximum number of bullets in flight at any one time
 
+
 function ACF_CreateBullet( BulletData )
+	ACF.CurBulletIndex = ACF.CurBulletIndex + 1 > ACF.BulletIndexLimt and 1 or ACF.CurBulletIndex + 1
+	local Index = ACF.CurBulletIndex
 	
-	ACF.CurBulletIndex = ACF.CurBulletIndex + 1		--Increment the index
-	if ACF.CurBulletIndex > ACF.BulletIndexLimt then
-		ACF.CurBulletIndex = 1
-	end
-	
-	local cvarGrav = GetConVar("sv_gravity")
-	BulletData["Accel"] = Vector(0,0,cvarGrav:GetInt()*-1)			--Those are BulletData settings that are global and shouldn't change round to round
-	BulletData["LastThink"] = SysTime()
-	BulletData["FlightTime"] = 0
-	BulletData["TraceBackComp"] = 0
-	if BulletData["FuseLength"] then
-		--print("Has fuse")
-		BulletData["InitTime"] = SysTime()
-	end
-	if BulletData["Gun"]:IsValid() then											--Check the Gun's velocity and add a modifier to the flighttime so the traceback system doesn't hit the originating contraption if it's moving along the shell path
+	BulletData["Accel"]         = Vector(0,0,GetConVar("sv_gravity"):GetInt()*-1)			--Those are BulletData settings that are global and shouldn't change round to round
+	BulletData["LastThink"]     = SysTime()
+	BulletData["FlightTime"]    = 0
+	BulletData["InitTime"]      = BulletData["FuseLength"] and SysTime() or nil
+	BulletData["Filter"]        = { BulletData["Gun"] }
+	BulletData["Index"]         = Index
+
+	if IsValid(BulletData["Gun"]) then											--Check the Gun's velocity and add a modifier to the flighttime so the traceback system doesn't hit the originating contraption if it's moving along the shell path
 		BulletData["TraceBackComp"] = BulletData["Gun"]:GetPhysicsObject():GetVelocity():Dot(BulletData["Flight"]:GetNormalized())
+		
 		if BulletData["Gun"].sitp_inspace then
 			BulletData["Accel"] = Vector(0, 0, 0)
 			BulletData["DragCoef"] = 0
 		end
-		--print(BulletData["TraceBackComp"])
+	else
+		BulletData["TraceBackComp"] = 0
 	end
-	BulletData["Filter"] = { BulletData["Gun"] }
-	BulletData["Index"] = ACF.CurBulletIndex
 		
-	ACF.Bullet[ACF.CurBulletIndex] = table.Copy(BulletData)		--Place the bullet at the current index pos
-	ACF_BulletClient( ACF.CurBulletIndex, ACF.Bullet[ACF.CurBulletIndex], "Init" , 0 )
-	ACF_CalcBulletFlight( ACF.CurBulletIndex, ACF.Bullet[ACF.CurBulletIndex] )
-	
+	ACF.Bullet[Index] = table.Copy(BulletData)		--Place the bullet at the current index pos
+	ACF_BulletClient( Index, ACF.Bullet[Index], "Init", 0 )
+	ACF_CalcBulletFlight( Index, ACF.Bullet[Index] )
 end
 
-function ACF_ManageBullets()
 
+function ACF_ManageBullets()
 	for Index,Bullet in pairs(ACF.Bullet) do
 		if not Bullet.HandlesOwnIteration then
 			ACF_CalcBulletFlight( Index, Bullet )			--This is the bullet entry in the table, the Index var omnipresent refers to this
 		end
 	end
-	
 end
 hook.Add("Tick", "ACF_ManageBullets", ACF_ManageBullets)
---hook.Remove("Think", "ACF_ManageBullets")--, ACF_ManageBullets)
+
 
 function ACF_RemoveBullet( Index )
-	
 	local Bullet = ACF.Bullet[Index]
 	
 	ACF.Bullet[Index] = nil
 	
 	if Bullet and Bullet.OnRemoved then Bullet:OnRemoved() end
-	
 end
 
-function ACF_CheckClips(Index, Bullet, Ent, HitPos )
-	if not (Ent:GetClass() == "prop_physics") or (Ent.ClipData == nil) then return false end
+
+function ACF_CheckClips(Ent, HitPos )
+	if Ent:GetClass() ~= "prop_physics" or not Ent.ClipData then return false end
 	
-	local HitClip = false
-	local normal
-	local origin
-	for i=1, #Ent.ClipData do
-		normal = Ent:LocalToWorldAngles(Ent.ClipData[i]["n"]):Forward()
-		origin = Ent:LocalToWorld(Ent.ClipData[i]["n"]:Forward()*Ent.ClipData[i]["d"])
-		HitClip = HitClip or normal:Dot((origin - HitPos):GetNormalized()) > 0
-		if HitClip then return true end
+	for i = 1, #Ent.ClipData do
+		local N = Ent.ClipData[i]["n"]
+		if Ent:LocalToWorldAngles(N):Forward():Dot((Ent:LocalToWorld(N:Forward() * Ent.ClipData[i]["d"]) - HitPos):GetNormalized()) > 0 then return true end
 	end
 	
-	return HitClip
+	return false
 end
 
-function ACF_CalcBulletFlight( Index, Bullet, BackTraceOverride )
+
+function ACF_Trace(RangerData)
+	local TraceRes = util.TraceLine(RangerData)
 	
-	// perf concern: use direct function call stored on bullet over hook system.
+	if IsValid(TraceRes.Entity) and ( not ACF_Check(TraceRes.Entity) or ACF_CheckClips(TraceRes.Entity, TraceRes.HitPos) ) then
+		table.insert(RangerData.filter, TraceRes.Entity)
+		
+		return ACF_Trace(RangerData)
+	end
+	
+	return TraceRes
+end
+
+
+function ACF_CalcBulletFlight( Index, Bullet, BackTraceOverride )
+	// perf concern: none of the ACF devs know how to code
 	if Bullet.PreCalcFlight then Bullet:PreCalcFlight() end
 	
 	
@@ -103,29 +104,29 @@ function ACF_CalcBulletFlight( Index, Bullet, BackTraceOverride )
 	
 	// perf concern: use direct function call stored on bullet over hook system.
 	if Bullet.PostCalcFlight then Bullet:PostCalcFlight() end
-	
 end
 
+
 function ACF_DoBulletsFlight( Index, Bullet )
-	local CanDo = hook.Run("ACF_BulletsFlight", Index, Bullet )
-	if CanDo == false then return end
-	if Bullet.FuseLength then
-		local Time = SysTime() - Bullet.InitTime
-		if Time > Bullet.FuseLength then
-			--print("Explode")
-			if not util.IsInWorld(Bullet.Pos) then
-				ACF_RemoveBullet( Index )
-			else
-				if Bullet.OnEndFlight then Bullet.OnEndFlight(Index, Bullet, FlightRes) end
-				ACF_BulletClient( Index, Bullet, "Update" , 1 , Bullet.Pos  )
-				ACF_BulletEndFlight = ACF.RoundTypes[Bullet.Type]["endflight"]
-				ACF_BulletEndFlight( Index, Bullet, Bullet.Pos, Bullet.Flight:GetNormalized() )	
-			end
+	if hook.Run("ACF_BulletsFlight", Index, Bullet ) == false then return end
+	
+	if Bullet.FuseLength and SysTime() - Bullet.InitTime > Bullet.FuseLength then
+		--print("Explode")
+		if not util.IsInWorld(Bullet.Pos) then
+			ACF_RemoveBullet( Index )
+		else
+			Bullet.Pos = LerpVector(math.random(), Bullet.Pos, Bullet.NextPos)
+
+			if Bullet.OnEndFlight then Bullet.OnEndFlight(Index, Bullet, FlightRes) end
+			
+			ACF_BulletClient( Index, Bullet, "Update" , 1 , Bullet.Pos  )
+			ACF_BulletEndFlight = ACF.RoundTypes[Bullet.Type]["endflight"]
+			ACF_BulletEndFlight( Index, Bullet, Bullet.Pos, Bullet.Flight:GetNormalized() )	
 		end
 	end
 	
 	if Bullet.SkyLvL then
-		if (CurTime() - Bullet.LifeTime) > 500 then			 -- We don't want to calculate bullets that will never come back to map.
+		if CurTime() - Bullet.LifeTime > 500 then			 -- We don't want to calculate bullets that will never come back to map.
 			ACF_RemoveBullet( Index )
 			return
 		end
@@ -145,22 +146,12 @@ function ACF_DoBulletsFlight( Index, Bullet )
 		end
 	end
 
-	local FlightTr = { }
-	local FlightRes
-	local RetryTrace = true
-	while RetryTrace do			--if trace hits clipped part of prop, add prop to trace filter and retry
-		RetryTrace = false
-		FlightTr.start = Bullet.StartTrace
+	local FlightTr = {}
+		FlightTr.start  = Bullet.StartTrace
 		FlightTr.endpos = Bullet.NextPos
 		FlightTr.filter = Bullet.Filter
-		if ( Bullet.Caliber <= 0.3 ) then FlightTr.mask = MASK_SHOT end
-		FlightRes = util.TraceLine(FlightTr)					--Trace to see if it will hit anything
-		
-		if FlightRes.HitNonWorld and ACF_CheckClips(Index, Bullet, FlightRes.Entity, FlightRes.HitPos ) then
-			table.insert( Bullet.Filter , FlightRes.Entity )
-			RetryTrace = true
-		end
-	end
+		FlightTr.mask   = MASK_SHOT
+	local FlightRes = ACF_Trace(FlightTr)
 	
 	if Bullet.SkipNextHit then
 		if not FlightRes.StartSolid and not FlightRes.HitNoDraw then Bullet.SkipNextHit = nil end
@@ -217,6 +208,7 @@ function ACF_DoBulletsFlight( Index, Bullet )
 	
 end
 
+
 function ACF_BulletClient( Index, Bullet, Type, Hit, HitPos )
 
 	if Type == "Update" then
@@ -230,7 +222,6 @@ function ACF_BulletClient( Index, Bullet, Type, Hit, HitPos )
 			end
 			Effect:SetScale( Hit )	--Hit Type 
 		util.Effect( "ACF_BulletEffect", Effect, true, true )
-
 	else
 		local Effect = EffectData()
 			local Filler = 0
@@ -245,16 +236,3 @@ function ACF_BulletClient( Index, Bullet, Type, Hit, HitPos )
 	end
 
 end
-
-function ACF_BulletWorldImpact( Bullet, Index, HitPos, HitNormal )
-	--You overwrite this with your own function, defined in the ammo definition file
-end
-
-function ACF_BulletPropImpact( Bullet, Index, Target, HitNormal, HitPos )
-	--You overwrite this with your own function, defined in the ammo definition file
-end
-
-function ACF_BulletEndFlight( Bullet, Index, HitPos )
-	--You overwrite this with your own function, defined in the ammo definition file
-end
-

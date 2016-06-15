@@ -310,7 +310,7 @@ function ACF_PenetrateGround( Bullet, Energy, HitPos, HitNormal )
 			HitRes.Ricochet = true
 		end
 	else --penetrated
-		Bullet.Flight = Bullet.Flight * loss
+		Bullet.Flight = Bullet.Flight * ( 1 - loss )
 		Bullet.Pos = DigRes.StartPos --this is actually where trace left brush
 		HitRes.Penetrated = true
 	end
@@ -326,15 +326,15 @@ function ACF_KEShove(Target, Pos, Vec, KE )
 	local parent = Target:GetParent()
 	local depth = 0
 	
-	if parent:IsValid() then
-		while parent:GetParent():IsValid() and depth<5 do
+	if IsValid(parent) then
+		while IsValid(parent:GetParent()) and depth<5 do
 			depth = depth + 1
 			parent = parent:GetParent()
 		end
 		phys = parent:GetPhysicsObject()
 	end
 	
-	if (phys:IsValid()) then
+	if IsValid(phys) then
 		if(!Target.acflastupdatemass) or ((Target.acflastupdatemass + 10) < CurTime()) then
 			ACF_CalcMassRatio(Target)
 		end
@@ -362,7 +362,7 @@ function ACF_HEKill( Entity , HitVector , Energy )
 	local obj = Entity:GetPhysicsObject()
 	local grav = true
 	local mass = nil
-	if obj:IsValid() and ISSITP then
+	if IsValid(obj) and ISSITP then
 		grav = obj:IsGravityEnabled()
 		mass = obj:GetMass()
 	end
@@ -390,12 +390,11 @@ function ACF_HEKill( Entity , HitVector , Energy )
 		Debris:Activate()
 
 	local phys = Debris:GetPhysicsObject() 
-	if (phys:IsValid()) then
+	if IsValid(phys) then
 		phys:ApplyForceOffset( HitVector:GetNormal() * Energy * 350 , Debris:GetPos()+VectorRand()*20 ) 	
 		phys:EnableGravity( grav )
-		if(mass != nil) then
-			phys:SetMass(mass)
-		end
+		
+		if mass then phys:SetMass(mass) end
 	end
 
 	return Debris
@@ -407,7 +406,7 @@ function ACF_APKill( Entity , HitVector , Power )
 	constraint.RemoveAll( Entity )
 	Entity:Remove()
 	
-	if(Entity:BoundingRadius() < ACF.DebrisScale) then
+	if Entity:BoundingRadius() < ACF.DebrisScale then
 		return nil
 	end
 
@@ -426,7 +425,7 @@ function ACF_APKill( Entity , HitVector , Power )
 	util.Effect( "WheelDust", BreakEffect )	
 		
 	local phys = Debris:GetPhysicsObject() 
-	if (phys:IsValid()) then	
+	if IsValid(phys) then	
 		phys:ApplyForceOffset( HitVector:GetNormal() * Power * 350 ,  Debris:GetPos()+VectorRand()*20 )	
 	end
 
@@ -437,7 +436,7 @@ end
 --converts what would be multiple simultaneous cache detonations into one large explosion
 function ACF_ScaledExplosion( ent )
 	local Inflictor = nil
-	if( ent.Inflictor ) then
+	if ent.Inflictor then
 		Inflictor = ent.Inflictor
 	end
 	
@@ -472,7 +471,7 @@ function ACF_ScaledExplosion( ent )
 					Occlusion.filter = Filter
 				local Occ = util.TraceLine( Occlusion )
 				
-				if ( Occ.Fraction == 0 ) then
+				if Occ.Fraction == 0 then
 					table.insert(Filter,Occ.Entity)
 					local Occlusion = {}
 						Occlusion.start = Pos
@@ -482,7 +481,7 @@ function ACF_ScaledExplosion( ent )
 					--print("Ignoring nested prop")
 				end
 					
-				if ( Occ.Hit and Occ.Entity:EntIndex() != Found.Entity:EntIndex() ) then 
+				if Occ.Hit and Occ.Entity:EntIndex() != Found.Entity:EntIndex() then 
 						--Msg("Target Occluded\n")
 				else
 					local FoundHEWeight
