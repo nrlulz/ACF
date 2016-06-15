@@ -311,7 +311,7 @@ function ACF_PenetrateGround( Bullet, Energy, HitPos, HitNormal )
 		end
 	else --penetrated
 		Bullet.Flight = Bullet.Flight * ( 1 - loss )
-		Bullet.Pos = DigRes.StartPos --this is actually where trace left brush
+		Bullet.Pos = DigRes.StartPos + Bullet.Flight:GetNormalized() * 0.25 --this is actually where trace left brush
 		HitRes.Penetrated = true
 	end
 	

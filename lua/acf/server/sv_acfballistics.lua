@@ -210,7 +210,6 @@ end
 
 
 function ACF_BulletClient( Index, Bullet, Type, Hit, HitPos )
-
 	if Type == "Update" then
 		local Effect = EffectData()
 			Effect:SetAttachment( Index )		--Bulet Index
@@ -234,5 +233,4 @@ function ACF_BulletClient( Index, Bullet, Type, Hit, HitPos )
 		util.Effect( "ACF_BulletEffect", Effect, true, true )
 
 	end
-
 end
