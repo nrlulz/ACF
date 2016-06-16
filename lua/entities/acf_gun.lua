@@ -601,28 +601,27 @@ function ENT:BarrelNotStuffed()
 			start = self:GetPos(),
 			endpos = self:LocalToWorld(self.Muzzle),
 			filter = self.BarrelFilter or {self},
-			mask = MASK_SHOT_HULL,
+			mask = MASK_SHOT,
 		}
+	local Own = self.Owner
 
+	TraceRes = util.TraceLine(tr)
+	while TraceRes.Hit do
+		if TraceRes.HitWorld or (IsValid(TraceRes.Entity) and not TraceRes.Entity:IsPlayer() and TraceRes.Entity:CPPIGetOwner() ~= Own) then
+			self.Stuffed = true
+
+			timer.Simple(0.5, function() self.Stuffed = false end)
+
+			return false
+		end
+
+		tr.filter[#tr.filter + 1] = TraceRes.Entity
 		TraceRes = util.TraceLine(tr)
-		while TraceRes.Hit do
-			if TraceRes.HitWorld or (IsValid(TraceRes.HitEntity) and TraceRes.HitEntity:GetOwner() ~= self.Owner) then
-				self.Stuffed = true
+	end
 
-				timer.Simple(0.5, function()
-					self.Stuffed = false
-				end)
-
-				return false
-			end
-
-			tr.filter[#tr.filter + 1] = TraceRes.Entity
-			TraceRes = util.TraceLine(tr)
-		end
-
-		if not self.BarrelFilter or #self.BarrelFilter ~= #tr.filter then
-			self.BarrelFilter = table.Copy(tr.filter)
-		end
+	if not self.BarrelFilter or #self.BarrelFilter ~= #tr.filter then
+		self.BarrelFilter = table.Copy(tr.filter)
+	end
 
 	return true
 end
