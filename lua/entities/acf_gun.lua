@@ -566,7 +566,7 @@ function ENT:ReloadMag()
 			self.IsUnderWeight = self:CheckWeight()
 		end
 	end
-	if ( (self.CurrentShot > 0) and self.IsUnderWeight and self:IsSolid() and self.Ready and self:GetPhysicsObject():GetMass() >= self.Mass and not (self:GetParent():IsValid() and not self.Parentable) ) then
+	if ( (self.CurrentShot > 0) and self.IsUnderWeight and self:IsSolid() and self.Ready and self:GetPhysicsObject():GetMass() >= self.Mass and not (IsValid(self:GetParent()) and not self.Parentable) ) then
 		if ( ACF.RoundTypes[self.BulletData.Type] ) then		--Check if the roundtype loaded actually exists
 			self:LoadAmmo(self.MagReload, false)	
 			self:EmitSound("weapons/357/357_reload4.wav",500,100)
@@ -594,17 +594,44 @@ function ENT:GetInaccuracy()
 	return coneAng
 end
 
+function ENT:BarrelNotStuffed()
+	if self.Stuffed then return false end
 
+	local tr = {
+			start = self:GetPos(),
+			endpos = self:LocalToWorld(self.Muzzle),
+			filter = self.BarrelFilter or {self},
+			mask = MASK_SHOT_HULL,
+		}
+
+		TraceRes = util.TraceLine(tr)
+		while TraceRes.Hit do
+			if TraceRes.HitWorld or (IsValid(TraceRes.HitEntity) and TraceRes.HitEntity:GetOwner() ~= self.Owner) then
+				self.Stuffed = true
+
+				timer.Simple(0.5, function()
+					self.Stuffed = false
+				end)
+
+				return false
+			end
+
+			tr.filter[#tr.filter + 1] = TraceRes.Entity
+			TraceRes = util.TraceLine(tr)
+		end
+
+		if not self.BarrelFilter or #self.BarrelFilter ~= #tr.filter then
+			self.BarrelFilter = table.Copy(tr.filter)
+		end
+
+	return true
+end
 
 function ENT:FireShell()
+	if hook.Run("ACF_FireShell", self, self.BulletData ) == false then return end
 	
-	local CanDo = hook.Run("ACF_FireShell", self, self.BulletData )
-	if CanDo == false then return end
-	if(self.IsUnderWeight == nil) then
-		self.IsUnderWeight = true
-		if(ISBNK) then
-			self.IsUnderWeight = self:CheckWeight()
-		end
+	if self.IsUnderWeight == nil then
+		self.IsUnderWeight = ISBNK and self:CheckWeight() or true
 	end
 	
 	local bool = true
@@ -616,15 +643,15 @@ function ENT:FireShell()
 			bool = false
 		end
 	end
-	if ( bool and self.IsUnderWeight and self:IsSolid() and self.Ready and self:GetPhysicsObject():GetMass() >= self.Mass and not (self:GetParent():IsValid() and not self.Parentable) ) then
+	if bool and self.IsUnderWeight and self:IsSolid() and self.Ready and self:GetPhysicsObject():GetMass() >= self.Mass and not (IsValid(self:GetParent()) and not self.Parentable) and self:BarrelNotStuffed() then
 		Blacklist = {}
 		if not ACF.AmmoBlacklist[self.BulletData.Type] then
 			Blacklist = {}
 		else
 			Blacklist = ACF.AmmoBlacklist[self.BulletData.Type]	
 		end
-		if ( ACF.RoundTypes[self.BulletData.Type] and !table.HasValue( Blacklist, self.Class ) ) then		--Check if the roundtype loaded actually exists
-		
+
+		if ACF.RoundTypes[self.BulletData.Type] and !table.HasValue( Blacklist, self.Class ) then		--Check if the roundtype loaded actually exists
 			local MuzzlePos = self:LocalToWorld(self.Muzzle)
 			local MuzzleVec = self:GetForward()
 			
@@ -647,7 +674,7 @@ function ENT:FireShell()
 			
 			self.Ready = false
 			self.CurrentShot = math.min(self.CurrentShot + 1, self.MagSize)
-			if((self.CurrentShot >= self.MagSize) and (self.MagSize > 1)) then
+			if self.CurrentShot >= self.MagSize and self.MagSize > 1 then
 				self:LoadAmmo(self.MagReload, false)	
 				self:EmitSound("weapons/357/357_reload4.wav",500,100)
 				self.CurrentShot = 0
