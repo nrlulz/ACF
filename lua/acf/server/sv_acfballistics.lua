@@ -1,9 +1,10 @@
 ACF.Bullet = {}
 ACF.CurBulletIndex = 0
-
-local IndexLimit = 1000
+ACF.BulletIndexLimit = 1000
+local IndexLimit = ACF.BulletIndexLimit
+local Bullets = ACF.Bullet
 local FlightTr = {}
-	FlightTr.mask   = MASK_SHOT
+	FlightTr.mask  = MASK_SHOT
 
 local util_TraceLine = util.TraceLine
 local math_Random = math.random
@@ -33,14 +34,14 @@ function ACF_CreateBullet( BulletData )
 		BulletData["Pos"] = BulletData["Pos"] + Gun:GetVelocity() * engine.TickInterval() * 1.1 -- Predicting where we'll be next tick so we dont shoot ourselves
 	end
 		
-	ACF.Bullet[Index] = table_Copy(BulletData)		--Place the bullet at the current index pos
-	ACF_BulletClient( Index, ACF.Bullet[Index], "Init", 0 )
-	ACF_CalcBulletFlight( Index, ACF.Bullet[Index] )
+	Bullets[Index] = table_Copy(BulletData)		--Place the bullet at the current index pos
+	ACF_BulletClient( Index, Bullets[Index], "Init", 0 )
+	ACF_CalcBulletFlight( Index, Bullets[Index] )
 end
 
 
 function ACF_ManageBullets()
-	for Index, Bullet in pairs(ACF.Bullet) do
+	for Index, Bullet in pairs(Bullets) do
 		--if not Bullet.HandlesOwnIteration then
 			ACF_CalcBulletFlight( Index, Bullet )			--This is the bullet entry in the table, the Index var omnipresent refers to this
 		--end
@@ -50,9 +51,9 @@ hook.Add("Tick", "ACF_ManageBullets", ACF_ManageBullets)
 
 
 function ACF_RemoveBullet( Index )
-	local Bullet = ACF.Bullet[Index]
+	local Bullet = Bullets[Index]
 	
-	ACF.Bullet[Index] = nil
+	Bullets[Index] = nil
 	
 	if Bullet and Bullet.OnRemoved then Bullet:OnRemoved() end
 end
@@ -70,13 +71,13 @@ function ACF_CheckClips(Ent, HitPos )
 end
 
 
-function ACF_Trace(RangerData)
-	local TraceRes = util_TraceLine(RangerData)
+function ACF_Trace()
+	local TraceRes = util_TraceLine(FlightTr)
 	
 	if TraceRes.Hit and IsValid(TraceRes.Entity) and ( not ACF_Check(TraceRes.Entity) or ACF_CheckClips(TraceRes.Entity, TraceRes.HitPos) ) then
-		RangerData.filter[#RangerData.filter + 1] = TraceRes.Entity
+		FlightTr.filter[#FlightTr.filter + 1] = TraceRes.Entity
 		
-		return ACF_Trace(RangerData)
+		return ACF_Trace(FlightTr)
 	end
 	
 	return TraceRes
@@ -148,7 +149,7 @@ function ACF_DoBulletsFlight( Index, Bullet)
 		FlightTr.start  = Bullet.Pos
 		FlightTr.endpos = Bullet.NextPos
 		FlightTr.filter = Bullet.Filter
-	local FlightRes = ACF_Trace(FlightTr)
+	local FlightRes = ACF_Trace()
 
 	
 	if Bullet.SkipNextHit then

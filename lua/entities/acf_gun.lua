@@ -560,11 +560,8 @@ function ENT:CheckWeight()
 end
 
 function ENT:ReloadMag()
-	if(self.IsUnderWeight == nil) then
-		self.IsUnderWeight = true
-		if(ISBNK) then
-			self.IsUnderWeight = self:CheckWeight()
-		end
+	if self.IsUnderWeight == nil then
+		self.IsUnderWeight = ISBNK and self:CheckWeight() or true
 	end
 	if ( (self.CurrentShot > 0) and self.IsUnderWeight and self:IsSolid() and self.Ready and self:GetPhysicsObject():GetMass() >= self.Mass and not (IsValid(self:GetParent()) and not self.Parentable) ) then
 		if ( ACF.RoundTypes[self.BulletData.Type] ) then		--Check if the roundtype loaded actually exists
@@ -585,7 +582,7 @@ function ENT:GetInaccuracy()
 	local SpreadScale = ACF.SpreadScale
 	local IaccMult = 1
 	
-	if (self.ACF.Health and self.ACF.MaxHealth) then
+	if self.ACF.Health and self.ACF.MaxHealth then
 		IaccMult = math.Clamp(((1 - SpreadScale) / (0.5)) * ((self.ACF.Health/self.ACF.MaxHealth) - 1) + 1, 1, SpreadScale)
 	end
 	
@@ -607,7 +604,7 @@ function ENT:BarrelNotStuffed()
 
 	TraceRes = util.TraceLine(tr)
 	while TraceRes.Hit do
-		if TraceRes.HitWorld or (IsValid(TraceRes.Entity) and not TraceRes.Entity:IsPlayer() and TraceRes.Entity:CPPIGetOwner() ~= Own) then
+		if TraceRes.HitWorld or (IsValid(TraceRes.Entity) and not TraceRes.Entity:IsPlayer() and CPPIGetOwner and TraceRes.Entity:CPPIGetOwner() ~= Own) then
 			self.Stuffed = true
 
 			timer.Simple(0.5, function() self.Stuffed = false end)
