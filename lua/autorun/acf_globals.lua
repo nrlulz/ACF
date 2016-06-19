@@ -330,29 +330,27 @@ CreateConVar("acf_spalling", 0)
 CreateConVar("acf_gunfire", 1)
 
 function ACF_CVarChangeCallback(CVar, Prev, New)
-	if( CVar == "acf_healthmod" ) then
+	local New = tonumber(New)
+	if CVar == "acf_healthmod" then
 		ACF.Threshold = 264.7 / math.max(New, 0.01)
+		
 		print ("Health Mod changed to a factor of " .. New)
-	elseif( CVar == "acf_armormod" ) then
+	elseif CVar == "acf_armormod" then
 		ACF.ArmorMod = 1 * math.max(New, 0)
+
 		print ("Armor Mod changed to a factor of " .. New)
-	elseif( CVar == "acf_ammomod" ) then
+	elseif CVar == "acf_ammomod" then
 		ACF.AmmoMod = 1 * math.max(New, 0.01)
+
 		print ("Ammo Mod changed to a factor of " .. New)
-	elseif( CVar == "acf_spalling" ) then
-		ACF.Spalling = math.floor(math.Clamp(New, 0, 1))
-		local text = "off"
-		if(ACF.Spalling > 0) then
-			text = "on"
-		end
-		print ("ACF Spalling is now " .. text)
-	elseif( CVar == "acf_gunfire" ) then
-		ACF.GunfireEnabled = tobool( New )
-		local text = "disabled"
-		if ACF.GunfireEnabled then 
-			text = "enabled" 
-		end
-		print ("ACF Gunfire has been " .. text)
+	elseif CVar == "acf_spalling" then
+		ACF.Spalling = New ~= 0
+
+		print ("ACF Spalling is now " .. New ~= 0 and "enabled" or "disabled")
+	elseif CVar == "acf_gunfire"  then
+		ACF.GunfireEnabled = New ~= 0
+
+		print ("ACF Gunfire has been " .. New ~= 0 and "enabled" or "disabled")
 	end
 end
 

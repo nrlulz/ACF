@@ -203,9 +203,7 @@ end
 
 function ACF_Spall( HitPos , HitVec , HitMask , KE , Caliber , Armour , Inflictor )
 	
-	if not ACF.Spalling then -- Folks say it's black magic and it kills their firstborns. So I had to disable it with more powerful magic.
-		return
-	end
+	if not ACF.Spalling then return end
 
 	local TotalWeight = 3.1416*(Caliber/2)^2 * Armour * 0.00079
 	local Spall = math_Max(math_floor(Caliber*ACF.KEtoSpall),2)
@@ -220,9 +218,9 @@ function ACF_Spall( HitPos , HitVec , HitMask , KE , Caliber , Armour , Inflicto
 		SpallTr.start = HitPos
 		SpallTr.filter = HitMask
 
-	for i = 1,Spall do
-			SpallTr.endpos = HitPos + (HitVec:GetNormalized()+VectorRand()/2):GetNormalized()*SpallVel
-			ACF_SpallTrace( HitVec , SpallTr , SpallEnergy , SpallArea , Inflictor )
+	for i = 1, Spall do
+		SpallTr.endpos = HitPos + (HitVec:GetNormalized()+VectorRand()/2):GetNormalized()*SpallVel
+		ACF_SpallTrace( HitVec , SpallTr , SpallEnergy , SpallArea , Inflictor )
 
 		--debugoverlay.Line( SpallTr.start, SpallTr.endpos, 10, Color( 255, 255, 255 ), false )
 	end
