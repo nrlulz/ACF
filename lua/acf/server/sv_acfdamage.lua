@@ -94,12 +94,12 @@ function ACF_HE( Hitpos , HitNormal , FillerMass, FragMass , Inflictor, NoOcc, A
 							local Sphere = math_Max(4 * 3.1415 * (Table.Dist*2.54 )^2,1) --Surface Area of the sphere at the range of that prop
 							local AreaAdjusted = Tar.ACF.Area
 							Table.Area = math_Min(AreaAdjusted/Sphere,0.5)*MaxSphere --Project the aera of the prop to the aera of the shadow it projects at the explosion max radius
-						Damage[Damage+1] = Table	--Add it to the Damage table so we know to damage it once we tallied everything
+						Damage[#Damage+1] = Table	--Add it to the Damage table so we know to damage it once we tallied everything
 						TotalArea = TotalArea + Table.Area
 					end
 				else
 					Targets[i] = nil	--Target was invalid, so let's ignore it
-					table.insert( OccFilter , Tar )
+					OccFilter[#OccFilter+1] = Tar )
 				end	
 			end
 		end
