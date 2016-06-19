@@ -509,7 +509,7 @@ if CLIENT then
 					if ( !IsValid( victim ) ) then return end
 					local inflictor    = msg:ReadString()
 					local attacker     = msg:ReadString()
-					if inflictor != "acf_gun" and inflictor != "acf_ammo" then
+					if inflictor ~= "acf_gun" and inflictor ~= "acf_ammo" then
 						ACF_PlayerKilled(msg)
 					end
 				end
@@ -531,7 +531,7 @@ if CLIENT then
 
 					if ( !IsValid( attacker ) ) then return end
 					if ( !IsValid( victim ) ) then return end
-					if inflictor != "acf_gun" and inflictor != "acf_ammo" then
+					if inflictor ~= "acf_gun" and inflictor ~= "acf_ammo" then
 						ACF_PlayerKilledByPlayer(msg)
 					end
 				end

@@ -342,11 +342,11 @@ function ENT:Update( ArgsTable )
 
 	local Feedback = ""
 	
-	if ( ArgsTable[1] != self.Owner ) then --Argtable[1] is the player that shot the tool
+	if ( ArgsTable[1] ~= self.Owner ) then --Argtable[1] is the player that shot the tool
 		return false, "You don't own that fuel tank!"
 	end
 	
-	if ( ArgsTable[6] != self.FuelType ) then
+	if ( ArgsTable[6] ~= self.FuelType ) then
 		for Key, Engine in pairs( self.Master ) do
 			if Engine:IsValid() then
 				Engine:Unlink( self )

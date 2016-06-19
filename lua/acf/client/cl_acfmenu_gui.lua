@@ -408,7 +408,7 @@ function PANEL:AmmoSlider(Name, Value, Min, Max, Decimals, Title, Desc) --Variab
 				acfmenupanel["CData"][Name]:SetValue(acfmenupanel.AmmoData[Name])
 			end
 			acfmenupanel["CData"][Name].OnValueChanged = function( slider, val )
-				if acfmenupanel.AmmoData[Name] != val then
+				if acfmenupanel.AmmoData[Name] ~= val then
 					acfmenupanel.AmmoData[Name] = val
 					self:UpdateAttribs( Name )
 				end
@@ -439,7 +439,7 @@ function PANEL:AmmoCheckbox(Name, Title, Desc) --Variable name in the table, sli
 			acfmenupanel["CData"][Name]:SetText( Title or "" )
 			acfmenupanel["CData"][Name]:SetDark( true )
 			acfmenupanel["CData"][Name]:SizeToContents()
-			if acfmenupanel.AmmoData[Name] != nil then
+			if acfmenupanel.AmmoData[Name] ~= nil then
 				acfmenupanel["CData"][Name]:SetChecked(acfmenupanel.AmmoData[Name])
 			else
 				acfmenupanel.AmmoData[Name] = false

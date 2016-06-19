@@ -78,7 +78,7 @@ function SWEP:PrimaryAttack()
 		local Modifiers = self:CalculateModifiers()
 		local Recoil = (self.Primary.BulletData["ProjMass"] * self.Primary.BulletData["MuzzleVel"] + self.Primary.BulletData["PropMass"] * 3000)/self.Weight
 		
-		if ( self.RoundType != "Empty" ) then
+		if ( self.RoundType ~= "Empty" ) then
 
 			local Inaccuracy = VectorRand() / 360 * self.Inaccuracy * Modifiers
 			local Flight = (MuzzleVec+Inaccuracy):GetNormalized() * Speed * 39.37

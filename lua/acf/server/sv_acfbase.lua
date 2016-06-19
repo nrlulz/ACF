@@ -31,7 +31,7 @@ function ACF_Activate ( Entity , Recalc )
 	local Count
 	local PhysObj = Entity:GetPhysicsObject()
 	if PhysObj:GetMesh() then Count = #PhysObj:GetMesh() end
-	if PhysObj:IsValid() and Count and Count>100 then
+	if IsValid(PhysObj) and Count and Count>100 then
 
 		if not Entity.ACF.Area then
 			Entity.ACF.Area = (PhysObj:GetSurfaceArea() * 6.45) * 0.52505066107
@@ -70,7 +70,7 @@ function ACF_Activate ( Entity , Recalc )
 	Entity.ACF.Mass = PhysObj:GetMass()
 	--Entity.ACF.Density = (PhysObj:GetMass()*1000)/Entity.ACF.Volume
 	
-	if Entity:IsPlayer() || Entity:IsNPC() then
+	if Entity:IsPlayer() or Entity:IsNPC() then
 		Entity.ACF.Type = "Squishy"
 	elseif Entity:IsVehicle() then
 		Entity.ACF.Type = "Vehicle"
@@ -80,24 +80,27 @@ function ACF_Activate ( Entity , Recalc )
 	--print(Entity.ACF.Health)
 end
 
+local Invalid = {}
+	Invalid["gmod_ghost"] = true
+	Invalid["debris"] = true
+	Invalid["prop_ragdoll"] = true
+	Invalid["func_"] = true
+
 function ACF_Check ( Entity )
-	
-	if ( IsValid(Entity) ) then
-		if ( Entity:GetPhysicsObject():IsValid() and !Entity:IsWorld() and !Entity:IsWeapon() ) then
-			local Class = Entity:GetClass()
-			if ( Class != "gmod_ghost" and Class != "debris" and Class != "prop_ragdoll" and not string.find( Class , "func_" )  ) then
-				if !Entity.ACF then 
-					ACF_Activate( Entity )
-				elseif Entity.ACF.Mass != Entity:GetPhysicsObject():GetMass() then
-					ACF_Activate( Entity , true )
-				end
-				--print("ACF_Check "..Entity.ACF.Type)
-				return Entity.ACF.Type	
-			end	
-		end
+	if IsValid(Entity) and IsValid(Entity:GetPhysicsObject()) and not Entity:IsWorld() and not Entity:IsWeapon() then
+		local Class = Entity:GetClass()
+		if not Invalid[Class] and not Invalid[string.sub(Class, 1, 5)] then
+			if not Entity.ACF then 
+				ACF_Activate( Entity )
+			elseif Entity.ACF.Mass ~= Entity:GetPhysicsObject():GetMass() then
+				ACF_Activate( Entity , true )
+			end
+			--print("ACF_Check "..Entity.ACF.Type)
+			return Entity.ACF.Type	
+		end	
 	end
+
 	return false
-	
 end
 
 function ACF_Damage ( Entity , Energy , FrArea , Angle , Inflictor , Bone, Gun, Type ) 
@@ -150,7 +153,7 @@ function ACF_CalcDamage( Entity , Energy , FrArea , Angle )
 		if(!Entity.sitp_spacetype) then
 			Entity.sitp_spacetype = "space"
 		end
-		if(Entity.sitp_spacetype != "space" and Entity.sitp_spacetype != "planet") then
+		if(Entity.sitp_spacetype ~= "space" and Entity.sitp_spacetype ~= "planet") then
 			var = 0
 		end
 	end
@@ -188,7 +191,7 @@ function ACF_VehicleDamage( Entity , Energy , FrArea , Angle , Inflictor , Bone,
 	local HitRes = ACF_CalcDamage( Entity , Energy , FrArea , Angle )
 	
 	local Driver = Entity:GetDriver()
-	if Driver:IsValid() then
+	if IsValid(Driver) then
 		--if Ammo == true then
 		--	Driver.KilledByAmmo = true
 		--end
@@ -196,7 +199,6 @@ function ACF_VehicleDamage( Entity , Energy , FrArea , Angle , Inflictor , Bone,
 		--if Ammo == true then
 		--	Driver.KilledByAmmo = false
 		--end
-		
 	end
 
 	HitRes.Kill = false
@@ -283,7 +285,7 @@ function ACF_SquishyDamage( Entity , Energy , FrArea , Angle , Inflictor , Bone,
 	--BNK stuff
 	if (ISBNK) then
 		if(Entity.freq and Inflictor.freq) then
-			if (Entity != Inflictor) and (Entity.freq == Inflictor.freq) then
+			if (Entity ~= Inflictor) and (Entity.freq == Inflictor.freq) then
 				dmul = 0
 			end
 		end
@@ -318,20 +320,18 @@ end
 -- ignoring ents attached by only nocollides
 ----------------------------------------------------------
 function ACF_GetAllPhysicalConstraints( ent, ResultTable )
-
-	local ResultTable = ResultTable or {}
-	
 	if not IsValid( ent ) then return end
-	if ResultTable[ ent ] then return end
 	
+	local ResultTable = ResultTable or {}
+
+	if ResultTable[ ent ] then return end
 	ResultTable[ ent ] = ent
 	
 	local ConTable = constraint.GetTable( ent )
 	
 	for k, con in ipairs( ConTable ) do
-		
 		-- skip shit that is attached by a nocollide
-		if not (con.Type == "NoCollide") then
+		if con.Type ~= "NoCollide" then
 			for EntNum, Ent in pairs( con.Entity ) do
 				ACF_GetAllPhysicalConstraints( Ent.Entity, ResultTable )
 			end
@@ -346,23 +346,27 @@ end
 -- for those extra sneaky bastards
 function ACF_GetAllChildren( ent, ResultTable )
 	
-	if not ent.GetChildren then return end
+	if not ent.GetChildren or not IsValid( ent ) then return end
 	
 	local ResultTable = ResultTable or {}
 	
-	if not IsValid( ent ) then return end
 	if ResultTable[ ent ] then return end
 	
 	ResultTable[ ent ] = ent
-	
-	local ChildTable = ent:GetChildren()
-	
-	for k, v in pairs( ChildTable ) do
-		
+
+	for k, v in pairs( ent:GetChildren() ) do
 		ACF_GetAllChildren( v, ResultTable )
-		
 	end
 	
 	return ResultTable
 	
+end
+
+function ACF_GetAncestor( Ent )
+	local Parent = Ent:GetParent()
+	if not IsValid(Parent) then return Ent end
+	
+	while IsValid(Parent:GetParent()) do Parent = Parent:GetParent() end
+	
+	return Parent
 end

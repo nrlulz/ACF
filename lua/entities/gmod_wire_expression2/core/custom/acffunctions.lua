@@ -37,7 +37,7 @@ local function isFuel(ent)
 end
 
 local function restrictInfo(ply, ent)
-	if GetConVar("sbox_acf_restrictinfo"):GetInt() != 0 then
+	if GetConVar("sbox_acf_restrictinfo"):GetInt() ~= 0 then
 		if isOwner(ply, ent) then return false else return true end
 	end
 	return false

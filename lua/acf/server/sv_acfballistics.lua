@@ -31,7 +31,7 @@ function ACF_CreateBullet( BulletData )
 			BulletData["DragCoef"] = 0
 		end
 
-		BulletData["Pos"] = BulletData["Pos"] + Gun:GetVelocity() * engine.TickInterval() * 1.1 -- Predicting where we'll be next tick so we dont shoot ourselves
+		BulletData["Pos"] = BulletData["Pos"] + ACF_GetAncestor(Gun):GetVelocity() * engine.TickInterval() * 1.1 -- Predicting where we'll be next tick so we dont shoot ourselves
 	end
 		
 	Bullets[Index] = table_Copy(BulletData)		--Place the bullet at the current index pos

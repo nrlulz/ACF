@@ -539,7 +539,7 @@ function this.PermissionsRaw(ownerid, attackerid, value)
 		local old = ownerprefs[attackerid] and true or nil
 		local new = value and true or nil
 		ownerprefs[attackerid] = new
-		return old != new
+		return old ~= new
 	end
 	
 	return false

@@ -458,7 +458,7 @@ function ENT:Update( ArgsTable )
 		return false, "The new gearbox must have the same model!"
 	end
 		
-	if self.Id != Id then
+	if self.Id ~= Id then
 	
 		self.Id = Id
 		self.Mass = List.Mobility[Id].weight

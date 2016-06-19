@@ -231,7 +231,7 @@ function ENT:Update( ArgsTable )
 	end
 	
 	local Feedback = ""
-	if Lookup.fuel != self.FuelType then
+	if Lookup.fuel ~= self.FuelType then
 		Feedback = " Fuel type changed, fuel tanks unlinked."
 		for Key,Value in pairs(self.FuelLink) do
 			table.remove(self.FuelLink,Key)

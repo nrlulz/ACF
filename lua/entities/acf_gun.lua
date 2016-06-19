@@ -223,7 +223,7 @@ function MakeACF_Gun(Owner, Pos, Angle, Id)
 	for Key, Value in pairs(PerVertex) do
 		local Table = string.Explode( " ", Value )
 		local Vec = Vector(tonumber(Table[2],10),tonumber(Table[4],10),tonumber(Table[3],10))
-		if Vec != Vector(1,1,1) then
+		if Vec ~= Vector(1,1,1) then
 			table.insert(Import, Vertex( Vec*Scale,0,0 ) )
 		end
 	end
@@ -632,7 +632,7 @@ function ENT:FireShell()
 	
 	local bool = true
 	if(ISSITP) then
-		if(self.sitp_spacetype != "space" and self.sitp_spacetype != "planet") then
+		if(self.sitp_spacetype ~= "space" and self.sitp_spacetype ~= "planet") then
 			bool = false
 		end
 		if(self.sitp_core == false) then
@@ -659,13 +659,13 @@ function ENT:FireShell()
 			self:MuzzleEffect( MuzzlePos, MuzzleVec )
 			
 			self.BulletData.Pos = MuzzlePos
-			self.BulletData.Flight = ShootVec * self.BulletData.MuzzleVel * 39.37 + self:GetVelocity()
+			self.BulletData.Flight = ShootVec * self.BulletData.MuzzleVel * 39.37 + ACF_GetAncestor(self):GetVelocity()
 			self.BulletData.Owner = self.User
 			self.BulletData.Gun = self
 			self.CreateShell = ACF.RoundTypes[self.BulletData.Type].create
 			self:CreateShell( self.BulletData )
 			
-			local HasPhys = constraint.FindConstraintEntity(self, "Weld"):IsValid() or not self:GetParent():IsValid()
+			local HasPhys = constraint.FindConstraintEntity(self, "Weld"):IsValid() or not IsValid(self:GetParent())
 			ACF_KEShove(self, HasPhys and util.LocalToWorld(self, self:GetPhysicsObject():GetMassCenter(), 0) or self:GetPos(), -self:GetForward(), (self.BulletData.ProjMass * self.BulletData.MuzzleVel * 39.37 + self.BulletData.PropMass * 3000 * 39.37)*(GetConVarNumber("acf_recoilpush") or 1) )
 			
 			self.Ready = false
