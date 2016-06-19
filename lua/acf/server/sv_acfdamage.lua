@@ -99,7 +99,7 @@ function ACF_HE( Hitpos , HitNormal , FillerMass, FragMass , Inflictor, NoOcc, A
 					end
 				else
 					Targets[i] = nil	--Target was invalid, so let's ignore it
-					OccFilter[#OccFilter+1] = Tar )
+					OccFilter[#OccFilter+1] = Tar
 				end	
 			end
 		end
