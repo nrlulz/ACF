@@ -330,7 +330,7 @@ function ENT:UpdateFuelMass()
 	end
 	
 	local phys = self:GetPhysicsObject()
-	if phys:IsValid() and math.abs(phys:GetMass() - self.Mass) > 1 then phys:SetMass(self.Mass) print("ACF FUEL SET MASS") end
+	if IsValid(phys) and math.abs(phys:GetMass() - self.Mass) > 1 then phys:SetMass(self.Mass) end
 	
 	self:UpdateOverlayText()
 	
