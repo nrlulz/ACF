@@ -80,11 +80,12 @@ function ACF_Activate ( Entity , Recalc )
 	--print(Entity.ACF.Health)
 end
 
-local Invalid = {}
-	Invalid["gmod_ghost"] = true
-	Invalid["debris"] = true
-	Invalid["prop_ragdoll"] = true
-	Invalid["func_"] = true
+local Invalid = {
+	gmod_ghost = true,
+	debris = true,
+	prop_ragdoll = true,
+	func_ = true
+}
 
 function ACF_Check ( Entity )
 	if IsValid(Entity) and IsValid(Entity:GetPhysicsObject()) and not Entity:IsWorld() and not Entity:IsWeapon() then
@@ -354,7 +355,7 @@ function ACF_GetAllChildren( ent, ResultTable )
 	
 	ResultTable[ ent ] = ent
 
-	for k, v in pairs( ent:GetChildren() ) do
+	for k, v in pairs( ent:GetChildren() or {} ) do
 		ACF_GetAllChildren( v, ResultTable )
 	end
 	

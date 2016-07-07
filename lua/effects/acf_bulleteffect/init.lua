@@ -110,6 +110,7 @@ function EFFECT:ApplyMovement( Bullet )
 	local setPos = Bullet.SimPos
 	if math.abs(setPos.x) > 16380 or math.abs(setPos.y) > 16380 or setPos.z < -16380 then
 		self:Remove()
+
 		return
 	end
 
@@ -134,7 +135,7 @@ function EFFECT:ApplyMovement( Bullet )
 				Light:SetDieTime( math.Clamp(CurTime()-self.CreateTime,0.075,0.15) ) -- 0.075, 0.1
 				Light:SetStartAlpha( 255 )
 				Light:SetEndAlpha( 155 )
-				Light:SetStartSize( 15*Bullet.Caliber ) -- 5
+				Light:SetStartSize( 7.5*Bullet.Caliber ) -- 5
 				Light:SetEndSize( 1 )
 				Light:SetStartLength( Length )
 				Light:SetEndLength( 1 )
