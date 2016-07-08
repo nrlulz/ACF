@@ -431,7 +431,7 @@ function ENT:Think()
 	self.Mass = math.max(self.EmptyMass, self:GetPhysicsObject():GetMass() - AmmoMass) + AmmoMass*(self.Ammo/math.max(self.Capacity,1))
 	
 	local Phys = self:GetPhysicsObject()
-	if IsValid(Phys) and math.abs(Phys:GetMass() - self.Mass) > 1 then Phys:SetMass(self.Mass)
+	if IsValid(Phys) and math.abs(Phys:GetMass() - self.Mass) > 1 then Phys:SetMass(self.Mass) end
 	
 	if self.Ammo ~= self.AmmoLast then
 		self:UpdateOverlayText()
