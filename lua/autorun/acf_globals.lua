@@ -160,12 +160,35 @@ elseif CLIENT then
 
 	-- Returns whether or not a sound actually exists, fixes client timeout issues
 	function IsValidSound( path )
-		if IsValidCache[path] == nil then 
-			IsValidCache[path] = file.Exists( string.format( "sound/%s", tostring( path ) ), "GAME" ) and true or false
+		if IsValidCache[path] == nil then
+			if file.Exists( string.format( "sound/%s", tostring( path ) ), "GAME" ) then
+				IsValidCache[path] = true
+				
+				return true
+			end
+
+			local SoundTab = sound.GetTable()
+			for I = #SoundTab, 1 , -1 do
+				if SoundTab[I] == path then
+					local sounds = sound.GetProperties(path).sound
+					for K = 1 , #sounds do
+						if not file.Exists( string.format( "sound/%s", string.Right(sounds[K], #sounds[K]-1)) , "GAME" ) then
+							IsValidCache[path] = false
+
+							return false
+						end
+					end
+
+					IsValidCache[path] = true
+					return true
+				end
+			end
+
+			IsValidCache[path] = false
 		end
+
 		return IsValidCache[path]
 	end
-	
 end
 
 include("acf/shared/rounds/roundap.lua")
