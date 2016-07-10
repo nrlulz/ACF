@@ -194,7 +194,7 @@ function TOOL.BuildCPanel(panel)
 	local SoundPreWide = SoundPre:GetWide()
 
 	local SoundPrePlay = vgui.Create("DButton", SoundPre)
-	SoundPrePlay:SetText("playgamesound")
+	SoundPrePlay:SetText("Play")
 	SoundPrePlay:SetWide(SoundPreWide / 2)
 	SoundPrePlay:SetPos(0, 0)
 	SoundPrePlay:SetTall(20)
