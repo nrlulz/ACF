@@ -2,7 +2,7 @@ ACF = {}
 ACF.AmmoTypes = {}
 ACF.MenuFunc = {}
 ACF.AmmoBlacklist = {}
-ACF.Version = 569 -- REMEMBER TO CHANGE THIS FOR GODS SAKE, OMFG!!!!!!! -wrex   Update the changelog too! -Ferv
+ACF.Version = 571 -- REMEMBER TO CHANGE THIS FOR GODS SAKE, OMFG!!!!!!! -wrex   Update the changelog too! -Ferv
 ACF.CurrentVersion = 0 -- just defining a variable, do not change
 
 ACF.Year = 1945
@@ -48,7 +48,7 @@ ACF.ElecRate = 1.5 --multiplier for electrics
 ACF.TankVolumeMul = 1.0 -- multiplier for fuel tank volume
 
 ACF.FuelDensity = { --kg/liter
-	Diesel = 0.832,  
+	Diesel = 0.832,
 	Petrol = 0.745,
 	Electric = 3.89 -- li-ion
 }
@@ -84,7 +84,7 @@ ACF.LiIonED = 0.458 -- li-ion energy density: kw hours / liter
 ACF.CuIToLiter = 0.0163871 -- cubic inches to liters
 
 ACF.RefillDistance = 300 --Distance in which ammo crate starts refilling.
-ACF.RefillSpeed = 700 -- (ACF.RefillSpeed / RoundMass) / Distance 
+ACF.RefillSpeed = 700 -- (ACF.RefillSpeed / RoundMass) / Distance
 
 ACF.DebrisScale = 20 -- Ignore debris that is less than this bounding radius.
 ACF.SpreadScale = 4		-- The maximum amount that damage can decrease a gun's accuracy.  Default 4x
@@ -125,7 +125,7 @@ if SERVER then
 	include("acf/server/sv_acfbase.lua")
 	include("acf/server/sv_acfdamage.lua")
 	include("acf/server/sv_acfballistics.lua")
-	
+
 	if ACF.EnableDefaultDP then
 		include("acf/server/sv_acfpermission.lua")
 	end
@@ -134,12 +134,12 @@ elseif CLIENT then
 
 	include("acf/client/cl_acfballistics.lua")
 	include("acf/client/cl_acfrender.lua")
-	
+
 	if ACF.EnableDefaultDP then
 		include("acf/client/cl_acfpermission.lua")
 		include("acf/client/gui/cl_acfsetpermission.lua")
 	end
-	
+
 	killicon.Add( "acf_AC", "HUD/killicons/acf_AC", Color( 200, 200, 48, 255 ) )
 	killicon.Add( "acf_AL", "HUD/killicons/acf_AL", Color( 200, 200, 48, 255 ) )
 	killicon.Add( "acf_C", "HUD/killicons/acf_C", Color( 200, 200, 48, 255 ) )
@@ -151,21 +151,21 @@ elseif CLIENT then
 	killicon.Add( "acf_RAC", "HUD/killicons/acf_RAC", Color( 200, 200, 48, 255 ) )
 	killicon.Add( "acf_SA", "HUD/killicons/acf_SA", Color( 200, 200, 48, 255 ) )
 	killicon.Add( "acf_ammo", "HUD/killicons/acf_ammo", Color( 200, 200, 48, 255 ) )
-	
+
 	CreateConVar("acf_cl_particlemul", 1)
 	CreateClientConVar("ACF_MobilityRopeLinks", "1", true, true)
-	
+
 	-- Cache results so we don't need to do expensive filesystem checks every time
 	local IsValidCache = {}
 
 	-- Returns whether or not a sound actually exists, fixes client timeout issues
 	function IsValidSound( path )
-		if IsValidCache[path] == nil then 
+		if IsValidCache[path] == nil then
 			IsValidCache[path] = file.Exists( string.format( "sound/%s", tostring( path ) ), "GAME" ) and true or false
 		end
 		return IsValidCache[path]
 	end
-	
+
 end
 
 include("acf/shared/rounds/roundap.lua")
@@ -183,7 +183,7 @@ include("acf/shared/acfcratelist.lua")
 --include("acf/shared/acfmissilelist.lua")
 
 ACF.Weapons = list.Get("ACFEnts")
-	
+
 ACF.Classes = list.Get("ACFClasses")
 
 ACF.RoundTypes = list.Get("ACFRoundTypes")
@@ -224,9 +224,9 @@ end)
 
 -- changes here will be automatically reflected in the armor properties tool
 function ACF_CalcArmor( Area, Ductility, Mass )
-	
+
 	return ( Mass * 1000 / Area / 0.78 ) / ( 1 + Ductility ) ^ 0.5 * ACF.ArmorMod
-	
+
 end
 
 function ACF_MuzzleVelocity( Propellant, Mass, Caliber )
@@ -239,19 +239,19 @@ function ACF_MuzzleVelocity( Propellant, Mass, Caliber )
 end
 
 function ACF_Kinetic( Speed , Mass, LimitVel )
-	
+
 	LimitVel = LimitVel or 99999
 	Speed = Speed/39.37
-	
+
 	local Energy = {}
 		Energy.Kinetic = ((Mass) * ((Speed)^2))/2000 --Energy in KiloJoules
 		Energy.Momentum = (Speed * Mass)
-		
+
 		local KE = (Mass * (Speed^ACF.KinFudgeFactor))/2000 + Energy.Momentum
 		Energy.Penetration = math.max( KE - (math.max(Speed-LimitVel,0)^2)/(LimitVel*5) * (KE/200)^0.95 , KE*0.1 )
 		--Energy.Penetration = math.max( KE - (math.max(Speed-LimitVel,0)^2)/(LimitVel*5) * (KE/200)^0.95 , KE*0.1 )
 		--Energy.Penetration = math.max(Energy.Momentum^ACF.KinFudgeFactor - math.max(Speed-LimitVel,0)/(LimitVel*5) * Energy.Momentum , Energy.Momentum*0.1)
-	
+
 	return Energy
 end
 
@@ -262,59 +262,59 @@ function ACF_CalcMassRatio( obj, pwr )
 	local PhysMass = 0
 	local power = 0
 	local fuel = 0
-	
+
 	-- find the physical parent highest up the chain
 	local Parent = obj
 	local depth = 0
-	
+
 	while Parent:GetParent():IsValid() and depth<6 do
 		Parent = Parent:GetParent()
 		depth = depth + 1
 	end
-	
+
 	-- get the shit that is physically attached to the vehicle
 	local PhysEnts = ACF_GetAllPhysicalConstraints( Parent )
-	
+
 	-- add any parented but not constrained props you sneaky bastards
 	local AllEnts = table.Copy( PhysEnts )
 	for k, v in pairs( AllEnts ) do
-		
+
 		table.Merge( AllEnts, ACF_GetAllChildren( v ) )
-	
+
 	end
-	
+
 	for k, v in pairs( AllEnts ) do
-		
+
 		if IsValid( v ) then
-		
+
 			if v:GetClass() == "acf_engine" then
 				power = power + (v.peakkw * 1.34)
 				fuel = v.RequiresFuel and 2 or fuel
 			elseif v:GetClass() == "acf_fueltank" then
 				fuel = math.max(fuel,1)
 			end
-			
+
 			local phys = v:GetPhysicsObject()
-			if IsValid( phys ) then		
-			
+			if IsValid( phys ) then
+
 				Mass = Mass + phys:GetMass()
-				
+
 				if PhysEnts[ v ] then
 					PhysMass = PhysMass + phys:GetMass()
 				end
-				
+
 			end
-		
+
 		end
-		
+
 	end
-	
+
 	for k, v in pairs( AllEnts ) do
 		v.acfphystotal = PhysMass
 		v.acftotal = Mass
 		v.acflastupdatemass = CurTime()
 	end
-	
+
 	if pwr then return { Power = power, Fuel = fuel } end
 end
 
@@ -349,8 +349,8 @@ function ACF_CVarChangeCallback(CVar, Prev, New)
 	elseif( CVar == "acf_gunfire" ) then
 		ACF.GunfireEnabled = tobool( New )
 		local text = "disabled"
-		if ACF.GunfireEnabled then 
-			text = "enabled" 
+		if ACF.GunfireEnabled then
+			text = "enabled"
 		end
 		print ("ACF Gunfire has been " .. text)
 	end
@@ -367,7 +367,7 @@ else
 	local function ACF_Notify()
 		local Type = NOTIFY_ERROR
 		if tobool( net.ReadBit() ) then Type = NOTIFY_GENERIC end
-		
+
 		GAMEMODE:AddNotify( net.ReadString(), Type, 7 )
 	end
 	net.Receive( "ACF_Notify", ACF_Notify )
@@ -385,7 +385,7 @@ function ACF_UpdateChecking( )
 			if CLIENT then chat.AddText( Color( 255, 0, 0 ), "A newer version of ACF is available!" ) end
 		end
 		ACF.CurrentVersion = rev
-		
+
 	end, function() end)
 end
 ACF_UpdateChecking( )
@@ -422,18 +422,18 @@ if SERVER then
 	concommand.Add( "acf_smokewind", function(ply, cmd, args, str)
 			local validply = IsValid(ply)
 			local printmsg = validply and function(hud, msg) ply:PrintMessage(hud, msg) end or msgtoconsole
-			
+
 			if not args[1] then printmsg(HUD_PRINTCONSOLE,
 					"Set the wind intensity upon all smoke munitions." ..
 					"\n   This affects the ability of smoke to be used for screening effect." ..
 					"\n   Example; acf_smokewind 300")
 					return false
 			end
-			
+
 			if validply and not ply:IsAdmin() then
 					printmsg(HUD_PRINTCONSOLE, "You can't use this because you are not an admin.")
 					return false
-					
+
 			else
 					local wind = tonumber(args[1])
 
@@ -441,15 +441,15 @@ if SERVER then
 							printmsg(HUD_PRINTCONSOLE, "Command unsuccessful: that wind value could not be interpreted as a number!")
 							return false
 					end
-					
+
 					ACF.SmokeWind = wind
-					
+
 					net.Start("acf_smokewind")
 							net.WriteFloat(wind)
 					net.Broadcast()
-					
+
 					printmsg(HUD_PRINTCONSOLE, "Command SUCCESSFUL: set smoke-wind to " .. wind .. "!")
-					return true        
+					return true
 			end
 	end)
 
@@ -472,7 +472,7 @@ ONE HUGE HACK to get good killicons.
 -- disabling this for now because it was breaking killicons completely and i don't want to deal with it right now
 /*
 if SERVER then
-	
+
 	hook.Add("PlayerDeath", "ACF_PlayerDeath",function( victim, inflictor, attacker )
 		if inflictor:GetClass() == "acf_ammo" then
 			net.Start("ACF_KilledByACF")
@@ -489,15 +489,15 @@ end
 
 
 if CLIENT then
-	
+
 	net.Receive("ACF_KilledByACF", function()
 		local Table = string.Explode(";", net.ReadString())
 		local victim, gun, attacker = Table[1], Table[2], Table[3]
-		
+
 		if attacker == "worldspawn" then attacker = "" end
 		GAMEMODE:AddDeathNotice( attacker, -1, "acf_"..gun, victim, 1001 )
 	end)
-	
+
 	if not ACF.replacedPlayerKilled then
 		timer.Create("ACF_replacePlayerKilled", 1, 0, function()
 			local Hooks = usermessage.GetTable()
