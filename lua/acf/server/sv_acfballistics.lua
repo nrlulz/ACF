@@ -21,17 +21,15 @@ function ACF_CreateBullet( BulletData )
 	BulletData["Accel"]         = Vector(0, 0, GetConVar("sv_gravity"):GetInt()*-1)			--Those are BulletData settings that are global and shouldn't change round to round
 	BulletData["LastThink"]     = SysTime()
 	BulletData["InitTime"]      = BulletData["FuseLength"] and SysTime() or nil
-	BulletData["Filter"]        = { BulletData["Gun"] }
+
 	--BulletData["Index"]         = Index
 
 	if IsValid(BulletData["Gun"]) then
 		local Gun = BulletData["Gun"]
-		if Gun.sitp_inspace then
-			BulletData["Accel"] = Vector(0, 0, 0)
-			BulletData["DragCoef"] = 0
-		end
-
+		BulletData["Filter"] = { Gun }		
 		BulletData["Pos"] = BulletData["Pos"] + ACF_GetAncestor(Gun):GetVelocity() * engine.TickInterval() * 1.1 -- Predicting where we'll be next tick so we dont shoot ourselves
+	else
+		BulletData["Filter"] = {}
 	end
 		
 	Bullets[Index] = table_Copy(BulletData)		--Place the bullet at the current index pos
