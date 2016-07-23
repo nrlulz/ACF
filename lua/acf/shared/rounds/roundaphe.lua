@@ -117,14 +117,14 @@ function Round.propimpact( Index, Bullet, Target, HitNormal, HitPos, Bone )
 	
 	if ACF_Check( Target ) then
 	
-		local Speed = Bullet.Flight:Length() / ACF.VelScale
+		local Speed = Bullet.Velocity:Length() / ACF.VelScale
 		local Energy = ACF_Kinetic( Speed , Bullet.ProjMass, Bullet.LimitVel )
 		local HitRes = ACF_RoundImpact( Bullet, Speed, Energy, Target, HitPos, HitNormal , Bone )
 		
 		if HitRes.Overkill > 0 then
 			table.insert( Bullet.Filter , Target )					--"Penetrate" (Ingoring the prop for the retry trace)
-			ACF_Spall( HitPos , Bullet.Flight , Bullet.Filter , Energy.Kinetic*HitRes.Loss , Bullet.Caliber , Target.ACF.Armour , Bullet.Owner ) --Do some spalling
-			Bullet.Flight = Bullet.Flight:GetNormalized() * (Energy.Kinetic*(1-HitRes.Loss)*2000/Bullet.ProjMass)^0.5 * 39.37
+			ACF_Spall( HitPos , Bullet.Velocity , Bullet.Filter , Energy.Kinetic*HitRes.Loss , Bullet.Caliber , Target.ACF.Armour , Bullet.Owner ) --Do some spalling
+			Bullet.Velocity = Bullet.Velocity:GetNormalized() * (Energy.Kinetic*(1-HitRes.Loss)*2000/Bullet.ProjMass)^0.5 * 39.37
 			return "Penetrated"
 		elseif HitRes.Ricochet then
 			return "Ricochet"
@@ -139,7 +139,7 @@ end
 
 function Round.worldimpact( Index, Bullet, HitPos, HitNormal )
 	
-	local Energy = ACF_Kinetic( Bullet.Flight:Length() / ACF.VelScale, Bullet.ProjMass, Bullet.LimitVel )
+	local Energy = ACF_Kinetic( Bullet.Velocity:Length() / ACF.VelScale, Bullet.ProjMass, Bullet.LimitVel )
 	local HitRes = ACF_PenetrateGround( Bullet, Energy, HitPos, HitNormal )
 	if HitRes.Penetrated then
 		return "Penetrated"
@@ -153,7 +153,7 @@ end
 
 function Round.endflight( Index, Bullet, HitPos, HitNormal )
 	
-	ACF_HE( HitPos - Bullet.Flight:GetNormalized()*3 , HitNormal , Bullet.FillerMass , Bullet.ProjMass - Bullet.FillerMass , Bullet.Owner )
+	ACF_HE( HitPos - Bullet.Velocity:GetNormalized()*3 , HitNormal , Bullet.FillerMass , Bullet.ProjMass - Bullet.FillerMass , Bullet.Owner )
 	ACF_RemoveBullet( Index )
 	
 end

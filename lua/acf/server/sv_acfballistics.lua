@@ -26,7 +26,8 @@ function ACF_CreateBullet( BulletData )
 
 	if IsValid(BulletData["Gun"]) then
 		local Gun = BulletData["Gun"]
-		BulletData["Filter"] = { Gun }		
+		BulletData["Filter"] = { Gun }
+		BulletData["Accel"] = Gun:GetPhysicsObject():IsGravityEnabled() and Vector(0, 0, Gun:GetGravity()*-1) or Vector(0, 0, 0)
 		BulletData["Pos"] = BulletData["Pos"] + ACF_GetAncestor(Gun):GetVelocity() * engine.TickInterval() * 1.1 -- Predicting where we'll be next tick so we dont shoot ourselves
 	else
 		BulletData["Filter"] = {}
@@ -60,9 +61,10 @@ end
 function ACF_CheckClips(Ent, HitPos )
 	if not Ent.ClipData or Ent:GetClass() ~= "prop_physics" then return false end
 	
-	for i = 1, #Ent.ClipData do
-		local N = Ent.ClipData[i]["n"]
-		if Ent:LocalToWorldAngles(N):Forward():Dot((Ent:LocalToWorld(N:Forward() * Ent.ClipData[i]["d"]) - HitPos):GetNormalized()) > 0 then return true end
+	local Data = Ent.ClipData
+	for i = 1, #Data do
+		local N = Data[i]["n"]
+		if Ent:LocalToWorldAngles(N):Forward():Dot((Ent:LocalToWorld(N:Forward() * Data[i]["d"]) - HitPos):GetNormalized()) > 0 then return true end
 	end
 	
 	return false
@@ -91,9 +93,9 @@ function ACF_CalcBulletFlight( Index, Bullet, Override)
 		local Time = SysTime()
 		local DeltaTime = Time - Bullet.LastThink
 		
-		local Drag = Bullet.Flight:GetNormalized() * Bullet.DragCoef * Bullet.Flight:LengthSqr() / ACF.DragDiv
-		Bullet.NextPos = Bullet.Pos + Bullet.Flight * ACF.VelScale * DeltaTime		--Calculates the next shell position
-		Bullet.Flight = Bullet.Flight + (Bullet.Accel - Drag) * DeltaTime				--Calculates the next shell vector
+		local Drag = Bullet.Velocity:GetNormalized() * Bullet.DragCoef * Bullet.Velocity:LengthSqr() / ACF.DragDiv
+		Bullet.NextPos = Bullet.Pos + Bullet.Velocity * ACF.VelScale * DeltaTime		--Calculates the next shell position
+		Bullet.Velocity = Bullet.Velocity + (Bullet.Accel - Drag) * DeltaTime				--Calculates the next shell vector
 		Bullet.LastThink = Time
 		
 		ACF_DoBulletsFlight( Index, Bullet )
@@ -117,7 +119,7 @@ function ACF_DoBulletsFlight( Index, Bullet)
 			
 			ACF_BulletClient( Index, Bullet, "Update" , 1 , Bullet.Pos  )
 			ACF_BulletEndFlight = ACF.RoundTypes[Bullet.Type]["endflight"]
-			ACF_BulletEndFlight( Index, Bullet, Bullet.Pos, Bullet.Flight:GetNormalized() )	
+			ACF_BulletEndFlight( Index, Bullet, Bullet.Pos, Bullet.Velocity:GetNormalized() )	
 		end
 	end
 	
@@ -218,7 +220,7 @@ function ACF_BulletClient( Index, Bullet, Type, Hit, HitPos )
 	if Type == "Update" then
 		local Effect = EffectData()
 			Effect:SetAttachment( Index )		--Bulet Index
-			Effect:SetStart( Bullet.Flight/10 )	--Bullet Direction
+			Effect:SetStart( Bullet.Velocity/10 )	--Bullet Direction
 			if Hit > 0 then		-- If there is a hit then set the effect pos to the impact pos instead of the retry pos
 				Effect:SetOrigin( HitPos )		--Bullet Pos
 			else
@@ -231,7 +233,7 @@ function ACF_BulletClient( Index, Bullet, Type, Hit, HitPos )
 			local Filler = 0
 			if Bullet["FillerMass"] then Filler = Bullet["FillerMass"]*15 end
 			Effect:SetAttachment( Index )		--Bulet Index
-			Effect:SetStart( Bullet.Flight/10 )	--Bullet Direction
+			Effect:SetStart( Bullet.Velocity/10 )	--Bullet Direction
 			Effect:SetOrigin( Bullet.Pos )
 			Effect:SetEntity( Entity(Bullet["Crate"]) )
 			Effect:SetScale( 0 )

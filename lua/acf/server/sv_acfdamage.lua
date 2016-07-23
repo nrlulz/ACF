@@ -286,8 +286,8 @@ function ACF_PenetrateGround( Bullet, Energy, HitPos, HitNormal )
 	local HitRes = {Penetrated = false, Ricochet = false}
 	
 	local DigTr = { }
-		DigTr.start = HitPos + Bullet.Flight:GetNormalized()*0.1
-		DigTr.endpos = HitPos + Bullet.Flight:GetNormalized()*(MaxDig+0.1)
+		DigTr.start = HitPos + Bullet.Velocity:GetNormalized()*0.1
+		DigTr.endpos = HitPos + Bullet.Velocity:GetNormalized()*(MaxDig+0.1)
 		DigTr.filter = Bullet.Filter
 		DigTr.mask = MASK_SOLID_BRUSHONLY
 	local DigRes = util_TraceLine(DigTr)
@@ -297,8 +297,8 @@ function ACF_PenetrateGround( Bullet, Energy, HitPos, HitNormal )
 	 
 	if loss == 1 or loss == 0 then --couldn't penetrate
 		local Ricochet = 0
-		local Speed = Bullet.Flight:Length() / ACF.VelScale
-		local Angle = ACF_GetHitAngle( HitNormal, Bullet.Flight )
+		local Speed = Bullet.Velocity:Length() / ACF.VelScale
+		local Angle = ACF_GetHitAngle( HitNormal, Bullet.Velocity )
 		local MinAngle = math_Min(Bullet.Ricochet - Speed/39.37/30 + 25, 89.9)	--Making the chance of a ricochet get higher as the speeds increase
 		if Angle > math_random(MinAngle,90) and Angle < 89.9 and math_random(0, 1) == 1 then	--Checking for ricochet
 			Ricochet = Angle/90*0.75
@@ -306,7 +306,7 @@ function ACF_PenetrateGround( Bullet, Energy, HitPos, HitNormal )
 		
 		if Ricochet > 0 and Bullet.GroundRicos < 2 then
 			Bullet.GroundRicos = Bullet.GroundRicos + 1
-			local Vec = Bullet.Flight:GetNormalized()
+			local Vec = Bullet.Velocity:GetNormalized()
 			--bit of maths shamelessly stolen from wiremod to rotate a vector around an axis
 			local x,y,z = HitNormal[1], HitNormal[2], HitNormal[3]
 			local length = (x*x+y*y+z*z)^0.5
@@ -316,12 +316,12 @@ function ACF_PenetrateGround( Bullet, Energy, HitPos, HitNormal )
 			(z*x*2) * Vec[1] + (z*y*2) * Vec[2] + (-1 + (z^2)*2) * Vec[3])
 			
 			Bullet.Pos = HitPos
-			Bullet.Flight = (Rotated + VectorRand()*0.025):GetNormalized() * Speed * Ricochet
+			Bullet.Velocity = (Rotated + VectorRand()*0.025):GetNormalized() * Speed * Ricochet
 			HitRes.Ricochet = true
 		end
 	else --penetrated
-		Bullet.Flight = Bullet.Flight * ( 1 - loss )
-		Bullet.Pos = DigRes.StartPos + Bullet.Flight:GetNormalized() * 0.25 --this is actually where trace left brush
+		Bullet.Velocity = Bullet.Velocity * ( 1 - loss )
+		Bullet.Pos = DigRes.StartPos + Bullet.Velocity:GetNormalized() * 0.25 --this is actually where trace left brush
 		HitRes.Penetrated = true
 	end
 	

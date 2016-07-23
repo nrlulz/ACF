@@ -567,6 +567,7 @@ end
 
 function ENT:BarrelNotStuffed()
 	if self.Stuffed then return false end
+	if not CPPIGetOwner then return true end
 
 	local tr = {
 			start = self:GetPos(),
@@ -578,7 +579,8 @@ function ENT:BarrelNotStuffed()
 
 	TraceRes = util.TraceLine(tr)
 	while TraceRes.Hit do
-		if TraceRes.HitWorld or (IsValid(TraceRes.Entity) and not TraceRes.Entity:IsPlayer() and CPPIGetOwner and TraceRes.Entity:CPPIGetOwner() ~= Own) then
+		local Ent = TraceRes.Entity
+		if TraceRes.HitWorld or (IsValid(Ent) and not Ent:IsPlayer() and Ent:CPPIGetOwner() ~= Own) then
 			self.Stuffed = true
 
 			timer.Simple(0.5, function() self.Stuffed = false end)
@@ -586,7 +588,7 @@ function ENT:BarrelNotStuffed()
 			return false
 		end
 
-		tr.filter[#tr.filter + 1] = TraceRes.Entity
+		tr.filter[#tr.filter + 1] = Ent
 		TraceRes = util.TraceLine(tr)
 	end
 
@@ -620,7 +622,7 @@ function ENT:FireShell()
 			self:MuzzleEffect( MuzzlePos, MuzzleVec )
 			
 			self.BulletData.Pos = MuzzlePos
-			self.BulletData.Flight = ShootVec * self.BulletData.MuzzleVel * 39.37 + ACF_GetAncestor(self):GetVelocity()
+			self.BulletData.Velocity = ShootVec * self.BulletData.MuzzleVel * 39.37 + ACF_GetAncestor(self):GetVelocity()
 			self.BulletData.Owner = self.User
 			self.BulletData.Gun = self
 			self.CreateShell = ACF.RoundTypes[self.BulletData.Type].create

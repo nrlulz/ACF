@@ -458,7 +458,7 @@ function ENT:Think()
 					local Speed = ACF_MuzzleVelocity( self.BulletData.PropMass, self.BulletData.ProjMass/2, self.Caliber )
 					
 					self.BulletData.Pos = MuzzlePos
-					self.BulletData.Flight = (MuzzleVec):GetNormalized() * Speed * 39.37 + self:GetVelocity()
+					self.BulletData.Velocity = (MuzzleVec):GetNormalized() * Speed * 39.37 + self:GetVelocity()
 					self.BulletData.Owner = self.Inflictor or self.Owner
 					self.BulletData.Gun = self
 					self.BulletData.Crate = self:EntIndex()

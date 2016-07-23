@@ -122,7 +122,7 @@ end
 function Round.propimpact( Index, Bullet, Target, HitNormal, HitPos, Bone )
 	
 	if ACF_Check( Target ) then
-		local Speed = Bullet.Flight:Length() / ACF.VelScale
+		local Speed = Bullet.Velocity:Length() / ACF.VelScale
 		local Energy = ACF_Kinetic( Speed , Bullet.ProjMass - (Bullet.FillerMass + Bullet.WPMass), Bullet.LimitVel )
 		local HitRes = ACF_RoundImpact( Bullet, Speed, Energy, Target, HitPos, HitNormal , Bone )
 		if HitRes.Ricochet then
@@ -141,7 +141,7 @@ end
 
 function Round.endflight( Index, Bullet, HitPos, HitNormal )
 	
-	--ACF_HE( HitPos - Bullet.Flight:GetNormalized()*3 , HitNormal, Bullet.FillerMass, Bullet.ProjMass - Bullet.FillerMass, Bullet.Owner )
+	--ACF_HE( HitPos - Bullet.Velocity:GetNormalized()*3 , HitNormal, Bullet.FillerMass, Bullet.ProjMass - Bullet.FillerMass, Bullet.Owner )
 	ACF_RemoveBullet( Index )
 	
 end

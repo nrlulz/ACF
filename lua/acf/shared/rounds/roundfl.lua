@@ -199,7 +199,7 @@ end
 
 function Round.worldimpact( Index, Bullet, HitPos, HitNormal )
 	
-	local Energy = ACF_Kinetic( Bullet.Flight:Length() / ACF.VelScale, Bullet.ProjMass, Bullet.LimitVel )
+	local Energy = ACF_Kinetic( Bullet.Velocity:Length() / ACF.VelScale, Bullet.ProjMass, Bullet.LimitVel )
 	local HitRes = ACF_PenetrateGround( Bullet, Energy, HitPos, HitNormal )
 	if HitRes.Penetrated then
 		return "Penetrated"

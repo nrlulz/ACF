@@ -165,13 +165,13 @@ end
 
 function Round.detonate( Index, Bullet, HitPos, HitNormal )
 	
-	ACF_HE( HitPos - Bullet.Flight:GetNormalized()*3 , HitNormal , Bullet.BoomFillerMass , Bullet.CasingMass , Bullet.Owner )
+	ACF_HE( HitPos - Bullet.Velocity:GetNormalized()*3 , HitNormal , Bullet.BoomFillerMass , Bullet.CasingMass , Bullet.Owner )
 
 	Bullet.Detonated = true
 	Bullet.InitTime = SysTime()
-	Bullet.FuseLength = 0.005 + 40/((Bullet.Flight + Bullet.Flight:GetNormalized() * Bullet.SlugMV * 39.37):Length()*0.0254)
+	Bullet.FuseLength = 0.005 + 40/((Bullet.Velocity + Bullet.Velocity:GetNormalized() * Bullet.SlugMV * 39.37):Length()*0.0254)
 	Bullet.Pos = HitPos
-	Bullet.Flight = Bullet.Flight + Bullet.Flight:GetNormalized() * Bullet.SlugMV * 39.37
+	Bullet.Velocity = Bullet.Velocity + Bullet.Velocity:GetNormalized() * Bullet.SlugMV * 39.37
 	Bullet.DragCoef = Bullet.SlugDragCoef
 	
 	Bullet.ProjMass = Bullet.SlugMass
@@ -180,7 +180,7 @@ function Round.detonate( Index, Bullet, HitPos, HitNormal )
 	Bullet.Ricochet = Bullet.SlugRicochet
 	
 	local DeltaTime = SysTime() - Bullet.LastThink
-	Bullet.NextPos = Bullet.Pos + (Bullet.Flight * ACF.VelScale * DeltaTime)		--Calculates the next shell position
+	Bullet.NextPos = Bullet.Pos + (Bullet.Velocity * ACF.VelScale * DeltaTime)		--Calculates the next shell position
 	
 end
 
@@ -189,14 +189,14 @@ function Round.propimpact( Index, Bullet, Target, HitNormal, HitPos, Bone )
 	if ACF_Check( Target ) then
 			
 		if Bullet.Detonated then
-			local Speed = Bullet.Flight:Length() / ACF.VelScale
+			local Speed = Bullet.Velocity:Length() / ACF.VelScale
 			local Energy = ACF_Kinetic( Speed , Bullet.ProjMass, 999999 )
 			local HitRes = ACF_RoundImpact( Bullet, Speed, Energy, Target, HitPos, HitNormal , Bone )
 			
 			if HitRes.Overkill > 0 then
 				table.insert( Bullet.Filter , Target )					--"Penetrate" (Ingoring the prop for the retry trace)
-				ACF_Spall( HitPos , Bullet.Flight , Bullet.Filter , Energy.Kinetic*HitRes.Loss , Bullet.Caliber , Target.ACF.Armour , Bullet.Owner ) --Do some spalling
-				Bullet.Flight = Bullet.Flight:GetNormalized() * (Energy.Kinetic*(1-HitRes.Loss*((not Bullet.NotFirstPen and 0.667) or 1))*2000/Bullet.ProjMass)^0.5 * 39.37 * ((Bullet.NotFirstPen and 0.333) or 1)
+				ACF_Spall( HitPos , Bullet.Velocity , Bullet.Filter , Energy.Kinetic*HitRes.Loss , Bullet.Caliber , Target.ACF.Armour , Bullet.Owner ) --Do some spalling
+				Bullet.Velocity = Bullet.Velocity:GetNormalized() * (Energy.Kinetic*(1-HitRes.Loss*((not Bullet.NotFirstPen and 0.667) or 1))*2000/Bullet.ProjMass)^0.5 * 39.37 * ((Bullet.NotFirstPen and 0.333) or 1)
 				Bullet.NotFirstPen = true
 				return "Penetrated"
 			else
@@ -205,7 +205,7 @@ function Round.propimpact( Index, Bullet, Target, HitNormal, HitPos, Bone )
 	
 		else
 			
-			local Speed = Bullet.Flight:Length() / ACF.VelScale
+			local Speed = Bullet.Velocity:Length() / ACF.VelScale
 			local Energy = ACF_Kinetic( Speed , Bullet.ProjMass - Bullet.FillerMass, Bullet.LimitVel )
 			local HitRes = ACF_RoundImpact( Bullet, Speed, Energy, Target, HitPos, HitNormal , Bone )
 			
@@ -233,7 +233,7 @@ function Round.worldimpact( Index, Bullet, HitPos, HitNormal )
 		return "Penetrated"
 	end
 	
-	local Energy = ACF_Kinetic( Bullet.Flight:Length() / ACF.VelScale, Bullet.ProjMass, 999999 )
+	local Energy = ACF_Kinetic( Bullet.Velocity:Length() / ACF.VelScale, Bullet.ProjMass, 999999 )
 	local HitRes = ACF_PenetrateGround( Bullet, Energy, HitPos, HitNormal )
 	if HitRes.Penetrated then
 		return "Penetrated"
