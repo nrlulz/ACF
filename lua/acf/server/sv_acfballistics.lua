@@ -27,7 +27,7 @@ function ACF_CreateBullet( BulletData )
 	if IsValid(BulletData["Gun"]) then
 		local Gun = BulletData["Gun"]
 		BulletData["Filter"] = { Gun }
-		BulletData["Accel"] = Gun:GetPhysicsObject():IsGravityEnabled() and Vector(0, 0, Gun:GetGravity()*-1) or Vector(0, 0, 0)
+		BulletData["Accel"] = Vector(0, 0, GetConVar("sv_gravity"):GetInt()*-1)
 		BulletData["Pos"] = BulletData["Pos"] + ACF_GetAncestor(Gun):GetVelocity() * engine.TickInterval() * 1.1 -- Predicting where we'll be next tick so we dont shoot ourselves
 	else
 		BulletData["Filter"] = {}

@@ -253,7 +253,7 @@ end
 
 function ACF_RoundImpact( Bullet, Speed, Energy, Target, HitPos, HitNormal , Bone  )	--Simulate a round impacting on a prop
 	--if (Bullet.Type == "HEAT") then print("Pen: "..((Energy.Penetration / Bullet["PenArea"]) * ACF.KEtoRHA)) end
-	local Angle = ACF_GetHitAngle( HitNormal , Bullet["Flight"] )
+	local Angle = ACF_GetHitAngle( HitNormal , Bullet["Velocity"] )
 		
 	local Ricochet = 0
 	local MinAngle = math_Min(Bullet["Ricochet"] - Speed/39.37/15,89)	--Making the chance of a ricochet get higher as the speeds increase
@@ -263,16 +263,16 @@ function ACF_RoundImpact( Bullet, Speed, Energy, Target, HitPos, HitNormal , Bon
 	end
 	local HitRes = ACF_Damage ( Target , Energy , Bullet["PenArea"] , Angle , Bullet["Owner"] , Bone, Bullet["Gun"], Bullet["Type"] )  --DAMAGE !!
 	
-	ACF_KEShove(Target, HitPos, Bullet["Flight"]:GetNormal(), Energy.Kinetic*HitRes.Loss*1000*Bullet["ShovePower"]*(GetConVarNumber("acf_recoilpush") or 1) )
+	ACF_KEShove(Target, HitPos, Bullet["Velocity"]:GetNormal(), Energy.Kinetic*HitRes.Loss*1000*Bullet["ShovePower"]*(GetConVarNumber("acf_recoilpush") or 1) )
 	
 	if HitRes.Kill then
-		Bullet.Filter[#Bullet.Filter + 1] = ACF_APKill( Target , (Bullet["Flight"]):GetNormalized() , Energy.Kinetic )
+		Bullet.Filter[#Bullet.Filter + 1] = ACF_APKill( Target , (Bullet["Velocity"]):GetNormalized() , Energy.Kinetic )
 	end	
 	
 	HitRes.Ricochet = false
 	if Ricochet > 0 then
 		Bullet["Pos"] = HitPos
-		Bullet["Flight"] = (Bullet["Flight"]:GetNormalized() + HitNormal*(1-Ricochet+0.05) + VectorRand()*0.05):GetNormalized() * Speed * Ricochet
+		Bullet["Velocity"] = (Bullet["Velocity"]:GetNormalized() + HitNormal*(1-Ricochet+0.05) + VectorRand()*0.05):GetNormalized() * Speed * Ricochet
 		
 		HitRes.Ricochet = true
 	end

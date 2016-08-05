@@ -84,7 +84,7 @@ function SWEP:PrimaryAttack()
 			local Flight = (MuzzleVec+Inaccuracy):GetNormalized() * Speed * 39.37
 			
 			self.Primary.BulletData["Pos"] = MuzzlePos
-			self.Primary.BulletData["Flight"] = (MuzzleVec+Inaccuracy):GetNormalized() * Speed * 39.37 + self:GetVelocity()
+			self.Primary.BulletData["Velocity"] = (MuzzleVec+Inaccuracy):GetNormalized() * Speed * 39.37 + self:GetVelocity()
 			self.Primary.BulletData["Owner"] = self.Owner
 			self.Primary.BulletData["Gun"] = self.Owner
 			self.Primary.BulletData["Crate"] = self:EntIndex()
