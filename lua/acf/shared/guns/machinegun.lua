@@ -63,6 +63,7 @@ ACF_defineGun("20mmMG", {
 	model = "models/machinegun/machinegun_20mm.mdl",
 	gunclass = "MG",
 	caliber = 2.0,
+	canparent = true,
 	weight = 95,
 	year = 1935,
 	rofmod = 0.55,

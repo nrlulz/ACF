@@ -31,8 +31,8 @@ ACF.HEATMulAmmo = 16.5 		--HEAT slug damage multiplier; 13.2x roughly equal to A
 ACF.HEATMulFuel = 8.25		--needs less multiplier, much less health than ammo
 ACF.HEATMulEngine = 8.25	--likewise
 
+ACF.Gravity = Vector(0, 0, GetConVar("sv_gravity"):GetInt()*-1)
 ACF.DragDiv = 80		--Drag fudge factor
-ACF.VelScale = 1		--Scale factor for the shell velocities in the game world
 -- local PhysEnv = physenv.GetPerformanceSettings()
 ACF.PhysMaxVel = 4000
 ACF.SmokeWind = 5 + math.random()*35 --affects the ability of smoke to be used for screening effect
@@ -369,6 +369,8 @@ function ACF_CVarChangeCallback(CVar, Prev, New)
 		ACF.GunfireEnabled = New ~= 0
 
 		print("ACF Gunfire has been " .. (New ~= 0 and "enabled" or "disabled"))
+	elseif CVar == "sv_gravity" then
+		ACF.Gravity = Vector(0, 0, New * -1) or Vector(0, 0, -600)
 	end
 end
 
@@ -427,6 +429,7 @@ cvars.AddChangeCallback("acf_armormod", ACF_CVarChangeCallback)
 cvars.AddChangeCallback("acf_ammomod", ACF_CVarChangeCallback)
 cvars.AddChangeCallback("acf_spalling", ACF_CVarChangeCallback)
 cvars.AddChangeCallback("acf_gunfire", ACF_CVarChangeCallback)
+cvars.AddChangeCallback("sv_gravity", ACF_CVarChangeCallback)
 
 -- smoke-wind cvar handling
 if SERVER then

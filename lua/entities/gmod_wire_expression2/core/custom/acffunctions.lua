@@ -708,7 +708,7 @@ end
 e2function number entity:acfMuzzleVel()
 	if not (isAmmo(this) or isGun(this)) then return 0 end
 	if restrictInfo(self, this) then return 0 end
-	return math.Round((this.BulletData["MuzzleVel"] or 0)*ACF.VelScale,3)
+	return math.Round((this.BulletData["MuzzleVel"] or 0),3)
 end
 
 -- Returns the mass of the projectile in a crate or gun

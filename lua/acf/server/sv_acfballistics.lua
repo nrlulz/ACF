@@ -11,29 +11,35 @@ local math_Random = math.random
 local util_IsInWorld = util.IsInWorld
 local util_Effect = util.Effect
 --local hook_Run = hook.Run, 109
-local table_Copy = table.Copy
 local math_Round = math.Round
 
-function ACF_CreateBullet( BulletData )
+function ACF_CreateBullet( Data )
 	ACF.CurBulletIndex = ACF.CurBulletIndex + 1 > IndexLimit and 1 or ACF.CurBulletIndex + 1
 	local Index = ACF.CurBulletIndex
 	
-	BulletData["Accel"]         = Vector(0, 0, GetConVar("sv_gravity"):GetInt()*-1)			--Those are BulletData settings that are global and shouldn't change round to round
-	BulletData["LastThink"]     = SysTime()
-	BulletData["InitTime"]      = BulletData["FuseLength"] and SysTime() or nil
+	local BulletData = {}
+		BulletData["Accel"]			= ACF.Gravity + Vector(0, 0, 0)		
+		BulletData["DragCoef"]		= Data.DragCoef
+		BulletData["FillerMass"]	= Data.FillerMass
+		BulletData["ProjMass"]		= Data.ProjMass
+		BulletData["Pos"]			= Data.Pos
+		BulletData["Velocity"]		= Data.Velocity
 
-	--BulletData["Index"]         = Index
+		BulletData["PenArea"]		= Data.PenArea
+		BulletData["FrArea"]		= Data.FrArea
+		BulletData["KETransfert"]	= Data.KETransfert
+		BulletData["LimitVel"]		= Data.LimitVel
+		BulletData["Ricochet"]		= Data.Ricochet
+		BulletData["ShovePower"]	= Data.ShovePower
 
-	if IsValid(BulletData["Gun"]) then
-		local Gun = BulletData["Gun"]
-		BulletData["Filter"] = { Gun }
-		BulletData["Accel"] = Vector(0, 0, GetConVar("sv_gravity"):GetInt()*-1)
-		BulletData["Pos"] = BulletData["Pos"] + ACF_GetAncestor(Gun):GetVelocity() * engine.TickInterval() * 1.1 -- Predicting where we'll be next tick so we dont shoot ourselves
-	else
-		BulletData["Filter"] = {}
-	end
+		BulletData["Owner"]			= Data.Owner
+		BulletData["Crate"]			= Data.Crate
+		BulletData["LastThink"]		= SysTime()
+		BulletData["InitTime"]		= Data.FuseLength and SysTime() or nil
+		BulletData["Filter"] 		= Data.Gun and { Data.Gun } or {}
+		BulletData["Type"]			= Data.Type
 		
-	Bullets[Index] = table_Copy(BulletData)		--Place the bullet at the current index pos
+	Bullets[Index] = BulletData		--Place the bullet at the current index pos
 	ACF_BulletClient( Index, Bullets[Index], "Init", 0 )
 	ACF_CalcBulletFlight( Index, Bullets[Index] )
 end
@@ -54,7 +60,7 @@ function ACF_RemoveBullet( Index )
 	
 	Bullets[Index] = nil
 	
-	if Bullet and Bullet.OnRemoved then Bullet:OnRemoved() end
+	--if Bullet and Bullet.OnRemoved then Bullet:OnRemoved() end
 end
 
 
@@ -63,8 +69,10 @@ function ACF_CheckClips(Ent, HitPos )
 	
 	local Data = Ent.ClipData
 	for i = 1, #Data do
-		local N = Data[i]["n"]
-		if Ent:LocalToWorldAngles(N):Forward():Dot((Ent:LocalToWorld(N:Forward() * Data[i]["d"]) - HitPos):GetNormalized()) > 0 then return true end
+		local DataI = Data[i]
+		local N = DataI["n"]
+
+		if Ent:LocalToWorldAngles(N):Forward():Dot((Ent:LocalToWorld(N:Forward() * DataI["d"]) - HitPos):GetNormalized()) > 0 then return true end
 	end
 	
 	return false
@@ -83,30 +91,25 @@ function ACF_Trace()
 	return TraceRes
 end
 
-function ACF_CalcBulletFlight( Index, Bullet, Override)
+function ACF_CalcBulletFlight(Index, Bullet, Override)
 	// perf concern: none of the ACF devs know how to code
-	if Bullet.PreCalcFlight then Bullet:PreCalcFlight() end
+	--if Bullet.PreCalcFlight then Bullet:PreCalcFlight() end
 	
-	if not Bullet.LastThink then 
-		ACF_RemoveBullet( Index ) 
-	else
-		local Time = SysTime()
-		local DeltaTime = Time - Bullet.LastThink
-		
-		local Drag = Bullet.Velocity:GetNormalized() * Bullet.DragCoef * Bullet.Velocity:LengthSqr() / ACF.DragDiv
-		Bullet.NextPos = Bullet.Pos + Bullet.Velocity * ACF.VelScale * DeltaTime		--Calculates the next shell position
-		Bullet.Velocity = Bullet.Velocity + (Bullet.Accel - Drag) * DeltaTime				--Calculates the next shell vector
-		Bullet.LastThink = Time
-		
-		ACF_DoBulletsFlight( Index, Bullet )
-	end
+	local Time = SysTime()
+	local DeltaTime = Time - Bullet.LastThink
 	
+	local Drag = Bullet.Velocity:GetNormalized() * Bullet.DragCoef * Bullet.Velocity:LengthSqr() / ACF.DragDiv
+	Bullet.NextPos = Bullet.Pos + Bullet.Velocity * DeltaTime		--Calculates the next shell position
+	Bullet.Velocity = Bullet.Velocity + (Bullet.Accel - Drag) * DeltaTime				--Calculates the next shell vector
+	Bullet.LastThink = Time
+	
+	ACF_DoBulletsFlight( Index, Bullet )
 	
 	// perf concern: use direct function call stored on bullet over hook system.
-	if Bullet.PostCalcFlight then Bullet:PostCalcFlight() end
+	--if Bullet.PostCalcFlight then Bullet:PostCalcFlight() end
 end
 
-function ACF_DoBulletsFlight( Index, Bullet)
+function ACF_DoBulletsFlight(Index, Bullet)
 	--if hook_Run("ACF_BulletsFlight", Index, Bullet ) == false then return end
 	
 	if Bullet.FuseLength and CurTime() - Bullet.InitTime > Bullet.FuseLength then

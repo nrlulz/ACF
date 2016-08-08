@@ -297,7 +297,7 @@ function ACF_PenetrateGround( Bullet, Energy, HitPos, HitNormal )
 	 
 	if loss == 1 or loss == 0 then --couldn't penetrate
 		local Ricochet = 0
-		local Speed = Bullet.Velocity:Length() / ACF.VelScale
+		local Speed = Bullet.Velocity:Length()
 		local Angle = ACF_GetHitAngle( HitNormal, Bullet.Velocity )
 		local MinAngle = math_Min(Bullet.Ricochet - Speed/39.37/30 + 25, 89.9)	--Making the chance of a ricochet get higher as the speeds increase
 		if Angle > math_random(MinAngle,90) and Angle < 89.9 and math_random(0, 1) == 1 then	--Checking for ricochet

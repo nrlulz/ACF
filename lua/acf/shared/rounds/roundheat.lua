@@ -96,7 +96,6 @@ function Round.convert( Crate, PlayerData )
 	
 	Data.Detonated = false
 	Data.NotFirstPen = false
-	Data.BoomPower = Data.PropMass + Data.FillerMass
 
 	if SERVER then --Only the crates need this part
 		ServerData.Id = PlayerData.Id
@@ -180,7 +179,7 @@ function Round.detonate( Index, Bullet, HitPos, HitNormal )
 	Bullet.Ricochet = Bullet.SlugRicochet
 	
 	local DeltaTime = SysTime() - Bullet.LastThink
-	Bullet.NextPos = Bullet.Pos + (Bullet.Velocity * ACF.VelScale * DeltaTime)		--Calculates the next shell position
+	Bullet.NextPos = Bullet.Pos + (Bullet.Velocity * DeltaTime)		--Calculates the next shell position
 	
 end
 
@@ -189,7 +188,7 @@ function Round.propimpact( Index, Bullet, Target, HitNormal, HitPos, Bone )
 	if ACF_Check( Target ) then
 			
 		if Bullet.Detonated then
-			local Speed = Bullet.Velocity:Length() / ACF.VelScale
+			local Speed = Bullet.Velocity:Length()
 			local Energy = ACF_Kinetic( Speed , Bullet.ProjMass, 999999 )
 			local HitRes = ACF_RoundImpact( Bullet, Speed, Energy, Target, HitPos, HitNormal , Bone )
 			
@@ -205,7 +204,7 @@ function Round.propimpact( Index, Bullet, Target, HitNormal, HitPos, Bone )
 	
 		else
 			
-			local Speed = Bullet.Velocity:Length() / ACF.VelScale
+			local Speed = Bullet.Velocity:Length()
 			local Energy = ACF_Kinetic( Speed , Bullet.ProjMass - Bullet.FillerMass, Bullet.LimitVel )
 			local HitRes = ACF_RoundImpact( Bullet, Speed, Energy, Target, HitPos, HitNormal , Bone )
 			
@@ -233,7 +232,7 @@ function Round.worldimpact( Index, Bullet, HitPos, HitNormal )
 		return "Penetrated"
 	end
 	
-	local Energy = ACF_Kinetic( Bullet.Velocity:Length() / ACF.VelScale, Bullet.ProjMass, 999999 )
+	local Energy = ACF_Kinetic( Bullet.Velocity:Length(), Bullet.ProjMass, 999999 )
 	local HitRes = ACF_PenetrateGround( Bullet, Energy, HitPos, HitNormal )
 	if HitRes.Penetrated then
 		return "Penetrated"
@@ -370,7 +369,7 @@ function Round.guiupdate( Panel, Table )
 
 	acfmenupanel:CPanelText("Desc", ACF.RoundTypes[PlayerData.Type].desc)	--Description (Name, Desc)
 	acfmenupanel:CPanelText("LengthDisplay", "Round Length : "..(math.floor((Data.PropLength+Data.ProjLength+Data.Tracer)*100)/100).."/"..(Data.MaxTotalLength).." cm")	--Total round length (Name, Desc)
-	acfmenupanel:CPanelText("VelocityDisplay", "Muzzle Velocity : "..math.floor(Data.MuzzleVel*ACF.VelScale).." m/s")	--Proj muzzle velocity (Name, Desc)	
+	acfmenupanel:CPanelText("VelocityDisplay", "Muzzle Velocity : "..math.floor(Data.MuzzleVel).." m/s")	--Proj muzzle velocity (Name, Desc)	
 	acfmenupanel:CPanelText("BlastDisplay", "Blast Radius : "..(math.floor(Data.BlastRadius*100)/100).." m")	--Proj muzzle velocity (Name, Desc)
 	acfmenupanel:CPanelText("FragDisplay", "Fragments : "..(Data.Fragments).."\n Average Fragment Weight : "..(math.floor(Data.FragMass*10000)/10).." g \n Average Fragment Velocity : "..math.floor(Data.FragVel).." m/s")	--Proj muzzle penetration (Name, Desc)
 	
