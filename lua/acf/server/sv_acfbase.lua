@@ -80,6 +80,7 @@ function ACF_Activate ( Entity , Recalc )
 	--print(Entity.ACF.Health)
 end
 
+local GlobalFilter = {}
 local Invalid = {
 	gmod_ghost = true,
 	debris = true,
@@ -88,7 +89,7 @@ local Invalid = {
 }
 
 function ACF_Check ( Entity )
-	if IsValid(Entity) and IsValid(Entity:GetPhysicsObject()) and not Entity:IsWorld() and not Entity:IsWeapon() then
+	if not GlobalFilter[Entity] and IsValid(Entity) and IsValid(Entity:GetPhysicsObject()) and not Entity:IsWorld() and not Entity:IsWeapon() then
 		local Class = Entity:GetClass()
 		if not Invalid[Class] and not Invalid[string.sub(Class, 1, 5)] then
 			if not Entity.ACF then 
@@ -101,14 +102,14 @@ function ACF_Check ( Entity )
 		end	
 	end
 
+	if not GlobalFilter[Entity] then GlobalFilter[Entity] = true end
 	return false
 end
 
 function ACF_Damage ( Entity , Energy , FrArea , Angle , Inflictor , Bone, Gun, Type ) 
 	
 	local Activated = ACF_Check( Entity )
-	local CanDo = hook.Run("ACF_BulletDamage", Activated, Entity, Energy, FrArea, Angle, Inflictor, Bone, Gun )
-	if CanDo == false then
+	if hook.Run("ACF_BulletDamage", Activated, Entity, Energy, FrArea, Angle, Inflictor, Bone, Gun ) == false then
 		return { Damage = 0, Overkill = 0, Loss = 0, Kill = false }		
 	end
 	
@@ -172,15 +173,8 @@ function ACF_VehicleDamage( Entity , Energy , FrArea , Angle , Inflictor , Bone,
 
 	local HitRes = ACF_CalcDamage( Entity , Energy , FrArea , Angle )
 	
-	local Driver = Entity:GetDriver()
-	if IsValid(Driver) then
-		--if Ammo == true then
-		--	Driver.KilledByAmmo = true
-		--end
-		Driver:TakeDamage( HitRes.Damage*40 , Inflictor, Gun )
-		--if Ammo == true then
-		--	Driver.KilledByAmmo = false
-		--end
+	if IsValid(Entity:GetDriver()) then
+		ACF_SquishyDamage(Entity:GetDriver() , Energy , FrArea , Angle , Inflictor , 2, Gun) -- Deal torso damage
 	end
 
 	HitRes.Kill = false

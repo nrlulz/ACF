@@ -82,7 +82,7 @@ end
 function ACF_Trace()
 	local TraceRes = util_TraceLine(FlightTr)
 	
-	if TraceRes.Hit and IsValid(TraceRes.Entity) and ( not ACF_Check(TraceRes.Entity) or ACF_CheckClips(TraceRes.Entity, TraceRes.HitPos) ) then
+	if TraceRes.HitNonWorld and ( not ACF_Check(TraceRes.Entity) or ACF_CheckClips(TraceRes.Entity, TraceRes.HitPos) ) then
 		FlightTr.filter[#FlightTr.filter + 1] = TraceRes.Entity
 		
 		return ACF_Trace(FlightTr)

@@ -567,20 +567,17 @@ end
 
 function ENT:BarrelNotStuffed()
 	if self.Stuffed then return false end
-	if not CPPIGetOwner then return true end
+	if not self.CPPIGetOwner then return true end
 
-	local tr = {
-			start = self:GetPos(),
-			endpos = self:LocalToWorld(self.Muzzle),
-			filter = self.BarrelFilter or {self},
-			mask = MASK_SHOT,
-		}
+	local tr = {start = self:GetPos(), endpos = self:LocalToWorld(self.Muzzle), filter = self.BarrelFilter or {self}, mask = MASK_SHOT}
 	local Own = self.Owner
 
-	TraceRes = util.TraceLine(tr)
+	local TraceRes = util.TraceLine(tr)
 	while TraceRes.Hit do
+		if Trace.HitWorld then return false end
+		
 		local Ent = TraceRes.Entity
-		if TraceRes.HitWorld or (IsValid(Ent) and not Ent:IsPlayer() and Ent:CPPIGetOwner() ~= Own) then
+		if IsValid(Ent) and not Ent:IsPlayer() and Ent:CPPIGetOwner() ~= Own then
 			self.Stuffed = true
 
 			timer.Simple(0.5, function() self.Stuffed = false end)
@@ -592,9 +589,7 @@ function ENT:BarrelNotStuffed()
 		TraceRes = util.TraceLine(tr)
 	end
 
-	if not self.BarrelFilter or #self.BarrelFilter ~= #tr.filter then
-		self.BarrelFilter = table.Copy(tr.filter)
-	end
+	if not self.BarrelFilter or #self.BarrelFilter ~= #tr.filter then self.BarrelFilter = table.Copy(tr.filter) end
 
 	return true
 end
@@ -648,7 +643,6 @@ function ENT:FireShell()
 			self:LoadAmmo(false, true)	
 		end
 	end
-	
 end
 
 function ENT:CreateShell()
