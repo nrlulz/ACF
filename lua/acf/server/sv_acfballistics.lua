@@ -3,6 +3,7 @@ ACF.CurBulletIndex = 0
 ACF.BulletIndexLimit = 1000
 local IndexLimit = ACF.BulletIndexLimit
 local Bullets = ACF.Bullet
+local DragDiv = ACF.DragDiv
 local FlightTr = {}
 	FlightTr.mask  = MASK_SHOT
 
@@ -35,9 +36,15 @@ function ACF_CreateBullet( Data )
 		BulletData["Owner"]			= Data.Owner
 		BulletData["Crate"]			= Data.Crate
 		BulletData["LastThink"]		= SysTime()
-		BulletData["InitTime"]		= Data.FuseLength and SysTime() or nil
+		BulletData["DetTime"]		= Data.FuzeTime and CurTime() + Data.FuzeTime or nil
 		BulletData["Filter"] 		= Data.Gun and { Data.Gun } or {}
 		BulletData["Type"]			= Data.Type
+
+		BulletData["CasingMass"]	= Data.CasingMass
+		BulletData["SlugDragCoef"] 	= Data.SlugDragCoef
+		BulletData["SlugMass"]		= Data.SlugMass
+		BulletData["SlugPenArea"]	= Data.SlugPenArea
+		BulletData["SlugRicochet"]	= Data.SlugRicochet
 		
 	Bullets[Index] = BulletData		--Place the bullet at the current index pos
 	ACF_BulletClient( Index, Bullets[Index], "Init", 0 )
@@ -98,7 +105,7 @@ function ACF_CalcBulletFlight(Index, Bullet, Override)
 	local Time = SysTime()
 	local DeltaTime = Time - Bullet.LastThink
 	
-	local Drag = Bullet.Velocity:GetNormalized() * Bullet.DragCoef * Bullet.Velocity:LengthSqr() / ACF.DragDiv
+	local Drag = Bullet.Velocity:GetNormalized() * Bullet.DragCoef * Bullet.Velocity:LengthSqr() / DragDiv
 	Bullet.NextPos = Bullet.Pos + Bullet.Velocity * DeltaTime		--Calculates the next shell position
 	Bullet.Velocity = Bullet.Velocity + (Bullet.Accel - Drag) * DeltaTime				--Calculates the next shell vector
 	Bullet.LastThink = Time
@@ -112,13 +119,13 @@ end
 function ACF_DoBulletsFlight(Index, Bullet)
 	--if hook_Run("ACF_BulletsFlight", Index, Bullet ) == false then return end
 	
-	if Bullet.FuseLength and CurTime() - Bullet.InitTime > Bullet.FuseLength then
+	if Bullet.DetTime and CurTime() >= Bullet.DetTime then
 		if not util_IsInWorld(Bullet.Pos) then
 			ACF_RemoveBullet( Index )
 		else
 			Bullet.Pos = LerpVector(math_Random(), Bullet.Pos, Bullet.NextPos)
 
-			if Bullet.OnEndFlight then Bullet.OnEndFlight(Index, Bullet, FlightRes) end
+			--if Bullet.OnEndFlight then Bullet.OnEndFlight(Index, Bullet, FlightRes) end
 			
 			ACF_BulletClient( Index, Bullet, "Update" , 1 , Bullet.Pos  )
 			ACF_BulletEndFlight = ACF.RoundTypes[Bullet.Type]["endflight"]

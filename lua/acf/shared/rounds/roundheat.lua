@@ -68,7 +68,7 @@ function Round.convert( Crate, PlayerData )
 	GUIData.FillerVol = math.Clamp(PlayerData.Data5*1,GUIData.MinFillerVol,GUIData.MaxFillerVol)
 	
 	Data.FillerMass = GUIData.FillerVol * ACF.HEDensity/1450
-	Data.BoomFillerMass = Data.FillerMass / 3 --manually update function "pierceeffect" with the divisor
+	Data.FillerMass = Data.FillerMass / 3 --manually update function "pierceeffect" with the divisor
 	Data.ProjMass = math.max(GUIData.ProjVolume-GUIData.FillerVol- AirVol-ConeVol,0)*7.9/1000 + Data.FillerMass + ConeVol*7.9/1000
 	Data.MuzzleVel = ACF_MuzzleVelocity( Data.PropMass, Data.ProjMass, Data.Caliber )
 	local Energy = ACF_Kinetic( Data.MuzzleVel*39.37 , Data.ProjMass, Data.LimitVel )
@@ -117,10 +117,10 @@ function Round.getDisplayData(Data)
 	local SlugEnergy = ACF_Kinetic( Data.MuzzleVel*39.37 + Data.SlugMV*39.37 , Data.SlugMass, 999999 )
 	GUIData.MaxPen = (SlugEnergy.Penetration/Data.SlugPenArea)*ACF.KEtoRHA
 	--GUIData.BlastRadius = (Data.FillerMass/2)^0.33*5*10
-	GUIData.BlastRadius = (Data.BoomFillerMass)^0.33*8--*39.37
-	GUIData.Fragments = math.max(math.floor((Data.BoomFillerMass/Data.CasingMass)*ACF.HEFrag),2)
+	GUIData.BlastRadius = (Data.FillerMass)^0.33*8--*39.37
+	GUIData.Fragments = math.max(math.floor((Data.FillerMass/Data.CasingMass)*ACF.HEFrag),2)
 	GUIData.FragMass = Data.CasingMass/GUIData.Fragments
-	GUIData.FragVel = (Data.BoomFillerMass*ACF.HEPower*1000/Data.CasingMass/GUIData.Fragments)^0.5
+	GUIData.FragVel = (Data.FillerMass*ACF.HEPower*1000/Data.CasingMass/GUIData.Fragments)^0.5
 	
 	return GUIData
 end
@@ -155,7 +155,7 @@ function Round.cratetxt( BulletData, builtFullData )
 		"Muzzle Velocity: ", math.Round(BulletData.MuzzleVel, 1), " m/s\n",
 		"Max Penetration: ", math.floor(DData.MaxPen), " mm\n",
 		"Blast Radius: ", math.Round(DData.BlastRadius, 1), " m\n",
-		"Blast Energy: ", math.floor((BulletData.BoomFillerMass) * ACF.HEPower), " KJ"
+		"Blast Energy: ", math.floor((BulletData.FillerMass) * ACF.HEPower), " KJ"
 	}
 	
 	return table.concat(str)
@@ -164,7 +164,7 @@ end
 
 function Round.detonate( Index, Bullet, HitPos, HitNormal )
 	
-	ACF_HE( HitPos - Bullet.Velocity:GetNormalized()*3 , HitNormal , Bullet.BoomFillerMass , Bullet.CasingMass , Bullet.Owner )
+	ACF_HE( HitPos - Bullet.Velocity:GetNormalized()*3 , HitNormal , Bullet.FillerMass , Bullet.CasingMass , Bullet.Owner )
 
 	Bullet.Detonated = true
 	Bullet.InitTime = SysTime()

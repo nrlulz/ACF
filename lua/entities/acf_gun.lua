@@ -133,8 +133,8 @@ function ENT:Initialize()
 	
 	self.Inaccuracy 	= 1
 	
-	self.Inputs = Wire_CreateInputs( self, { "Fire", "Unload", "Reload" } )
-	self.Outputs = WireLib.CreateSpecialOutputs( self, { "Ready", "AmmoCount", "Entity", "Shots Left", "Fire Rate", "Muzzle Weight", "Muzzle Velocity" }, { "NORMAL", "NORMAL", "ENTITY", "NORMAL", "NORMAL", "NORMAL", "NORMAL" } )
+	self.Inputs = Wire_CreateInputs( self, { "Fire", "Fuze Time", "Unload", "Reload" } )
+	self.Outputs = WireLib.CreateSpecialOutputs( self, { "Ready", "AmmoCount", "Entity", "Shots Left", "Fire Rate", "Projectile Weight", "Muzzle Velocity" }, { "NORMAL", "NORMAL", "ENTITY", "NORMAL", "NORMAL", "NORMAL", "NORMAL" } )
 	Wire_TriggerOutput(self, "Entity", self)
 
 end  
@@ -178,7 +178,7 @@ function MakeACF_Gun(Owner, Pos, Angle, Id)
 	if(Lookup.magsize) then
 		Gun.MagSize = math.max(Gun.MagSize, Lookup.magsize)
 	else
-		Gun.Inputs = Wire_AdjustInputs( Gun, { "Fire", "Unload" } )
+		Gun.Inputs = Wire_AdjustInputs( Gun, { "Fire", "Fuze Time", "Unload" } )
 	end
 	Gun.MagReload = 0
 	if(Lookup.magreload) then
@@ -349,7 +349,7 @@ function ENT:Link( Target )
 	self.ReloadTime = ( ( Target.BulletData.RoundVolume / 500 ) ^ 0.60 ) * self.RoFmod * self.PGRoFmod
 	self.RateOfFire = 60 / self.ReloadTime
 	Wire_TriggerOutput( self, "Fire Rate", self.RateOfFire )
-	Wire_TriggerOutput( self, "Muzzle Weight", math.floor( Target.BulletData.ProjMass * 1000 ) )
+	Wire_TriggerOutput( self, "Projectile Weight", math.floor( Target.BulletData.ProjMass * 1000 ) )
 	Wire_TriggerOutput( self, "Muzzle Velocity", math.floor( Target.BulletData.MuzzleVel ) )
 
 	return true, "Link successful!"
@@ -399,27 +399,29 @@ local WireTable = { "gmod_wire_adv_pod", "gmod_wire_pod", "gmod_wire_keyboard", 
 
 function ENT:GetUser( inp )
 	if not inp then return nil end
-	if inp:GetClass() == "gmod_wire_adv_pod" then
+
+	local Class = inp:GetClass()
+	if Class == "gmod_wire_adv_pod" then
 		if inp.Pod then
 			return inp.Pod:GetDriver()
 		end
-	elseif inp:GetClass() == "gmod_wire_pod" then
+	elseif Class == "gmod_wire_pod" then
 		if inp.Pod then
 			return inp.Pod:GetDriver()
 		end
-	elseif inp:GetClass() == "gmod_wire_keyboard" then
+	elseif Class == "gmod_wire_keyboard" then
 		if inp.ply then
 			return inp.ply 
 		end
-	elseif inp:GetClass() == "gmod_wire_joystick" then
+	elseif Class == "gmod_wire_joystick" then
 		if inp.Pod then 
 			return inp.Pod:GetDriver()
 		end
-	elseif inp:GetClass() == "gmod_wire_joystick_multi" then
+	elseif Class == "gmod_wire_joystick_multi" then
 		if inp.Pod then 
 			return inp.Pod:GetDriver()
 		end
-	elseif inp:GetClass() == "gmod_wire_expression2" then
+	elseif Class == "gmod_wire_expression2" then
 		if inp.Inputs.Fire then
 			return self:GetUser(inp.Inputs.Fire.Src) 
 		elseif inp.Inputs.Shoot then
@@ -434,27 +436,33 @@ function ENT:GetUser( inp )
 			end
 		end
 	end
+
 	return inp.Owner or inp:GetOwner()
-	
 end
 
 function ENT:TriggerInput( iname, value )
-	
-	if (iname == "Unload" and value > 0) then
-		self:UnloadAmmo()
-	elseif ( iname == "Fire" and value > 0 and ACF.GunfireEnabled ) then
-		if self.NextFire < CurTime() then
-			self.User = self:GetUser(self.Inputs.Fire.Src) or self.Owner
-			if not IsValid(self.User) then self.User = self.Owner end
-			self:FireShell()
-			self:Think()
+	if iname == "Fire" then
+		if value ~= 0 and ACF.GunfireEnabled then
+			if self.NextFire < CurTime() then
+				self.User = self:GetUser(self.Inputs.Fire.Src) or self.Owner
+
+				self:FireShell()
+				self:Think()
+			end
+
+			self.Firing = true
+		else
+			self.Firing = false
 		end
-		self.Firing = true
-	elseif ( iname == "Fire" and value <= 0 ) then
-		self.Firing = false
-	elseif ( iname == "Reload" and value ~= 0 ) then
+	elseif iname == "Fuze Time" then
+		self.FuzeTime = value > 0.1 and value or nil
+	elseif iname == "Unload" then
+		if value ~= 0 then
+			self:UnloadAmmo()
+		end
+	elseif iname == "Reload" and value ~= 0 then
 		self.Reloading = true
-	end		
+	end	
 end
 
 local function RetDist( enta, entb )
@@ -574,7 +582,7 @@ function ENT:BarrelNotStuffed()
 
 	local TraceRes = util.TraceLine(tr)
 	while TraceRes.Hit do
-		if Trace.HitWorld then return false end
+		if TraceRes.HitWorld then return false end
 		
 		local Ent = TraceRes.Entity
 		if IsValid(Ent) and not Ent:IsPlayer() and Ent:CPPIGetOwner() ~= Own then
@@ -681,6 +689,7 @@ function ENT:LoadAmmo( AddTime, Reload )
 		AmmoEnt.Ammo = AmmoEnt.Ammo - 1
 		self.BulletData = AmmoEnt.BulletData
 		self.BulletData.Crate = AmmoEnt:EntIndex()
+		self.BulletData.FuzeTime = self.FuzeTime and math.Max(self.FuzeTime + math.Rand(-0.1, 0.1), 0.1) or nil
 		
 		local cb = 1
 		if(self.CrateBonus and (self.MagReload == 0)) then
@@ -693,7 +702,7 @@ function ENT:LoadAmmo( AddTime, Reload )
 		
 		self.RateOfFire = (60/self.ReloadTime)
 		Wire_TriggerOutput(self, "Fire Rate", self.RateOfFire)
-		Wire_TriggerOutput(self, "Muzzle Weight", math.floor(self.BulletData.ProjMass*1000) )
+		Wire_TriggerOutput(self, "Projectile Weight", math.floor(self.BulletData.ProjMass*1000) )
 		Wire_TriggerOutput(self, "Muzzle Velocity", math.floor(self.BulletData.MuzzleVel) )
 		
 		self.NextFire = curTime + self.ReloadTime
@@ -702,6 +711,7 @@ function ENT:LoadAmmo( AddTime, Reload )
 		if AddTime then
 			reloadTime = reloadTime + AddTime * self.CrateBonus
 		end
+
 		if Reload then
 			self:ReloadEffect()
 		end

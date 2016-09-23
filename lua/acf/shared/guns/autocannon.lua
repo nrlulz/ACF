@@ -16,6 +16,7 @@ ACF_defineGun("20mmAC", { --id
 	desc = "The 20mm AC is the smallest of the family; having a good rate of fire but a tiny shell.",
 	model = "models/autocannon/autocannon_20mm.mdl",
 	caliber = 2.0,
+	canparent = true,
 	gunclass = "AC",
 	weight = 225,
 	year = 1930,

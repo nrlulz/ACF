@@ -17,6 +17,7 @@ ACF_defineGun("40mmGL", { --id
 	model = "models/launcher/40mmgl.mdl",
 	gunclass = "GL",
 	caliber = 4.0,
+	canparent = true,
 	weight = 55,
 	magsize = 6,
 	magreload = 2.5,

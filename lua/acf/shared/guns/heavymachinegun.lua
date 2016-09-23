@@ -22,6 +22,7 @@ ACF_defineGun("20mmHMG", { --id
 	model = "models/machinegun/machinegun_20mm_compact.mdl",
 	gunclass = "HMG",
 	caliber = 2.0,
+	canparent = true,
 	weight = 60,
 	year = 1935,
 	rofmod = 2.85,

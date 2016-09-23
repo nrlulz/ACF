@@ -1,7 +1,7 @@
 
 AddCSLuaFile()
 
-ACF.AmmoBlacklist.SM = { "MO", "MG", "HW", "C", "GL", "HMG", "AL", "AC", "RAC", "SA", "SC" }
+ACF.AmmoBlacklist.SM = { "MG", "GL", "HMG", "AL", "AC", "RAC", "SA", "SC" }
 
 local Round = {}
 
@@ -61,6 +61,7 @@ function Round.convert( Crate, PlayerData )
 	Data.LimitVel = 100										--Most efficient penetration speed in m/s
 	Data.KETransfert = 0.1									--Kinetic energy transfert to the target for movement purposes
 	Data.Ricochet = 60										--Base ricochet angle
+	Data.RoundVolume = Data.RoundVolume * 2					--Less per crate and makes us load slower
 
 	if SERVER then --Only the crates need this part
 		ServerData.Id = PlayerData.Id
