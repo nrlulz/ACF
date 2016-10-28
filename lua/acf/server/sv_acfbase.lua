@@ -149,6 +149,14 @@ local Invalid = {
 }
 
 function ACF_Check ( Entity )
+	if not timer.Exists("ACF_GlobalPurge") then
+		timer.Create("ACF_GlobalPurge", 5, 1, function()
+			for K in pairs(GlobalFilter) do
+				if not IsValid(K) then GlobalFilter[K] = nil end
+			end
+		end)
+	end
+	
 	if GlobalFilter[Entity] then return false end
 	--if Entity.ACF then return Entity.ACF.Type end
 
