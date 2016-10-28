@@ -14,7 +14,7 @@ Component.Author = "FreeFry"
 Component.Description = "Adds functions for controlling ACF sents."
 
 Component.restrictInfo = function (ply, ent) -- Hack, this allows this function to be used from inline and prepared type functions.
-	if GetConVar("sbox_acf_restrictinfo"):GetInt() != 0 then
+	if GetConVar("sbox_acf_restrictinfo"):GetInt() ~= 0 then
 		if EXPADV.IsOwner(ent, ply) then return false else return true end
 	end
 	return false
@@ -408,7 +408,7 @@ Component:AddFunctionHelper( "acfAmmoType", "e:", "Returns the type of ammo in a
 Component:AddInlineFunction( "acfCaliber", "e:", "n", "(@value 1:IsValid() and (@value 1:GetClass() == 'acf_ammo' or @value 1:GetClass() == 'acf_gun') and !EXPADV.Components.acf.restrictInfo(Context.player, @value 1) and (@value 1.Caliber or 0) * 10 or 0)" )
 Component:AddFunctionHelper( "acfCaliber", "e:", "Returns the caliber of the ammo in an ACF ammo crate or weapon." )
 
-Component:AddInlineFunction( "acfMuzzleVel", "e:", "n", "(@value 1:IsValid() and (@value 1:GetClass() == 'acf_ammo' or @value 1:GetClass() == 'acf_gun') and !EXPADV.Components.acf.restrictInfo(Context.player, @value 1) and $math.Round((@value 1.BulletData['MuzzleVel'] or 0) * $ACF.VelScale, 3) or 0)" )
+Component:AddInlineFunction( "acfMuzzleVel", "e:", "n", "(@value 1:IsValid() and (@value 1:GetClass() == 'acf_ammo' or @value 1:GetClass() == 'acf_gun') and !EXPADV.Components.acf.restrictInfo(Context.player, @value 1) and $math.Round((@value 1.BulletData['MuzzleVel'] or 0), 3) or 0)" )
 Component:AddFunctionHelper( "acfMuzzleVel", "e:", "Returns the muzzle velocity of the ammo in an ACF ammo crate or weapon." )
 
 Component:AddInlineFunction( "acfProjectileMass", "e:", "n", "(@value 1:IsValid() and (@value 1:GetClass() == 'acf_ammo' or @value 1:GetClass() == 'acf_gun') and !EXPADV.Components.acf.restrictInfo(Context.player, @value 1) and $math.Round(@value 1.BulletData['ProjMass'] or 0, 3) or 0)" )
@@ -428,9 +428,9 @@ Component:AddPreparedFunction( "acfPenetration", "e:", "n",
 if @value 1:IsValid() and (@value 1:GetClass() == 'acf_ammo' or @value 1:GetClass() == 'acf_gun') and !EXPADV.Components.acf.restrictInfo(Context.player, @value 1) then
 	@define type = @value 1.BulletData["Type"] or ""
 	if @type == "AP" or @type == "APHE" then
-		@ret = $math.Round(( $ACF_Kinetic( @value 1.BulletData["MuzzleVel"]*39.37, @value 1.BulletData["ProjMass"] - (@value 1.BulletData["FillerMass"] or 0), @value 1.BulletData["LimitVel"] ).Penetration / @value 1.BulletData['PenAera'] ) * $ACF.KEtoRHA, 3 )
+		@ret = $math.Round(( $ACF_Kinetic( @value 1.BulletData["MuzzleVel"]*39.37, @value 1.BulletData["ProjMass"] - (@value 1.BulletData["FillerMass"] or 0), @value 1.BulletData["LimitVel"] ).Penetration / @value 1.BulletData['PenArea'] ) * $ACF.KEtoRHA, 3 )
 	elseif @type == "HEAT" then
-		@ret = $math.Round(( $ACF_Kinetic( @value 1.BulletData["SlugMV"]*39.37, @value 1.BulletData["SlugMass"], 99999999 ).Penetration / @value 1.BulletData["SlugPenAera"] ) * $ACF.KEtoRHA, 3 )
+		@ret = $math.Round(( $ACF_Kinetic( @value 1.BulletData["SlugMV"]*39.37, @value 1.BulletData["SlugMass"], 99999999 ).Penetration / @value 1.BulletData["SlugPenArea"] ) * $ACF.KEtoRHA, 3 )
 	elseif @type == "FL" then
 		@ret = $math.Round(( $ACF_Kinetic( @value 1.BulletData["MuzzleVel"]*39.37, @value 1.BulletData["FlechetteMass"], @value 1.BulletData["LimitVel"] ).Penetration / @value 1.BulletData["FlechettePenArea"] ) * $ACF.KEtoRHA, 3 )
 	end

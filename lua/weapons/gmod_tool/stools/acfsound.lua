@@ -200,7 +200,7 @@ function TOOL.BuildCPanel(panel)
 	SoundPrePlay:SetTall(20)
 	SoundPrePlay:SetVisible(true)
 	SoundPrePlay.DoClick = function()
-		RunConsoleCommand("play",SoundNameText:GetValue())
+		RunConsoleCommand("playgamesound",SoundNameText:GetValue())
 	end
 
 	local SoundPreStop = vgui.Create("DButton", SoundPre)
@@ -210,7 +210,7 @@ function TOOL.BuildCPanel(panel)
 	SoundPreStop:SetTall(20)
 	SoundPreStop:SetVisible(true)
 	SoundPreStop.DoClick = function()
-		RunConsoleCommand("play", "common/NULL.WAV") //Playing a silent sound will mute the preview but not the sound emitters.
+		RunConsoleCommand("playgamesound", "common/NULL.WAV") //Playing a silent sound will mute the preview but not the sound emitters.
 	end
 	panel:AddItem(SoundPre)
 	SoundPre:InvalidateLayout(true)

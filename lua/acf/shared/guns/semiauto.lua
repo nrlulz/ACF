@@ -17,6 +17,7 @@ ACF_defineGun("25mmSA", { --id
 	model = "models/autocannon/semiautocannon_25mm.mdl",
 	gunclass = "SA",
 	caliber = 2.5,
+	canparent = true,
 	weight = 200,
 	year = 1935,
 	rofmod = 1,

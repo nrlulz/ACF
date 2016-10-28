@@ -1,10 +1,9 @@
    
 function EFFECT:Init( data )
-
 	self.Index = data:GetAttachment()
 	self:SetModel("models/munitions/round_100mm_shot.mdl") 
 	
-	if not ( self.Index ) then 
+	if not self.Index then 
 		Msg("ACF_BulletEffect: Error! Insufficient data to spawn.\n")
 		self:Remove() 
 		return 
@@ -108,14 +107,15 @@ function EFFECT:Think()
 end 
 
 function EFFECT:ApplyMovement( Bullet )
-
 	local setPos = Bullet.SimPos
-	if((math.abs(setPos.x) > 16000) or (math.abs(setPos.y) > 16000) or (setPos.z < -16000)) then
+	if math.abs(setPos.x) > 16380 or math.abs(setPos.y) > 16380 or setPos.z < -16380 then
 		self:Remove()
+
 		return
 	end
-	if( setPos.z < 16000 ) then
-		self:SetPos( Bullet.SimPos )--Moving the effect to the calculated position
+
+	if setPos.z < 16380  then
+		self:SetPos( setPos )--Moving the effect to the calculated position
 		self:SetAngles( Bullet.SimFlight:Angle() )
 	end
 	
@@ -127,7 +127,7 @@ function EFFECT:ApplyMovement( Bullet )
 		--for i=1, MaxSprites do
 			--local Light = Bullet.Tracer:Add( "sprites/light_glow02_add.vmt", Bullet.SimPos - (DeltaPos*i/MaxSprites) )
 			--local Light = Bullet.Tracer:Add( "sprites/acf_tracer.vmt", Bullet.SimPos - (DeltaPos*i/MaxSprites) )
-			local Light = Bullet.Tracer:Add( "sprites/acf_tracer.vmt", Bullet.SimPos - DeltaPos )
+			local Light = Bullet.Tracer:Add( "sprites/acf_tracer.vmt", setPos - DeltaPos )
 			if (Light) then		
 				Light:SetAngles( Bullet.SimFlight:Angle() )
 				Light:SetVelocity( Bullet.SimFlight:GetNormalized() )
@@ -135,14 +135,14 @@ function EFFECT:ApplyMovement( Bullet )
 				Light:SetDieTime( math.Clamp(CurTime()-self.CreateTime,0.075,0.15) ) -- 0.075, 0.1
 				Light:SetStartAlpha( 255 )
 				Light:SetEndAlpha( 155 )
-				Light:SetStartSize( 15*Bullet.Caliber ) -- 5
+				Light:SetStartSize( 7.5*Bullet.Caliber ) -- 5
 				Light:SetEndSize( 1 )
 				Light:SetStartLength( Length )
 				Light:SetEndLength( 1 )
 			end
 		for i=1, MaxSprites do
-			local Smoke = Bullet.Tracer:Add( "particle/smokesprites_000"..math.random(1,9), Bullet.SimPos - (DeltaPos*i/MaxSprites) )
-			if (Smoke) then		
+			local Smoke = Bullet.Tracer:Add( "particle/smokesprites_000"..math.random(1,9), setPos - (DeltaPos*i/MaxSprites) )
+			if (Smoke) then
 				Smoke:SetAngles( Bullet.SimFlight:Angle() )
 				Smoke:SetVelocity( Bullet.SimFlight*0.05 )
 				Smoke:SetColor( 200 , 200 , 200 )
@@ -159,42 +159,12 @@ function EFFECT:ApplyMovement( Bullet )
 			end
 		end
 	end
-
 end
 
--- function EFFECT:HitEffect( HitPos, Energy, EffectType )	--EffectType key : 1 = Round stopped, 2 = Round penetration
-
-	-- if (EffectType > 0) then
-		-- local BulletEffect = {}
-			-- BulletEffect.Num = 1
-			-- BulletEffect.Src = HitPos - self.SimFlight:GetNormalized()*20
-			-- BulletEffect.Dir = self.SimFlight
-			-- BulletEffect.Spread = Vector(0,0,0)
-			-- BulletEffect.Tracer = 0
-			-- BulletEffect.Force = 0
-			-- BulletEffect.Damage = 0	 
-		-- self.Entity:FireBullets(BulletEffect) 
-	-- end
-	-- if (EffectType == 2) then
-		-- local Spall = EffectData()
-			-- Spall:SetOrigin( HitPos )
-			-- Spall:SetNormal( (self.SimFlight):GetNormalized() )
-			-- Spall:SetScale( math.max(Energy/5000,1) )
-		-- util.Effect( "AP_Hit", Spall )
-	-- elseif (EffectType == 3) then
-		-- local Sparks = EffectData()
-			-- Sparks:SetOrigin( HitPos )
-			-- Sparks:SetNormal( (self.SimFlight):GetNormalized() )
-		-- util.Effect( "ManhackSparks", Sparks )
-	-- end	
-
--- end
-
 function EFFECT:Render()  
-
 	local Bullet = ACF.BulletEffect[self.Index]
 	
-	if (Bullet) then
+	if Bullet then
 		self.Entity:SetModelScale( Bullet.Caliber/10 , 0 )
 		self.Entity:DrawModel()       // Draw the model. 
 	end

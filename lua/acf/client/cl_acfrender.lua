@@ -27,7 +27,7 @@ net.Receive("ACF_RenderDamage", function()
 	for k,v in ipairs( Table ) do
 		local ent, Health, MaxHealth = ents.GetByIndex( v.ID ), v.Health, v.MaxHealth
 		if not IsValid(ent) then return end
-		if Health != MaxHealth then
+		if Health ~= MaxHealth then
 			ent.ACF_Health = Health
 			ent.ACF_MaxHealth = MaxHealth
 			ent.ACF_HelathPercent = (Health/MaxHealth)

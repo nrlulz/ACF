@@ -97,7 +97,7 @@ function SWEP:PrimaryAttack()
 		if CLIENT then return end
 	local ent = tr.Entity
 	if ent:IsValid() then
-		if ent:IsPlayer() || ent:IsNPC() then
+		if ent:IsPlayer() or ent:IsNPC() then
 			local PlayerHealth = ent:Health() --get the health
 			local PlayerMaxHealth = ent:GetMaxHealth()--and max health too
 			local PlayerArmour = ent:Armor()

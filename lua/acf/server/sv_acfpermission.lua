@@ -455,7 +455,7 @@ end
 
 
 
-function this.CanDamage(Type, Entity, Energy, FrAera, Angle, Inflictor, Bone, Gun)
+function this.CanDamage(Type, Entity, Energy, FrArea, Angle, Inflictor, Bone, Gun)
 	local owner = CPPI and Entity:CPPIGetOwner() or Entity:GetOwner()
 	
 	if not (IsValid(owner) and owner:IsPlayer()) then
@@ -539,7 +539,7 @@ function this.PermissionsRaw(ownerid, attackerid, value)
 		local old = ownerprefs[attackerid] and true or nil
 		local new = value and true or nil
 		ownerprefs[attackerid] = new
-		return old != new
+		return old ~= new
 	end
 	
 	return false

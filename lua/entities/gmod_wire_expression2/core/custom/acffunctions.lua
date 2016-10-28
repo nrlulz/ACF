@@ -37,7 +37,7 @@ local function isFuel(ent)
 end
 
 local function restrictInfo(ply, ent)
-	if GetConVar("sbox_acf_restrictinfo"):GetInt() != 0 then
+	if GetConVar("sbox_acf_restrictinfo"):GetInt() ~= 0 then
 		if isOwner(ply, ent) then return false else return true end
 	end
 	return false
@@ -708,7 +708,7 @@ end
 e2function number entity:acfMuzzleVel()
 	if not (isAmmo(this) or isGun(this)) then return 0 end
 	if restrictInfo(self, this) then return 0 end
-	return math.Round((this.BulletData["MuzzleVel"] or 0)*ACF.VelScale,3)
+	return math.Round((this.BulletData["MuzzleVel"] or 0),3)
 end
 
 -- Returns the mass of the projectile in a crate or gun
@@ -752,10 +752,10 @@ e2function number entity:acfPenetration()
 	local Energy
 	if Type == "AP" or Type == "APHE" then
 		Energy = ACF_Kinetic(this.BulletData["MuzzleVel"]*39.37, this.BulletData["ProjMass"] - (this.BulletData["FillerMass"] or 0), this.BulletData["LimitVel"] )
-		return math.Round((Energy.Penetration/this.BulletData["PenAera"])*ACF.KEtoRHA,3)
+		return math.Round((Energy.Penetration/this.BulletData["PenArea"])*ACF.KEtoRHA,3)
 	elseif Type == "HEAT" then
 		Energy = ACF_Kinetic(this.BulletData["SlugMV"]*39.37, this.BulletData["SlugMass"], 9999999 )
-		return math.Round((Energy.Penetration/this.BulletData["SlugPenAera"])*ACF.KEtoRHA,3)
+		return math.Round((Energy.Penetration/this.BulletData["SlugPenArea"])*ACF.KEtoRHA,3)
 	elseif Type == "FL" then
 		Energy = ACF_Kinetic(this.BulletData["MuzzleVel"]*39.37 , this.BulletData["FlechetteMass"], this.BulletData["LimitVel"] )
 		return math.Round((Energy.Penetration/this.BulletData["FlechettePenArea"])*ACF.KEtoRHA, 3)

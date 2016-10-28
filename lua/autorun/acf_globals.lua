@@ -11,12 +11,12 @@ ACF.Threshold = 264.7	--Health Divisor (don't forget to update cvar function dow
 ACF.PartialPenPenalty = 5 --Exponent for the damage penalty for partial penetration
 ACF.PenAreaMod = 0.85
 ACF.KinFudgeFactor = 2.1	--True kinetic would be 2, over that it's speed biaised, below it's mass biaised
-ACF.KEtoRHA = 0.25		--Empirical conversion from (kinetic energy in KJ)/(Aera in Cm2) to RHA penetration
-ACF.GroundtoRHA = 0.05		--How much mm of steel is a mm of ground worth (Real soil is about 0.15
+ACF.KEtoRHA = 0.25		--Empirical conversion from (kinetic energy in KJ)/(Area in Cm2) to RHA penetration
+ACF.GroundtoRHA = 0.15		--How much mm of steel is a mm of ground worth (Real soil is about 0.15
 ACF.KEtoSpall = 1
 ACF.AmmoMod = 0.6		-- Ammo modifier. 1 is 1x the amount of ammo
 ACF.ArmorMod = 1
-ACF.Spalling = 0
+ACF.Spalling = false
 ACF.GunfireEnabled = true
 ACF.MeshCalcEnabled = false
 
@@ -31,8 +31,8 @@ ACF.HEATMulAmmo = 16.5 		--HEAT slug damage multiplier; 13.2x roughly equal to A
 ACF.HEATMulFuel = 8.25		--needs less multiplier, much less health than ammo
 ACF.HEATMulEngine = 8.25	--likewise
 
+ACF.Gravity = Vector(0, 0, GetConVar("sv_gravity"):GetInt()*-1)
 ACF.DragDiv = 80		--Drag fudge factor
-ACF.VelScale = 1		--Scale factor for the shell velocities in the game world
 -- local PhysEnv = physenv.GetPerformanceSettings()
 ACF.PhysMaxVel = 4000
 ACF.SmokeWind = 5 + math.random()*35 --affects the ability of smoke to be used for screening effect
@@ -160,12 +160,35 @@ elseif CLIENT then
 
 	-- Returns whether or not a sound actually exists, fixes client timeout issues
 	function IsValidSound( path )
-		if IsValidCache[path] == nil then 
-			IsValidCache[path] = file.Exists( string.format( "sound/%s", tostring( path ) ), "GAME" ) and true or false
+		if IsValidCache[path] == nil then
+			if file.Exists( string.format( "sound/%s", tostring( path ) ), "GAME" ) then
+				IsValidCache[path] = true
+				
+				return true
+			end
+
+			local SoundTab = sound.GetTable()
+			for I = #SoundTab, 1 , -1 do
+				if SoundTab[I] == path then
+					local sounds = sound.GetProperties(path).sound
+					for K = 1 , #sounds do
+						if not file.Exists( string.format( "sound/%s", string.Right(sounds[K], #sounds[K]-1)) , "GAME" ) then
+							IsValidCache[path] = false
+
+							return false
+						end
+					end
+
+					IsValidCache[path] = true
+					return true
+				end
+			end
+
+			IsValidCache[path] = false
 		end
+
 		return IsValidCache[path]
 	end
-	
 end
 
 include("acf/shared/rounds/roundap.lua")
@@ -264,13 +287,7 @@ function ACF_CalcMassRatio( obj, pwr )
 	local fuel = 0
 	
 	-- find the physical parent highest up the chain
-	local Parent = obj
-	local depth = 0
-	
-	while Parent:GetParent():IsValid() and depth<6 do
-		Parent = Parent:GetParent()
-		depth = depth + 1
-	end
+	local Parent = ACF_GetAncestor(obj)
 	
 	-- get the shit that is physically attached to the vehicle
 	local PhysEnts = ACF_GetAllPhysicalConstraints( Parent )
@@ -330,29 +347,30 @@ CreateConVar("acf_spalling", 0)
 CreateConVar("acf_gunfire", 1)
 
 function ACF_CVarChangeCallback(CVar, Prev, New)
-	if( CVar == "acf_healthmod" ) then
+	local New = tonumber(New)
+
+	if CVar == "acf_healthmod" then
 		ACF.Threshold = 264.7 / math.max(New, 0.01)
-		print ("Health Mod changed to a factor of " .. New)
-	elseif( CVar == "acf_armormod" ) then
+		
+		print("Health Mod changed to a factor of " .. New)
+	elseif CVar == "acf_armormod" then
 		ACF.ArmorMod = 1 * math.max(New, 0)
-		print ("Armor Mod changed to a factor of " .. New)
-	elseif( CVar == "acf_ammomod" ) then
+
+		print("Armor Mod changed to a factor of " .. New)
+	elseif CVar == "acf_ammomod" then
 		ACF.AmmoMod = 1 * math.max(New, 0.01)
-		print ("Ammo Mod changed to a factor of " .. New)
-	elseif( CVar == "acf_spalling" ) then
-		ACF.Spalling = math.floor(math.Clamp(New, 0, 1))
-		local text = "off"
-		if(ACF.Spalling > 0) then
-			text = "on"
-		end
-		print ("ACF Spalling is now " .. text)
-	elseif( CVar == "acf_gunfire" ) then
-		ACF.GunfireEnabled = tobool( New )
-		local text = "disabled"
-		if ACF.GunfireEnabled then 
-			text = "enabled" 
-		end
-		print ("ACF Gunfire has been " .. text)
+
+		print("Ammo Mod changed to a factor of " .. New)
+	elseif CVar == "acf_spalling" then
+		ACF.Spalling = New ~= 0
+
+		print("ACF Spalling is now " .. (New ~= 0 and "enabled" or "disabled"))
+	elseif CVar == "acf_gunfire"  then
+		ACF.GunfireEnabled = New ~= 0
+
+		print("ACF Gunfire has been " .. (New ~= 0 and "enabled" or "disabled"))
+	elseif CVar == "sv_gravity" then
+		ACF.Gravity = Vector(0, 0, New * -1) or Vector(0, 0, -600)
 	end
 end
 
@@ -411,6 +429,7 @@ cvars.AddChangeCallback("acf_armormod", ACF_CVarChangeCallback)
 cvars.AddChangeCallback("acf_ammomod", ACF_CVarChangeCallback)
 cvars.AddChangeCallback("acf_spalling", ACF_CVarChangeCallback)
 cvars.AddChangeCallback("acf_gunfire", ACF_CVarChangeCallback)
+cvars.AddChangeCallback("sv_gravity", ACF_CVarChangeCallback)
 
 -- smoke-wind cvar handling
 if SERVER then
@@ -509,7 +528,7 @@ if CLIENT then
 					if ( !IsValid( victim ) ) then return end
 					local inflictor    = msg:ReadString()
 					local attacker     = msg:ReadString()
-					if inflictor != "acf_gun" and inflictor != "acf_ammo" then
+					if inflictor ~= "acf_gun" and inflictor ~= "acf_ammo" then
 						ACF_PlayerKilled(msg)
 					end
 				end
@@ -531,7 +550,7 @@ if CLIENT then
 
 					if ( !IsValid( attacker ) ) then return end
 					if ( !IsValid( victim ) ) then return end
-					if inflictor != "acf_gun" and inflictor != "acf_ammo" then
+					if inflictor ~= "acf_gun" and inflictor ~= "acf_ammo" then
 						ACF_PlayerKilledByPlayer(msg)
 					end
 				end

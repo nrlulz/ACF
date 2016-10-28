@@ -36,7 +36,7 @@ function Round.convert( Crate, PlayerData )
 	Data.MuzzleVel = ACF_MuzzleVelocity( Data.PropMass, Data.ProjMass, Data.Caliber )
 	local Energy = ACF_Kinetic( Data.MuzzleVel*39.37 , Data.ProjMass, Data.LimitVel )
 		
-	local MaxVol = ACF_RoundShellCapacity( Energy.Momentum, Data.FrAera, Data.Caliber, Data.ProjLength )
+	local MaxVol = ACF_RoundShellCapacity( Energy.Momentum, Data.FrArea, Data.Caliber, Data.ProjLength )
 	GUIData.MinFillerVol = 0
 	GUIData.MaxFillerVol = math.min(GUIData.ProjVolume,MaxVol)
 	GUIData.FillerVol = math.min(PlayerData.Data5,GUIData.MaxFillerVol)
@@ -47,13 +47,11 @@ function Round.convert( Crate, PlayerData )
 	
 	--Random bullshit left
 	Data.ShovePower = 0.1
-	Data.PenAera = Data.FrAera^ACF.PenAreaMod
-	Data.DragCoef = ((Data.FrAera/10000)/Data.ProjMass)
+	Data.PenArea = Data.FrArea^ACF.PenAreaMod
+	Data.DragCoef = ((Data.FrArea/10000)/Data.ProjMass)
 	Data.LimitVel = 100										--Most efficient penetration speed in m/s
 	Data.KETransfert = 0.1									--Kinetic energy transfert to the target for movement purposes
 	Data.Ricochet = 60										--Base ricochet angle
-	
-	Data.BoomPower = Data.PropMass + Data.FillerMass
 
 	if SERVER then --Only the crates need this part
 		ServerData.Id = PlayerData.Id
@@ -112,7 +110,7 @@ end
 function Round.propimpact( Index, Bullet, Target, HitNormal, HitPos, Bone )
 	
 	if ACF_Check( Target ) then
-		local Speed = Bullet.Flight:Length() / ACF.VelScale
+		local Speed = Bullet.Velocity:Length()
 		local Energy = ACF_Kinetic( Speed , Bullet.ProjMass - Bullet.FillerMass, Bullet.LimitVel )
 		local HitRes = ACF_RoundImpact( Bullet, Speed, Energy, Target, HitPos, HitNormal , Bone )
 		if HitRes.Ricochet then
@@ -131,7 +129,7 @@ end
 
 function Round.endflight( Index, Bullet, HitPos, HitNormal )
 	
-	ACF_HE( HitPos - Bullet.Flight:GetNormalized()*3 , HitNormal , Bullet.FillerMass , Bullet.ProjMass - Bullet.FillerMass , Bullet.Owner )
+	ACF_HE( HitPos - Bullet.Velocity:GetNormalized()*3 , HitNormal , Bullet.FillerMass , Bullet.ProjMass - Bullet.FillerMass , Bullet.Owner )
 	ACF_RemoveBullet( Index )
 	
 end
@@ -241,7 +239,7 @@ function Round.guiupdate( Panel, Table )
 
 	acfmenupanel:CPanelText("Desc", ACF.RoundTypes[PlayerData.Type].desc)	--Description (Name, Desc)
 	acfmenupanel:CPanelText("LengthDisplay", "Round Length : "..(math.floor((Data.PropLength+Data.ProjLength+Data.Tracer)*100)/100).."/"..(Data.MaxTotalLength).." cm")	--Total round length (Name, Desc)
-	acfmenupanel:CPanelText("VelocityDisplay", "Muzzle Velocity : "..math.floor(Data.MuzzleVel*ACF.VelScale).." m/s")	--Proj muzzle velocity (Name, Desc)	
+	acfmenupanel:CPanelText("VelocityDisplay", "Muzzle Velocity : "..math.floor(Data.MuzzleVel).." m/s")	--Proj muzzle velocity (Name, Desc)	
 	acfmenupanel:CPanelText("BlastDisplay", "Blast Radius : "..(math.floor(Data.BlastRadius*100)/100).." m")	--Proj muzzle velocity (Name, Desc)
 	acfmenupanel:CPanelText("FragDisplay", "Fragments : "..(Data.Fragments).."\n Average Fragment Weight : "..(math.floor(Data.FragMass*10000)/10).." g \n Average Fragment Velocity : "..math.floor(Data.FragVel).." m/s")	--Proj muzzle penetration (Name, Desc)
 	
