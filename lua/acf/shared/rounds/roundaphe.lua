@@ -112,6 +112,7 @@ function Round.cratetxt( BulletData )
 end
 
 function Round.propimpact( Index, Bullet, Target, HitNormal, HitPos, Bone )
+	 -- In what situation should we be hitting the same entity again?
 	
 	if ACF_Check( Target ) then
 	
@@ -120,18 +121,22 @@ function Round.propimpact( Index, Bullet, Target, HitNormal, HitPos, Bone )
 		local HitRes = ACF_RoundImpact( Bullet, Speed, Energy, Target, HitPos, HitNormal , Bone )
 		
 		if HitRes.Overkill > 0 then
-			table.insert( Bullet.Filter , Target )					--"Penetrate" (Ingoring the prop for the retry trace)
+			Bullet.Filter[#Bullet.Filter+1] = Target
+
 			ACF_Spall( HitPos , Bullet.Velocity , Bullet.Filter , Energy.Kinetic*HitRes.Loss , Bullet.Caliber , Target.ACF.Armour , Bullet.Owner ) --Do some spalling
 			Bullet.Velocity = Bullet.Velocity:GetNormalized() * (Energy.Kinetic*(1-HitRes.Loss)*2000/Bullet.ProjMass)^0.5 * 39.37
+			
 			return "Penetrated"
 		elseif HitRes.Ricochet then
 			return "Ricochet"
 		else
 			return false
 		end
-	else 
-		table.insert( Bullet.Filter , Target )
-	return "Penetrated" end
+	else
+		Bullet.Filter[#Bullet.Filter+1] = Target
+		
+		return "Penetrated"
+	end
 	
 end
 

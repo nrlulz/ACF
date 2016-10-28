@@ -85,24 +85,92 @@ local Invalid = {
 	gmod_ghost = true,
 	debris = true,
 	prop_ragdoll = true,
-	func_ = true
+	func_areaportal = true,
+	func_areaportalwindow = true,
+	func_breakable = true,
+	func_breakable_surf = true,
+	func_brush = true,
+	func_button = true,
+	func_capturezone = true,
+	func_changeclass = true,
+	func_clip_vphysics = true,
+	func_combine_ball_spawner = true,
+	func_conveyor = true,
+	func_detail = true,
+	--func_door = true,
+	--func_door_rotating = true,
+	func_dustcloud = true,
+	func_dustmotes = true,
+	func_extinguishercharger = true,
+	func_guntarget = true,
+	func_healthcharger = true,
+	func_illusionary = true,
+	func_ladder = true,
+	func_ladderendpoint = true,
+	func_lod = true,
+	func_lookdoor = true,
+	func_monitor = true,
+	func_movelinear = true,
+	func_nobuild = true,
+	func_nogrenades = true,
+	func_occluder = true,
+	--func_physbox = true,
+	--func_physbox_multiplayer = true,
+	func_platrot = true,
+	func_precipitation = true,
+	func_proprespawnzone = true,
+	func_recharge = true,
+	func_reflective_glass = true,
+	func_regenerate = true,
+	func_respawnroom = true,
+	func_respawnroomvisualizer = true,
+	func_rot_button = true,
+	--func_rotating = true,
+	func_smokevolume = true,
+	func_tank = true,
+	func_tankairboatgun = true,
+	func_tankapcrocket = true,
+	func_tanklaser = true,
+	func_tankmortar = true,
+	func_tankphyscannister = true,
+	func_tankpulselaser = true,
+	func_tankrocket = true,
+	func_tanktrain = true,
+	func_trackautochange = true,
+	func_trackchange = true,
+	func_tracktrain = true,
+	func_traincontrols = true,
+	func_useableladder = true,
+	func_vehicleclip = true,
+	func_viscluster = true,
+	func_wall = true,
+	func_wall_toggle = true,
+	func_water_analog = true
 }
 
 function ACF_Check ( Entity )
-	if not GlobalFilter[Entity] and IsValid(Entity) and IsValid(Entity:GetPhysicsObject()) and not Entity:IsWorld() and not Entity:IsWeapon() then
-		local Class = Entity:GetClass()
-		if not Invalid[Class] and not Invalid[string.sub(Class, 1, 5)] then
-			if not Entity.ACF then 
-				ACF_Activate( Entity )
-			elseif Entity.ACF.Mass ~= Entity:GetPhysicsObject():GetMass() then
-				ACF_Activate( Entity , true )
+	if GlobalFilter[Entity] then return false end
+	--if Entity.ACF then return Entity.ACF.Type end
+
+	if IsValid(Entity) and not Entity:IsWorld() and not Entity:IsWeapon() then
+		local Phys = Entity:GetPhysicsObject()
+
+		if IsValid(Phys) then
+			local Class = Entity:GetClass()
+			if not Invalid[Class] then
+				if not Entity.ACF then 
+					ACF_Activate( Entity )
+				elseif Entity.ACF.Mass ~= Phys:GetMass() then
+					ACF_Activate( Entity , true )
+				end
+				
+				Entity.ACF_Valid = true
+				return Entity.ACF.Type	
 			end
-			--print("ACF_Check "..Entity.ACF.Type)
-			return Entity.ACF.Type	
-		end	
+		end
 	end
 
-	if not GlobalFilter[Entity] then GlobalFilter[Entity] = true end
+	GlobalFilter[Entity] = true
 	return false
 end
 

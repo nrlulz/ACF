@@ -19,32 +19,33 @@ function ACF_CreateBullet( Data )
 	local Index = ACF.CurBulletIndex
 	
 	local BulletData = {}
-		BulletData["Accel"]			= ACF.Gravity + Vector(0, 0, 0)		
-		BulletData["DragCoef"]		= Data.DragCoef
-		BulletData["FillerMass"]	= Data.FillerMass
-		BulletData["ProjMass"]		= Data.ProjMass
-		BulletData["Pos"]			= Data.Pos
-		BulletData["Velocity"]		= Data.Velocity
+		BulletData.Accel		= ACF.Gravity + Vector(0, 0, 0)		
+		BulletData.DragCoef		= Data.DragCoef
+		BulletData.FillerMass	= Data.FillerMass
+		BulletData.ProjMass		= Data.ProjMass
+		BulletData.Pos			= Data.Pos
+		BulletData.Velocity		= Data.Velocity
 
-		BulletData["PenArea"]		= Data.PenArea
-		BulletData["FrArea"]		= Data.FrArea
-		BulletData["KETransfert"]	= Data.KETransfert
-		BulletData["LimitVel"]		= Data.LimitVel
-		BulletData["Ricochet"]		= Data.Ricochet
-		BulletData["ShovePower"]	= Data.ShovePower
+		BulletData.PenArea		= Data.PenArea
+		BulletData.FrArea		= Data.FrArea
+		BulletData.KETransfert	= Data.KETransfert
+		BulletData.LimitVel		= Data.LimitVel
+		BulletData.Ricochet		= Data.Ricochet
+		BulletData.ShovePower	= Data.ShovePower
 
-		BulletData["Owner"]			= Data.Owner
-		BulletData["Crate"]			= Data.Crate
-		BulletData["LastThink"]		= SysTime()
-		BulletData["DetTime"]		= Data.FuzeTime and CurTime() + Data.FuzeTime or nil
-		BulletData["Filter"] 		= Data.Gun and { Data.Gun } or {}
-		BulletData["Type"]			= Data.Type
+		BulletData.Owner		= Data.Owner
+		BulletData.Crate		= Data.Crate
+		BulletData.LastThink	= SysTime()
+		BulletData.DetTime		= Data.FuzeTime and CurTime() + Data.FuzeTime or nil
+		BulletData.Filter		= Data.Gun and { Data.Gun } or {}
+		BulletData.Type			= Data.Type
 
-		BulletData["CasingMass"]	= Data.CasingMass
-		BulletData["SlugDragCoef"] 	= Data.SlugDragCoef
-		BulletData["SlugMass"]		= Data.SlugMass
-		BulletData["SlugPenArea"]	= Data.SlugPenArea
-		BulletData["SlugRicochet"]	= Data.SlugRicochet
+		BulletData.CasingMass	= Data.CasingMass
+		BulletData.SlugDragCoef = Data.SlugDragCoef
+		BulletData.SlugMass		= Data.SlugMass
+		BulletData.SlugPenArea	= Data.SlugPenArea
+		BulletData.SlugRicochet	= Data.SlugRicochet
+		BulletData.SlugMV		= Data.SlugMV
 		
 	Bullets[Index] = BulletData		--Place the bullet at the current index pos
 	ACF_BulletClient( Index, Bullets[Index], "Init", 0 )
@@ -52,7 +53,7 @@ function ACF_CreateBullet( Data )
 end
 
 
-function ACF_ManageBullets()
+local function ACF_ManageBullets()
 	for Index, Bullet in pairs(Bullets) do
 		--if not Bullet.HandlesOwnIteration then
 			ACF_CalcBulletFlight( Index, Bullet )			--This is the bullet entry in the table, the Index var omnipresent refers to this
@@ -62,8 +63,8 @@ end
 hook.Add("Tick", "ACF_ManageBullets", ACF_ManageBullets)
 
 
-function ACF_RemoveBullet( Index )
-	local Bullet = Bullets[Index]
+function ACF_RemoveBullet(Index)
+	--local Bullet = Bullets[Index]
 	
 	Bullets[Index] = nil
 	
@@ -71,15 +72,15 @@ function ACF_RemoveBullet( Index )
 end
 
 
-function ACF_CheckClips(Ent, HitPos )
+function ACF_CheckClips(Ent, HitPos)
 	if not Ent.ClipData or Ent:GetClass() ~= "prop_physics" then return false end
 	
 	local Data = Ent.ClipData
 	for i = 1, #Data do
 		local DataI = Data[i]
-		local N = DataI["n"]
+		local N = DataI[n]
 
-		if Ent:LocalToWorldAngles(N):Forward():Dot((Ent:LocalToWorld(N:Forward() * DataI["d"]) - HitPos):GetNormalized()) > 0 then return true end
+		if Ent:LocalToWorldAngles(N):Forward():Dot((Ent:LocalToWorld(N:Forward() * DataI[d]) - HitPos):GetNormalized()) > 0 then return true end
 	end
 	
 	return false
@@ -182,17 +183,17 @@ function ACF_DoBulletsFlight(Index, Bullet)
 			else
 				local Retry = ACF.RoundTypes[Bullet.Type]["worldimpact"]( Index, Bullet, FlightRes.HitPos, FlightRes.HitNormal )
 				if Retry == "Penetrated" then 								--if it is, we soldier on	
-					if Bullet.OnPenetrated then Bullet.OnPenetrated(Index, Bullet, FlightRes) end
+					--if Bullet.OnPenetrated then Bullet.OnPenetrated(Index, Bullet, FlightRes) end
 					
 					ACF_BulletClient( Index, Bullet, "Update" , 2 , FlightRes.HitPos  )
 					ACF_CalcBulletFlight( Index, Bullet )
 				elseif Retry == "Ricochet"  then
-					if Bullet.OnRicocheted then Bullet.OnRicocheted(Index, Bullet, FlightRes) end
+					--if Bullet.OnRicocheted then Bullet.OnRicocheted(Index, Bullet, FlightRes) end
 					
 					ACF_BulletClient( Index, Bullet, "Update" , 3 , FlightRes.HitPos  )
 					ACF_CalcBulletFlight( Index, Bullet )
 				else														--If not, end of the line, boyo
-					if Bullet.OnEndFlight then Bullet.OnEndFlight(Index, Bullet, FlightRes) end
+					--if Bullet.OnEndFlight then Bullet.OnEndFlight(Index, Bullet, FlightRes) end
 					
 					ACF_BulletClient( Index, Bullet, "Update" , 1 , FlightRes.HitPos  )
 					ACF_BulletEndFlight = ACF.RoundTypes[Bullet.Type]["endflight"]
@@ -202,17 +203,17 @@ function ACF_DoBulletsFlight(Index, Bullet)
 		else -- Hit entity	
 			local Retry = ACF.RoundTypes[Bullet.Type]["propimpact"]( Index, Bullet, FlightRes.Entity , FlightRes.HitNormal , FlightRes.HitPos , FlightRes.HitGroup )				--If we hit stuff then send the resolution to the damage function	
 			if Retry == "Penetrated" then		--If we should do the same trace again, then do so
-				if Bullet.OnPenetrated then Bullet.OnPenetrated(Index, Bullet, FlightRes) end
+				--if Bullet.OnPenetrated then Bullet.OnPenetrated(Index, Bullet, FlightRes) end
 				
 				ACF_BulletClient( Index, Bullet, "Update" , 2 , FlightRes.HitPos  )
 				ACF_DoBulletsFlight( Index, Bullet )
 			elseif Retry == "Ricochet"  then
-				if Bullet.OnRicocheted then Bullet.OnRicocheted(Index, Bullet, FlightRes) end
+				--if Bullet.OnRicocheted then Bullet.OnRicocheted(Index, Bullet, FlightRes) end
 				
 				ACF_BulletClient( Index, Bullet, "Update" , 3 , FlightRes.HitPos  )
 				ACF_CalcBulletFlight( Index, Bullet )
 			else						--Else end the flight here
-				if Bullet.OnEndFlight then Bullet.OnEndFlight(Index, Bullet, FlightRes) end
+				--if Bullet.OnEndFlight then Bullet.OnEndFlight(Index, Bullet, FlightRes) end
 				
 				ACF_BulletClient( Index, Bullet, "Update" , 1 , FlightRes.HitPos  )
 				ACF_BulletEndFlight = ACF.RoundTypes[Bullet.Type]["endflight"]
@@ -240,14 +241,11 @@ function ACF_BulletClient( Index, Bullet, Type, Hit, HitPos )
 		util_Effect( "ACF_BulletEffect", Effect, true, true )
 	else
 		local Effect = EffectData()
-			local Filler = 0
-			if Bullet["FillerMass"] then Filler = Bullet["FillerMass"]*15 end
 			Effect:SetAttachment( Index )		--Bulet Index
 			Effect:SetStart( Bullet.Velocity/10 )	--Bullet Direction
 			Effect:SetOrigin( Bullet.Pos )
 			Effect:SetEntity( Entity(Bullet["Crate"]) )
 			Effect:SetScale( 0 )
 		util_Effect( "ACF_BulletEffect", Effect, true, true )
-
 	end
 end

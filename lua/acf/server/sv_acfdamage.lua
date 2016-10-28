@@ -29,11 +29,11 @@ function ACF_HE( Hitpos , HitNormal , FillerMass, FragMass , Inflictor, NoOcc, A
 	while LoopKill and Power > 0 do
 		LoopKill = false
 		local PowerSpent = 0
-		local Iterations = 0
 		local Damage = {}
 		local TotalArea = 0
+
 		for i,Tar in pairs(Targets) do
-			Iterations = i
+
 			if ( Tar ~= nil and Power > 0 and not Tar.Exploding ) then
 				local Type = ACF_Check(Tar)
 				if ( Type ) then
@@ -359,23 +359,14 @@ ACF.IgniteDebris =
 function ACF_HEKill( Entity , HitVector , Energy )
 	--print("ACF_HEKill ent: ".. Entity:GetModel() or "unknown")
 	--print("ACF_HEKill Energy "..Energy or "nill")
-	
-	local obj = Entity:GetPhysicsObject()
-	local grav = true
-	local mass = nil
-	if IsValid(obj) and ISSITP then
-		grav = obj:IsGravityEnabled()
-		mass = obj:GetMass()
-	end
-	constraint.RemoveAll( Entity )
-	
-	local entClass = Entity:GetClass()
-	
+	constraint.RemoveAll( Entity )	
 	Entity:Remove()
 	
-	if Entity:BoundingRadius() < ACF.DebrisScale then
-		return nil
-	end
+	local obj = Entity:GetPhysicsObject()
+	local mass = IsValid(obj) and obj:GetMass() or nil
+	local entClass = Entity:GetClass()
+	
+	if Entity:BoundingRadius() < ACF.DebrisScale then return nil end
 	
 	local Debris = ents.Create( "Debris" )
 		Debris:SetModel( Entity:GetModel() )
@@ -384,17 +375,14 @@ function ACF_HEKill( Entity , HitVector , Energy )
 		Debris:SetMaterial("models/props_wasteland/metal_tram001a")
 		Debris:Spawn()
 		
-		if ACF.IgniteDebris[entClass] then
-			Debris:Ignite(60,0)
-		end
+		if ACF.IgniteDebris[entClass] then Debris:Ignite(60, 0) end
 		
 		Debris:Activate()
 
 	local phys = Debris:GetPhysicsObject() 
 	if IsValid(phys) then
 		phys:ApplyForceOffset( HitVector:GetNormal() * Energy * 350 , Debris:GetPos()+VectorRand()*20 ) 	
-		phys:EnableGravity( grav )
-		
+		phys:EnableGravity( true )
 		if mass then phys:SetMass(mass) end
 	end
 
@@ -407,9 +395,9 @@ function ACF_APKill( Entity , HitVector , Power )
 	constraint.RemoveAll( Entity )
 	Entity:Remove()
 	
-	if Entity:BoundingRadius() < ACF.DebrisScale then
-		return nil
-	end
+	local obj = Entity:GetPhysicsObject()
+	local mass = IsValid(obj) and obj:GetMass() or nil
+	if Entity:BoundingRadius() < ACF.DebrisScale then return nil end
 
 	local Debris = ents.Create( "Debris" )
 		Debris:SetModel( Entity:GetModel() )
@@ -427,7 +415,8 @@ function ACF_APKill( Entity , HitVector , Power )
 		
 	local phys = Debris:GetPhysicsObject() 
 	if IsValid(phys) then	
-		phys:ApplyForceOffset( HitVector:GetNormal() * Power * 350 ,  Debris:GetPos()+VectorRand()*20 )	
+		phys:ApplyForceOffset( HitVector:GetNormal() * Power * 350 ,  Debris:GetPos()+VectorRand()*20 )
+		if mass then phys:SetMass(mass) end
 	end
 
 	return Debris

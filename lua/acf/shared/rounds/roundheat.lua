@@ -193,7 +193,7 @@ function Round.propimpact( Index, Bullet, Target, HitNormal, HitPos, Bone )
 			local HitRes = ACF_RoundImpact( Bullet, Speed, Energy, Target, HitPos, HitNormal , Bone )
 			
 			if HitRes.Overkill > 0 then
-				table.insert( Bullet.Filter , Target )					--"Penetrate" (Ingoring the prop for the retry trace)
+				Bullet.Filter[#Bullet.Filter+1] = Target					--"Penetrate" (Ingoring the prop for the retry trace)
 				ACF_Spall( HitPos , Bullet.Velocity , Bullet.Filter , Energy.Kinetic*HitRes.Loss , Bullet.Caliber , Target.ACF.Armour , Bullet.Owner ) --Do some spalling
 				Bullet.Velocity = Bullet.Velocity:GetNormalized() * (Energy.Kinetic*(1-HitRes.Loss*((not Bullet.NotFirstPen and 0.667) or 1))*2000/Bullet.ProjMass)^0.5 * 39.37 * ((Bullet.NotFirstPen and 0.333) or 1)
 				Bullet.NotFirstPen = true
@@ -217,7 +217,8 @@ function Round.propimpact( Index, Bullet, Target, HitNormal, HitPos, Bone )
 			
 		end
 	else
-		table.insert( Bullet.Filter , Target )
+		Bullet.Filter[#Bullet.Filter+1] = Target
+
 		return "Penetrated"
 	end
 	
@@ -281,7 +282,7 @@ function Round.pierceeffect( Effect, Bullet )
 			Flash:SetOrigin( Bullet.SimPos )
 			Flash:SetNormal( Bullet.SimFlight:GetNormalized() )
 			Flash:SetRadius( math.max( Radius, 1 ) )
-		util.Effect( "ACF_HEAT_Explosion", Flash )
+		util.Effect( "acf_heat_explosion", Flash )
 		
 		Bullet.Detonated = true
 		Effect:SetModel("models/Gibs/wood_gib01e.mdl")
