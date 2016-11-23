@@ -110,12 +110,13 @@ end
 function EFFECT:ApplyMovement( Bullet )
 
 	local setPos = Bullet.SimPos
-	if((math.abs(setPos.x) > 16000) or (math.abs(setPos.y) > 16000) or (setPos.z < -16000)) then
+	if math.abs(setPos.x) > 16380 or math.abs(setPos.y) > 16380 or setPos.z < -16380 then
 		self:Remove()
 		return
 	end
-	if( setPos.z < 16000 ) then
-		self:SetPos( Bullet.SimPos )--Moving the effect to the calculated position
+	
+	if setPos.z < 16380  then
+		self:SetPos( setPos )--Moving the effect to the calculated position
 		self:SetAngles( Bullet.SimFlight:Angle() )
 	end
 	
@@ -127,7 +128,7 @@ function EFFECT:ApplyMovement( Bullet )
 		--for i=1, MaxSprites do
 			--local Light = Bullet.Tracer:Add( "sprites/light_glow02_add.vmt", Bullet.SimPos - (DeltaPos*i/MaxSprites) )
 			--local Light = Bullet.Tracer:Add( "sprites/acf_tracer.vmt", Bullet.SimPos - (DeltaPos*i/MaxSprites) )
-			local Light = Bullet.Tracer:Add( "sprites/acf_tracer.vmt", Bullet.SimPos - DeltaPos )
+			local Light = Bullet.Tracer:Add( "sprites/acf_tracer.vmt", setPos - DeltaPos )
 			if (Light) then		
 				Light:SetAngles( Bullet.SimFlight:Angle() )
 				Light:SetVelocity( Bullet.SimFlight:GetNormalized() )
@@ -141,7 +142,7 @@ function EFFECT:ApplyMovement( Bullet )
 				Light:SetEndLength( 1 )
 			end
 		for i=1, MaxSprites do
-			local Smoke = Bullet.Tracer:Add( "particle/smokesprites_000"..math.random(1,9), Bullet.SimPos - (DeltaPos*i/MaxSprites) )
+			local Smoke = Bullet.Tracer:Add( "particle/smokesprites_000"..math.random(1,9), setPos - (DeltaPos*i/MaxSprites) )
 			if (Smoke) then		
 				Smoke:SetAngles( Bullet.SimFlight:Angle() )
 				Smoke:SetVelocity( Bullet.SimFlight*0.05 )
