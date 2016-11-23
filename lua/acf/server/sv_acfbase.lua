@@ -135,27 +135,8 @@ function ACF_CalcDamage( Entity , Energy , FrArea , Angle )
 	local Penetration = math.min( MaxPenetration , Armour )			--Clamp penetration to the armour thickness
 	
 	local HitRes = {}
-	--BNK Stuff
-	local dmul = 1
-	if (ISBNK) then
-		local cvar = GetConVarNumber("sbox_godmode")
 	
-		if (cvar == 1) then
-			dmul = 0
-		end
-	end
-	--SITP Stuff
-	local var = 1
-	if (ISSITP) then
-		if(!Entity.sitp_spacetype) then
-			Entity.sitp_spacetype = "space"
-		end
-		if(Entity.sitp_spacetype != "space" and Entity.sitp_spacetype != "planet") then
-			var = 0
-		end
-	end
-	
-	HitRes.Damage = var * dmul * (Penetration/Armour)^2 * FrArea --/math.abs( math.cos(math.rad(Angle/1.25)) )	-- This is the volume of the hole caused by our projectile, with area adjusted by slope
+	HitRes.Damage = (Penetration/Armour)^2 * FrArea --/math.abs( math.cos(math.rad(Angle/1.25)) )	-- This is the volume of the hole caused by our projectile, with area adjusted by slope
 	HitRes.Overkill = (MaxPenetration - Penetration)
 	HitRes.Loss = Penetration/MaxPenetration
 	
@@ -277,31 +258,12 @@ function ACF_SquishyDamage( Entity , Energy , FrArea , Angle , Inflictor , Bone,
 		Damage = HitRes.Damage*10	
 	
 	end
-	
-	local dmul = 2.5
-	
-	--BNK stuff
-	if (ISBNK) then
-		if(Entity.freq and Inflictor.freq) then
-			if (Entity != Inflictor) and (Entity.freq == Inflictor.freq) then
-				dmul = 0
-			end
-		end
-	end
-	
-	--SITP stuff
-	local var = 1
-	if(!Entity.sitp_spacetype) then
-		Entity.sitp_spacetype = "space"
-	end
-	if(Entity.sitp_spacetype == "homeworld") then
-		var = 0
-	end
-	
+
 	--if Ammo == true then
 	--	Entity.KilledByAmmo = true
 	--end
-	Entity:TakeDamage( Damage * dmul * var, Inflictor, Gun )
+	local DamageMultiplier = 2.5
+	Entity:TakeDamage( Damage * DamageMultiplier * var, Inflictor, Gun )
 	--if Ammo == true then
 	--	Entity.KilledByAmmo = false
 	--end
@@ -365,4 +327,12 @@ function ACF_GetAllChildren( ent, ResultTable )
 	
 	return ResultTable
 	
+end
+
+function ACF_GetAncestor( Ent )
+	local Parent = Ent
+	
+	while IsValid(Parent:GetParent()) do Parent = Parent:GetParent() end
+	
+	return Parent
 end
