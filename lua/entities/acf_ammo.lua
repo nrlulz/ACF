@@ -439,7 +439,7 @@ function ENT:Think()
 	local color = self:GetColor()
 	self:SetNWVector("TracerColour", Vector( color.r, color.g, color.b ) )
 		
-	self:SetNWVector("Accel", Vector(0,0,cvarGrav:GetInt()*-1))
+	self:SetNWVector("Accel", Vector(0, 0, GetConVar("sv_gravity"):GetInt()*-1))
 		
 	self:NextThink( CurTime() +  1 )
 	
