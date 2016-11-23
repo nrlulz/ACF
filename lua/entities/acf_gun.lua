@@ -536,38 +536,9 @@ function ENT:Think()
 	
 end
 
-function ENT:CheckWeight()
-	local mass = self:GetPhysicsObject():GetMass()
-	local maxmass = GetConVarNumber("bnk_maxweight") * 1000 + 999
-	
-	local chk = false
-	
-	local allents = constraint.GetAllConstrainedEntities( self )
-	for _, ent in pairs(allents) do
-		if (ent and ent:IsValid() and not ent:IsPlayer() and not (ent == self)) then
-			local phys = ent:GetPhysicsObject()
-			if(phys:IsValid()) then
-				mass = mass + phys:GetMass()
-			end
-		end
-	end
-	
-	if( mass < maxmass ) then
-		chk = true
-	end
-	
-	return chk
-end
-
 function ENT:ReloadMag()
-	if(self.IsUnderWeight == nil) then
-		self.IsUnderWeight = true
-		if(ISBNK) then
-			self.IsUnderWeight = self:CheckWeight()
-		end
-	end
-	if ( (self.CurrentShot > 0) and self.IsUnderWeight and self:IsSolid() and self.Ready and self:GetPhysicsObject():GetMass() >= self.Mass and not (self:GetParent():IsValid() and not self.Parentable) ) then
-		if ( ACF.RoundTypes[self.BulletData.Type] ) then		--Check if the roundtype loaded actually exists
+	if self.CurrentShot > 0 and self:IsSolid() and self.Ready and self:GetPhysicsObject():GetMass() >= self.Mass and not (IsValid(self:GetParent()) and not self.Parentable) then
+		if ACF.RoundTypes[self.BulletData.Type] then		--Check if the roundtype loaded actually exists
 			self:LoadAmmo(self.MagReload, false)	
 			self:EmitSound("weapons/357/357_reload4.wav",500,100)
 			self.CurrentShot = 0
@@ -585,7 +556,7 @@ function ENT:GetInaccuracy()
 	local SpreadScale = ACF.SpreadScale
 	local IaccMult = 1
 	
-	if (self.ACF.Health and self.ACF.MaxHealth) then
+	if self.ACF.Health and self.ACF.MaxHealth then
 		IaccMult = math.Clamp(((1 - SpreadScale) / (0.5)) * ((self.ACF.Health/self.ACF.MaxHealth) - 1) + 1, 1, SpreadScale)
 	end
 	
@@ -594,29 +565,41 @@ function ENT:GetInaccuracy()
 	return coneAng
 end
 
+function ENT:BarrelNotStuffed()
+	if self.Stuffed then return false end
+	if not self.CPPIGetOwner then return true end
 
+	local tr = {start = self:GetPos(), endpos = self:LocalToWorld(self.Muzzle), filter = self.BarrelFilter or {self}, mask = MASK_SHOT}
+	local Own = self.Owner
+
+	local TraceRes = util.TraceLine(tr)
+	while TraceRes.Hit do
+		if TraceRes.HitWorld then return false end
+		
+		local Ent = TraceRes.Entity
+		if IsValid(Ent) and not Ent:IsPlayer() and Ent:CPPIGetOwner() ~= Own then
+			self.Stuffed = true
+
+			timer.Simple(0.5, function() self.Stuffed = false end)
+
+			return false
+		end
+
+		tr.filter[#tr.filter + 1] = Ent
+		TraceRes = util.TraceLine(tr)
+	end			
+
+	if not self.BarrelFilter or #self.BarrelFilter ~= #tr.filter then self.BarrelFilter = table.Copy(tr.filter) end
+
+	return true
+end
 
 function ENT:FireShell()
 	
 	local CanDo = hook.Run("ACF_FireShell", self, self.BulletData )
 	if CanDo == false then return end
-	if(self.IsUnderWeight == nil) then
-		self.IsUnderWeight = true
-		if(ISBNK) then
-			self.IsUnderWeight = self:CheckWeight()
-		end
-	end
-	
-	local bool = true
-	if(ISSITP) then
-		if(self.sitp_spacetype != "space" and self.sitp_spacetype != "planet") then
-			bool = false
-		end
-		if(self.sitp_core == false) then
-			bool = false
-		end
-	end
-	if ( bool and self.IsUnderWeight and self:IsSolid() and self.Ready and self:GetPhysicsObject():GetMass() >= self.Mass and not (self:GetParent():IsValid() and not self.Parentable) ) then
+
+	if self:IsSolid() and self.Ready and self:GetPhysicsObject():GetMass() >= self.Mass and not (IsValid(self:GetParent()) and not self.Parentable) and self:BarrelNotStuffed() then
 		Blacklist = {}
 		if not ACF.AmmoBlacklist[self.BulletData.Type] then
 			Blacklist = {}
@@ -636,7 +619,7 @@ function ENT:FireShell()
 			self:MuzzleEffect( MuzzlePos, MuzzleVec )
 			
 			self.BulletData.Pos = MuzzlePos
-			self.BulletData.Flight = ShootVec * self.BulletData.MuzzleVel * 39.37 + self:GetVelocity()
+			self.BulletData.Flight = ShootVec * self.BulletData.MuzzleVel * 39.37 + ACF_GetAncestor(self):GetVelocity()
 			self.BulletData.Owner = self.User
 			self.BulletData.Gun = self
 			self.CreateShell = ACF.RoundTypes[self.BulletData.Type].create

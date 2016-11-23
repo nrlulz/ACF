@@ -428,9 +428,9 @@ Component:AddPreparedFunction( "acfPenetration", "e:", "n",
 if @value 1:IsValid() and (@value 1:GetClass() == 'acf_ammo' or @value 1:GetClass() == 'acf_gun') and !EXPADV.Components.acf.restrictInfo(Context.player, @value 1) then
 	@define type = @value 1.BulletData["Type"] or ""
 	if @type == "AP" or @type == "APHE" then
-		@ret = $math.Round(( $ACF_Kinetic( @value 1.BulletData["MuzzleVel"]*39.37, @value 1.BulletData["ProjMass"] - (@value 1.BulletData["FillerMass"] or 0), @value 1.BulletData["LimitVel"] ).Penetration / @value 1.BulletData['PenAera'] ) * $ACF.KEtoRHA, 3 )
+		@ret = $math.Round(( $ACF_Kinetic( @value 1.BulletData["MuzzleVel"]*39.37, @value 1.BulletData["ProjMass"] - (@value 1.BulletData["FillerMass"] or 0), @value 1.BulletData["LimitVel"] ).Penetration / @value 1.BulletData['PenArea'] ) * $ACF.KEtoRHA, 3 )
 	elseif @type == "HEAT" then
-		@ret = $math.Round(( $ACF_Kinetic( @value 1.BulletData["SlugMV"]*39.37, @value 1.BulletData["SlugMass"], 99999999 ).Penetration / @value 1.BulletData["SlugPenAera"] ) * $ACF.KEtoRHA, 3 )
+		@ret = $math.Round(( $ACF_Kinetic( @value 1.BulletData["SlugMV"]*39.37, @value 1.BulletData["SlugMass"], 99999999 ).Penetration / @value 1.BulletData["SlugPenArea"] ) * $ACF.KEtoRHA, 3 )
 	elseif @type == "FL" then
 		@ret = $math.Round(( $ACF_Kinetic( @value 1.BulletData["MuzzleVel"]*39.37, @value 1.BulletData["FlechetteMass"], @value 1.BulletData["LimitVel"] ).Penetration / @value 1.BulletData["FlechettePenArea"] ) * $ACF.KEtoRHA, 3 )
 	end
