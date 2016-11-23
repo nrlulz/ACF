@@ -455,7 +455,7 @@ end
 
 
 
-function this.CanDamage(Type, Entity, Energy, FrAera, Angle, Inflictor, Bone, Gun)
+function this.CanDamage(Type, Entity, Energy, FrArea, Angle, Inflictor, Bone, Gun)
 	local owner = CPPI and Entity:CPPIGetOwner() or Entity:GetOwner()
 	
 	if not (IsValid(owner) and owner:IsPlayer()) then

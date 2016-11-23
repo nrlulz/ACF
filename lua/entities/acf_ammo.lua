@@ -157,14 +157,14 @@ function ENT:ACF_Activate( Recalc )
 	self.ACF = self.ACF or {} 
 	
 	local PhysObj = self:GetPhysicsObject()
-	if not self.ACF.Aera then
-		self.ACF.Aera = PhysObj:GetSurfaceArea() * 6.45
+	if not self.ACF.Area then
+		self.ACF.Area = PhysObj:GetSurfaceArea() * 6.45
 	end
 	if not self.ACF.Volume then
 		self.ACF.Volume = PhysObj:GetVolume() * 16.38
 	end
 	
-	local Armour = EmptyMass*1000 / self.ACF.Aera / 0.78 --So we get the equivalent thickness of that prop in mm if all it's weight was a steel plate
+	local Armour = EmptyMass*1000 / self.ACF.Area / 0.78 --So we get the equivalent thickness of that prop in mm if all it's weight was a steel plate
 	local Health = self.ACF.Volume/ACF.Threshold							--Setting the threshold of the prop aera gone 
 	local Percent = 1 
 	
@@ -183,10 +183,10 @@ function ENT:ACF_Activate( Recalc )
 	
 end
 
-function ENT:ACF_OnDamage( Entity, Energy, FrAera, Angle, Inflictor, Bone, Type )	--This function needs to return HitRes
+function ENT:ACF_OnDamage( Entity, Energy, FrArea, Angle, Inflictor, Bone, Type )	--This function needs to return HitRes
 
 	local Mul = ((Type == "HEAT" and ACF.HEATMulAmmo) or 1) --Heat penetrators deal bonus damage to ammo
-	local HitRes = ACF_PropDamage( Entity, Energy, FrAera * Mul, Angle, Inflictor )	--Calling the standard damage prop function
+	local HitRes = ACF_PropDamage( Entity, Energy, FrArea * Mul, Angle, Inflictor )	--Calling the standard damage prop function
 	
 	if self.Exploding or not self.IsExplosive then return HitRes end
 	
@@ -438,14 +438,8 @@ function ENT:Think()
 	
 	local color = self:GetColor()
 	self:SetNWVector("TracerColour", Vector( color.r, color.g, color.b ) )
-	
-	local cvarGrav = GetConVar("sv_gravity")
-	local vec = Vector(0,0,cvarGrav:GetInt()*-1)
-	if( self.sitp_inspace ) then
-		vec = Vector(0, 0, 0)
-	end
 		
-	self:SetNWVector("Accel", vec)
+	self:SetNWVector("Accel", Vector(0, 0, GetConVar("sv_gravity"):GetInt()*-1))
 		
 	self:NextThink( CurTime() +  1 )
 	

@@ -21,13 +21,13 @@ function Round.create( Gun, BulletData )
 	FlechetteData["Crate"] = BulletData["Crate"]
 	FlechetteData["Gun"] = BulletData["Gun"]
 	FlechetteData["Pos"] = BulletData["Pos"]
-	FlechetteData["FrAera"] = BulletData["FlechetteArea"]
+	FlechetteData["FrArea"] = BulletData["FlechetteArea"]
 	FlechetteData["ProjMass"] = BulletData["FlechetteMass"]
 	FlechetteData["DragCoef"] = BulletData["FlechetteDragCoef"]
 	FlechetteData["Tracer"] = BulletData["Tracer"]
 	FlechetteData["LimitVel"] = BulletData["LimitVel"]
 	FlechetteData["Ricochet"] = BulletData["Ricochet"]
-	FlechetteData["PenAera"] = BulletData["FlechettePenArea"]
+	FlechetteData["PenArea"] = BulletData["FlechettePenArea"]
 	FlechetteData["ShovePower"] = BulletData["ShovePower"]
 	FlechetteData["KETransfert"] = BulletData["KETransfert"]
 
@@ -87,8 +87,8 @@ function Round.convert( Crate, PlayerData )
 	Data["ProjMass"] = Data["Flechettes"] * Data["FlechetteMass"] -- total mass of all flechettes
 	Data["PropMass"] = Data["PropMass"]
 	Data["ShovePower"] = 0.2
-	Data["PenAera"] = Data["FrAera"]^ACF.PenAreaMod
-	Data["DragCoef"] = ((Data["FrAera"]/10000)/Data["ProjMass"])
+	Data["PenArea"] = Data["FrArea"]^ACF.PenAreaMod
+	Data["DragCoef"] = ((Data["FrArea"]/10000)/Data["ProjMass"])
 	Data["LimitVel"] = 500										--Most efficient penetration speed in m/s
 	Data["KETransfert"] = 0.1									--Kinetic energy transfert to the target for movement purposes
 	Data["Ricochet"] = 75										--Base ricochet angle
