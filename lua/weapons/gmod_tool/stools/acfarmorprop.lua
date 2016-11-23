@@ -131,7 +131,7 @@ function TOOL:LeftClick( trace )
 	
 	local ductility = math.Clamp( self:GetClientNumber( "ductility" ), -80, 80 )
 	local thickness = math.Clamp( self:GetClientNumber( "thickness" ), 0.1, 50000 )
-	local mass = CalcArmor( ent.ACF.Aera, ductility / 100, thickness )
+	local mass = CalcArmor( ent.ACF.Area, ductility / 100, thickness )
 	
 	ApplySettings( ply, ent, { Mass = mass, Ductility = ductility } )
 	
@@ -202,7 +202,7 @@ function TOOL:Think()
 	
 	if ACF_Check( ent ) then
 		
-		ply:ConCommand( "acfarmorprop_area " .. ent.ACF.Aera )
+		ply:ConCommand( "acfarmorprop_area " .. ent.ACF.Area )
 		self.Weapon:SetNWFloat( "WeightMass", ent:GetPhysicsObject():GetMass() )
 		self.Weapon:SetNWFloat( "HP", ent.ACF.Health )
 		self.Weapon:SetNWFloat( "Armour", ent.ACF.Armour )
