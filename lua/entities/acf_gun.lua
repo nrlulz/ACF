@@ -594,7 +594,34 @@ function ENT:GetInaccuracy()
 	return coneAng
 end
 
+function ENT:BarrelNotStuffed()
+	if self.Stuffed then return false end
+	if not self.CPPIGetOwner then return true end
 
+	local tr = {start = self:GetPos(), endpos = self:LocalToWorld(self.Muzzle), filter = self.BarrelFilter or {self}, mask = MASK_SHOT}
+	local Own = self.Owner
+
+	local TraceRes = util.TraceLine(tr)
+	while TraceRes.Hit do
+		if TraceRes.HitWorld then return false end
+		
+		local Ent = TraceRes.Entity
+		if IsValid(Ent) and not Ent:IsPlayer() and Ent:CPPIGetOwner() ~= Own then
+			self.Stuffed = true
+
+			timer.Simple(0.5, function() self.Stuffed = false end)
+
+			return false
+		end
+
+		tr.filter[#tr.filter + 1] = Ent
+		TraceRes = util.TraceLine(tr)
+	end			
+
+	if not self.BarrelFilter or #self.BarrelFilter ~= #tr.filter then self.BarrelFilter = table.Copy(tr.filter) end
+
+	return true
+end
 
 function ENT:FireShell()
 	
@@ -616,7 +643,7 @@ function ENT:FireShell()
 			bool = false
 		end
 	end
-	if ( bool and self.IsUnderWeight and self:IsSolid() and self.Ready and self:GetPhysicsObject():GetMass() >= self.Mass and not (self:GetParent():IsValid() and not self.Parentable) ) then
+	if bool and self:IsSolid() and self.Ready and self:GetPhysicsObject():GetMass() >= self.Mass and not (IsValid(self:GetParent()) and not self.Parentable) and self:BarrelNotStuffed() then
 		Blacklist = {}
 		if not ACF.AmmoBlacklist[self.BulletData.Type] then
 			Blacklist = {}
