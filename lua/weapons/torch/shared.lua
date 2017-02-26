@@ -126,11 +126,11 @@ function SWEP:PrimaryAttack()
 				ent.ACF.Armour = ent.ACF.MaxArmour * (0.5 + ent.ACF.Health/ent.ACF.MaxHealth/2)
 				ent:EmitSound( "ambient/energy/NewSpark0" ..tostring( math.random( 3, 5 ) ).. ".wav", true, true )--Welding noise here, gotte figure out how to do a looped sound.
 				TeslaSpark(tr.HitPos , 1 )
-			end
 			self.Weapon:SetNWFloat( "HP", ent.ACF.Health )
 			self.Weapon:SetNWFloat( "Armour", ent.ACF.Armour )
 			self.Weapon:SetNWFloat( "MaxHP", ent.ACF.MaxHealth )
 			self.Weapon:SetNWFloat( "MaxArmour", ent.ACF.MaxArmour )
+			end
 		end
 	else 
 		self.Weapon:SetNWFloat( "HP", 0 )
