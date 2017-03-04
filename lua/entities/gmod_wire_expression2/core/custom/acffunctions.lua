@@ -180,6 +180,34 @@ end
 
 __e2setcost( 2 )
 
+e2function number entity:acfLinkToAmmoBox(entity box, number notify)
+    if not isAmmo(box) then return 0 end
+    if not isGun(this) then return 0 end
+
+    if not isOwner(self, this) then return 0 end
+    if not isOwner(self, box) then return 0 end
+    
+    local success, msg = this:Link(box)
+    if notify > 0 then
+        ACF_SendNotify(self.player, success, msg)
+    end
+    return success and 1 or 0
+end
+
+e2function number entity:acfUnlinkFromAmmoBox(entity box, number notify)
+    if not isAmmo(box) then return 0 end
+    if not isGun(this) then return 0 end
+    
+    if not isOwner(self, this) then return 0 end
+    if not isOwner(self, box) then return 0 end
+    
+    local success, msg = this:Unlink(box)
+    if notify > 0 then
+        ACF_SendNotify(self.player, success, msg)
+    end
+    return success and 1 or 0
+end
+
 -- Returns the full name of an ACF entity
 e2function string entity:acfName()
 	if isAmmo(this) then return (this.RoundId .. " " .. this.RoundType) end
