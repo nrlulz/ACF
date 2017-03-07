@@ -108,7 +108,7 @@ function EFFECT:Think()
 	end
 	
 	--self:Remove()
-	if Bullet.Tracer then Bullet.Tracer:Finish() end
+	if Bullet and Bullet.Tracer then Bullet.Tracer:Finish() end
 	return false
 
 end 
