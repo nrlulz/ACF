@@ -38,7 +38,10 @@ function EFFECT:Init( data )
 		end	
 		ACF_SimBulletFlight( Bullet, self.Index )
 		--self:Remove()	--This effect updated the old one, so it removes itself now	
-		if Bullet.Tracer then Bullet.Tracer:Finish() end
+		if Bullet.Tracer then
+			Bullet.Tracer:Finish()
+			Bullet.Tracer = nil
+		end
 		self.Alive = false
 	
 	else
@@ -108,7 +111,10 @@ function EFFECT:Think()
 	end
 	
 	--self:Remove()
-	if Bullet.Tracer then Bullet.Tracer:Finish() end
+	if Bullet and Bullet.Tracer then
+		Bullet.Tracer:Finish()
+		Bullet.Tracer = nil
+	end
 	return false
 
 end 
@@ -118,7 +124,10 @@ function EFFECT:ApplyMovement( Bullet )
 	local setPos = Bullet.SimPos
 	if((math.abs(setPos.x) > 16380) or (math.abs(setPos.y) > 16380) or (setPos.z < -16380)) then
 		--self:Remove()
-		if Bullet.Tracer then Bullet.Tracer:Finish() end
+		if Bullet.Tracer then
+			Bullet.Tracer:Finish()
+			Bullet.Tracer = nil
+		end
 		self.Alive = false
 		return
 	end
