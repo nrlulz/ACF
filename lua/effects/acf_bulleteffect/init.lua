@@ -127,7 +127,7 @@ function EFFECT:ApplyMovement( Bullet )
 		self:SetAngles( Bullet.SimFlight:Angle() )
 	end
 
-	if IsValid(Bullet.Tracer) then
+	if Bullet.Tracer then
 		local DeltaTime = ACF.CurTime - Bullet.LastThink
 		--local DeltaPos = Bullet.SimFlight*DeltaTime
 		local DeltaPos = Bullet.SimPos - Bullet.SimPosLast
