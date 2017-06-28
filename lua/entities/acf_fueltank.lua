@@ -147,6 +147,7 @@ function ENT:Initialize()
 	self.Fuel = 0  --current fuel level in liters
 	self.FuelType = nil
 	self.EmptyMass = 0 --mass of tank only
+	self.NextMassUpdate = 0
 	self.Id = nil --model id
 	self.Active = false
 	self.SupplyFuel = false
@@ -333,9 +334,10 @@ function ENT:UpdateFuelMass()
 		self.Mass = self.EmptyMass + FuelMass
 	end
 	
-	--reduce superflous engine calls, update fuel tank mass every 5 kgs change
-	if math.abs(self.LastMass - self.Mass) > 5 then
+	--reduce superflous engine calls, update fuel tank mass every 5 kgs change or every 10s-15s
+	if math.abs(self.LastMass - self.Mass) > 5 or CurTime() > self.NextMassUpdate then
 		self.LastMass = self.Mass
+		self.NextMassUpdate = CurTime()+math.Rand(10,15)
 		local phys = self:GetPhysicsObject()  	
 		if (phys:IsValid()) then 
 			phys:SetMass( self.Mass ) 

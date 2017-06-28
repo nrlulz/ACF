@@ -105,7 +105,7 @@ __e2setcost( 5 )
 --returns 1 if hitpos is on a clipped part of prop
 e2function number entity:acfHitClip( vector hitpos )
 	if not isOwner(self, this) then return 0 end
-	if ACF_CheckClips(nil, nil, this, hitpos) then return 1 else return 0 end
+	if ACF_CheckClips(this, hitpos) then return 1 else return 0 end
 end
 
 __e2setcost( 1 )
@@ -784,7 +784,14 @@ end
 -- [ Armor Functions ] --
 
 
-__e2setcost( 10 )
+__e2setcost( 1 )
+
+-- Returns the effective armor given an armor value and hit angle
+e2function number acfEffectiveArmor(number Armor, number Angle)
+	return math.Round(Armor/math.abs(math.cos(math.rad(math.min(Angle,89.999)))),1)
+end
+
+__e2setcost( 5 )
 
 -- Returns the current health of an entity
 e2function number entity:acfPropHealth()
@@ -824,6 +831,14 @@ e2function number entity:acfPropDuctility()
 	if restrictInfo(self, this) then return 0 end
 	if not ACF_Check(this) then return 0 end
 	return (this.ACF.Ductility or 0)*100
+end
+
+-- Returns the effective armor from a trace hitting a prop
+e2function number ranger:acfEffectiveArmor()
+	if not (this and validPhysics(this.Entity)) then return 0 end
+	if restrictInfo(self, this.Entity) then return 0 end
+	if not ACF_Check(this.Entity) then return 0 end
+	return math.Round(this.Entity.ACF.Armour/math.abs( math.cos(math.rad(ACF_GetHitAngle( this.HitNormal , this.HitPos-this.StartPos )))),1)
 end
 
 

@@ -99,7 +99,7 @@ Component:AddPreparedFunction( "acfActive", "e:b", "",
 end]] )
 Component:AddFunctionHelper( "acfActive", "e:b", "Sets Active (false/true) for an ACF engine, ammo crate, or fuel tank." )
 
-Component:AddInlineFunction( "acfHitClip", "e:v", "b", "(@value 1:IsValid() and !EXPADV.Components.acf.restrictInfo(Context.player, @value 1)) and ACF_CheckClips(nil, nil, @value 1, @value 2)" )
+Component:AddInlineFunction( "acfHitClip", "e:v", "b", "(@value 1:IsValid() and !EXPADV.Components.acf.restrictInfo(Context.player, @value 1)) and ACF_CheckClips(@value 1, @value 2)" )
 Component:AddFunctionHelper( "acfHitClip", "e:v", "Returns true if hitpos is on a clipped part of prop." )
 
 Component:AddPreparedFunction( "acfLinks", "e:", "ar",

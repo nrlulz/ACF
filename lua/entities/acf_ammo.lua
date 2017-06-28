@@ -136,6 +136,7 @@ function ENT:Initialize()
 	self.CanUpdate = true
 	self.Load = false
 	self.EmptyMass = 0
+	self.NextMassUpdate = 0
 	self.Ammo = 0
 	
 	self.Master = {}
@@ -381,9 +382,10 @@ end
 function ENT:UpdateMass()
 	self.Mass = self.EmptyMass + self:AmmoMass()*(self.Ammo/math.max(self.Capacity,1))
 	
-	--reduce superflous engine calls, update crate mass every 5 kgs change
-	if math.abs(self.LastMass - self.Mass) > 5 then
+	--reduce superflous engine calls, update crate mass every 5 kgs change or every 10s-15s
+	if math.abs(self.LastMass - self.Mass) > 5 or CurTime() > self.NextMassUpdate then
 		self.LastMass = self.Mass
+		self.NextMassUpdate = CurTime()+math.Rand(10,15)
 		local phys = self:GetPhysicsObject()  	
 		if (phys:IsValid()) then 
 			phys:SetMass( self.Mass ) 
