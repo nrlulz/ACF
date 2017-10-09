@@ -17,6 +17,10 @@
 	local Class = Gun:GetNWString( "Class" )
 	local ClassData = list.Get("ACFClasses").GunClass[Class]
 	
+	if not ClassData then
+		return nil
+	end
+	
 	local Attachment = "muzzle"
 	local longbarrel = ClassData.longbarrel
 	if longbarrel ~= nil then
