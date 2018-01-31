@@ -1,0 +1,13 @@
+If you want your ACF-powered vehicle to go at realistic speeds, put the following code in your server's server.cfg configuration file
+or run this command in the GMod game console
+
+lua_run local tbl = physenv.GetPerformanceSettings() tbl.MaxAngularVelocity = 30000 physenv.SetPerformanceSettings(tbl)
+lua_run local tbl = physenv.GetPerformanceSettings() tbl.MaxVelocity = 20000 physenv.SetPerformanceSettings(tbl)
+
+When installing, please install in the ACF folder via Addons folder in the GMod game directory ie:
+C:\Program Files (x86)\Steam\steamapps\common\GarrysMod\garrysmod\addons\ACF for computers running Windows
+By default GMod is located on the C drive in windows however if you installed GMod on a different drive or on other operating systems ie
+Linux or macOS, note the directory:
+steamapps\common\GarrysMod\garrysmod\addons\ACF
+When using SVN please set output to said directory
+When using Zip archive process extract the contents in the folder in the Zip archive (NOT the folder itself) to the said directory
