@@ -5,7 +5,7 @@
 
 ACF_DefineEngine( "1.2-I3", {
 	name = "1.2L I3 Petrol",
-	desc = "Tiny microcar engine, efficient but weak",
+	desc = "Tiny microcar engine; efficient and weak",
 	model = "models/engines/inline3s.mdl",
 	sound = "acf_engines/i4_petrolsmall2.wav",
 	category = "I3",
@@ -39,7 +39,7 @@ ACF_DefineEngine( "3.4-I3", {
 
 ACF_DefineEngine( "13.5-I3", {
 	name = "13.5L I3 Petrol",
-	desc = "Short block light tank engine, likes sideways mountings",
+	desc = "Short block light tank engine; likes sideways mountings",
 	model = "models/engines/inline3b.mdl",
 	sound = "acf_engines/i4_petrollarge.wav",
 	category = "I3",
@@ -58,7 +58,7 @@ ACF_DefineEngine( "13.5-I3", {
 
 ACF_DefineEngine( "1.1-I3", {
 	name = "1.1L I3 Diesel",
-	desc = "ATV grade 3-banger, enormous rev band but a choppy idle, great for light utility work",
+	desc = "ATV grade 3-banger with a choppy idle; great for light utility work",
 	model = "models/engines/inline3s.mdl",
 	sound = "acf_engines/i4_diesel2.wav",
 	category = "I3",
@@ -75,7 +75,7 @@ ACF_DefineEngine( "1.1-I3", {
 
 ACF_DefineEngine( "2.8-I3", {
 	name = "2.8L I3 Diesel",
-	desc = "Medium utility grade I3 diesel, for tractors",
+	desc = "Medium utility grade I3 diesel; for tractors",
 	model = "models/engines/inline3m.mdl",
 	sound = "acf_engines/i4_dieselmedium.wav",
 	category = "I3",
@@ -92,7 +92,7 @@ ACF_DefineEngine( "2.8-I3", {
 
 ACF_DefineEngine( "11.0-I3", {
 	name = "11.0L I3 Diesel",
-	desc = "Light tank duty engine, compact yet grunts hard",
+	desc = "Light tank duty engine; compact yet grunts hard",
 	model = "models/engines/inline3b.mdl",
 	sound = "acf_engines/i4_diesellarge.wav",
 	category = "I3",

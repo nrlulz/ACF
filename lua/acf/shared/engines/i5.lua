@@ -5,7 +5,7 @@
 
 ACF_DefineEngine( "2.3-I5", {
 	name = "2.3L I5 Petrol",
-	desc = "Sedan-grade 5-cylinder, solid and dependable",
+	desc = "Sedan-grade 5-cylinder; solid and dependable",
 	model = "models/engines/inline5s.mdl",
 	sound = "acf_engines/i5_petrolsmall.wav",
 	category = "I5",
@@ -22,7 +22,7 @@ ACF_DefineEngine( "2.3-I5", {
 
 ACF_DefineEngine( "3.9-I5", {
 	name = "3.9L I5 Petrol",
-	desc = "Truck sized inline 5, strong with a good balance of revs and torques",
+	desc = "Truck sized inline 5; strong with a good balance of revs and torque",
 	model = "models/engines/inline5m.mdl",
 	sound = "acf_engines/i5_petrolmedium.wav",
 	category = "I5",
@@ -41,7 +41,7 @@ ACF_DefineEngine( "3.9-I5", {
 
 ACF_DefineEngine( "2.9-I5", {
 	name = "2.9L I5 Diesel",
-	desc = "Aging fuel-injected diesel, low in horsepower but very forgiving and durable",
+	desc = "Aging fuel-injected diesel; low in horsepower but very forgiving and durable",
 	model = "models/engines/inline5s.mdl",
 	sound = "acf_engines/i5_dieselsmall2.wav",
 	category = "I5",
@@ -58,7 +58,7 @@ ACF_DefineEngine( "2.9-I5", {
 
 ACF_DefineEngine( "4.1-I5", {
 	name = "4.1L I5 Diesel",
-	desc = "Heavier duty diesel, found in things that work hard",
+	desc = "Heavier duty diesel; found in things that work hard",
 	model = "models/engines/inline5m.mdl",
 	sound = "acf_engines/i5_dieselmedium.wav",
 	category = "I5",

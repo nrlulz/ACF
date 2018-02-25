@@ -5,7 +5,7 @@
 
 ACF_DefineEngine( "4.6-V12", {
 	name = "4.6L V12 Petrol",
-	desc = "An elderly racecar engine; low on torque, but plenty of power",
+	desc = "An elderly racecar engine; low on torque, but has plenty of power",
 	model = "models/engines/v12s.mdl",
 	sound = "acf_engines/v12_petrolsmall.wav",
 	category = "V12",
@@ -22,7 +22,7 @@ ACF_DefineEngine( "4.6-V12", {
 
 ACF_DefineEngine( "7.0-V12", {
 	name = "7.0L V12 Petrol",
-	desc = "A high end V12; primarily found in very expensive cars",
+	desc = "A high end V12; found primarily in very expensive cars",
 	model = "models/engines/v12m.mdl",
 	sound = "acf_engines/v12_petrolmedium.wav",
 	category = "V12",
@@ -37,9 +37,26 @@ ACF_DefineEngine( "7.0-V12", {
 	limitrpm = 7500
 } )
 
+ACF_DefineEngine( "13.0-V12", {
+	name = "13.0L V12 Petrol",
+	desc = "Thirsty gasoline V12; good torque and power for medium applications.",
+	model = "models/engines/v12m.mdl",
+	sound = "acf_engines/v12_special.wav",
+	category = "V12",
+	fuel = "Petrol",
+	enginetype = "GenericPetrol",
+	weight = 520,
+	torque = 660,
+	flywheelmass = 1,
+	idlerpm = 700,
+	peakminrpm = 2500,
+	peakmaxrpm = 4000,
+	limitrpm = 4250
+} )
+
 ACF_DefineEngine( "23.0-V12", {
 	name = "23.0L V12 Petrol",
-	desc = "A large, thirsty gasoline V12, found in early cold war tanks",
+	desc = "A large, thirsty gasoline V12; found in early cold war tanks",
 	model = "models/engines/v12l.mdl",
 	sound = "acf_engines/v12_petrollarge.wav",
 	category = "V12",
@@ -58,7 +75,7 @@ ACF_DefineEngine( "23.0-V12", {
 
 ACF_DefineEngine( "4.0-V12", {
 	name = "4.0L V12 Diesel",
-	desc = "Reliable truck-duty diesel; a lot of smooth torque",
+	desc = "Reliable truck-duty diesel; plenty of smooth torque",
 	model = "models/engines/v12s.mdl",
 	sound = "acf_engines/v12_dieselsmall.wav",
 	category = "V12",
@@ -75,7 +92,7 @@ ACF_DefineEngine( "4.0-V12", {
 
 ACF_DefineEngine( "9.2-V12", {
 	name = "9.2L V12 Diesel",
-	desc = "High torque light-tank V12, used mainly for vehicles that require balls",
+	desc = "High torque light-tank V12; mainly for vehicles that require balls",
 	model = "models/engines/v12m.mdl",
 	sound = "acf_engines/v12_dieselmedium.wav",
 	category = "V12",
@@ -92,7 +109,7 @@ ACF_DefineEngine( "9.2-V12", {
 
 ACF_DefineEngine( "21.0-V12", {
 	name = "21.0L V12 Diesel",
-	desc = "AVDS-1790-2 tank engine; massively powerful, but enormous and heavy",
+	desc = "AVDS-1790-2 tank engine; extremely powerful, but enormous and heavy",
 	model = "models/engines/v12l.mdl",
 	sound = "acf_engines/v12_diesellarge.wav",
 	category = "V12",
@@ -105,21 +122,4 @@ ACF_DefineEngine( "21.0-V12", {
 	peakminrpm = 500,
 	peakmaxrpm = 1500,
 	limitrpm = 2500
-} )
-
-ACF_DefineEngine( "13.0-V12", {
-	name = "13.0L V12 Petrol",
-	desc = "Thirsty gasoline v12, good torque and power for medium applications.",
-	model = "models/engines/v12m.mdl",
-	sound = "acf_engines/v12_special.wav",
-	category = "V12",
-	fuel = "Petrol",
-	enginetype = "GenericPetrol",
-	weight = 520,
-	torque = 660,
-	flywheelmass = 1,
-	idlerpm = 700,
-	peakminrpm = 2500,
-	peakmaxrpm = 4000,
-	limitrpm = 4250
 } )

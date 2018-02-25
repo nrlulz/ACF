@@ -1,6 +1,8 @@
 
 -- Single-cylinder engines
 
+-- Petrol
+
 ACF_DefineEngine( "0.25-I1", {
 	name = "250cc Single",
 	desc = "Tiny bike engine",
@@ -50,4 +52,23 @@ ACF_DefineEngine( "1.3-I1", {
 	peakminrpm = 3600,
 	peakmaxrpm = 6000,
 	limitrpm = 6700
+} )
+
+-- Diesel
+
+ACF_DefineEngine( "0.3-I1", {
+	name = "300cc Diesel Single",
+	desc = "For when your lawnmower can't climb those hills with a petrol",
+	model = "models/engines/1cylsml.mdl",
+	sound = "acf_engines/i1_small.wav",
+	category = "Single",
+	fuel = "Diesel",
+	enginetype = "GenericDiesel",
+	weight = 20,
+	torque = 37,
+	flywheelmass = 0.05,
+	idlerpm = 450,
+	peakminrpm = 700,
+	peakmaxrpm = 2350,
+	limitrpm = 3000
 } )
