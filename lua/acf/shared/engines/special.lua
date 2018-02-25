@@ -3,7 +3,7 @@
 
 ACF_DefineEngine( "0.9L-I2", {
 	name = "0.9L I2 Petrol",
-	desc = "Turbocharged inline twin engine; delivers surprising pep for its size",
+	desc = "Turbocharged inline twin; delivers surprising pep for its size",
 	model = "models/engines/inline2s.mdl",
 	sound = "acf_extra/vehiclefx/engines/ponyengine.wav",
 	category = "Special",
@@ -58,7 +58,7 @@ ACF_DefineEngine( "1.8L-V4", {
 
 ACF_DefineEngine( "2.4L-V6", {
 	name = "2.4L V6 Petrol",
-	desc = "Although the cast iron block is fairly heavy, this tiny V6 makes up for it with impressive power.  The unique V angle allows uncharacteristically high RPM for a V6",
+	desc = "Although the cast iron block is fairly heavy, this tiny V6 makes up for it with impressive power. The unique V angle allows uncharacteristically high RPM for a V6",
 	model = "models/engines/v6small.mdl",
 	sound = "acf_extra/vehiclefx/engines/l6/capri_onmid.WAV",
 	category = "Special",
@@ -94,7 +94,7 @@ ACF_DefineEngine( "1.9L-I4", {
 
 ACF_DefineEngine( "2.6L-Wankel", {
 	name = "2.6L Rotary",
-	desc = "4 rotor racing Wankel; high revving and high strung",
+	desc = "Large 4-rotor racing Wankel; high revving and high strung",
 	model = "models/engines/wankel_4_med.mdl",
 	sound = "acf_engines/wankel_large.wav",
 	category = "Special",
@@ -130,7 +130,7 @@ ACF_DefineEngine( "2.9-V8", {
 
 ACF_DefineEngine( "3.8-I6", {
 	name = "3.8L I6 Petrol",
-	desc = "Large racing straight six; powerful and high revving, but lacking in torque.",
+	desc = "Large racing straight six; powerful and high revving, but lacking in torque",
 	model = "models/engines/inline6m.mdl",
 	sound = "acf_engines/l6_special.wav",
 	category = "Special",
@@ -166,7 +166,7 @@ ACF_DefineEngine( "5.3-V10", {
 
 ACF_DefineEngine( "7.2-V8", {
 	name = "7.2L V8 Petrol",
-	desc = "Very high revving, glorious V8 of ear rapetasticalness.",
+	desc = "Very high revving, glorious V8 of ear rapetasticalness",
 	model = "models/engines/v8m.mdl",
 	sound = "acf_engines/v8_special2.wav",
 	category = "Special",
@@ -184,7 +184,7 @@ ACF_DefineEngine( "7.2-V8", {
 
 ACF_DefineEngine( "3.0-V12", {
 	name = "3.0L V12 Petrol",
-	desc = "A purpose-built racing V12, not known for longevity.",
+	desc = "A purpose-built racing V12, not known for longevity",
 	model = "models/engines/v12s.mdl",
 	sound = "acf_extra/vehiclefx/engines/v12/gtb4_onmid.WAV",
 	pitch = 0.85,

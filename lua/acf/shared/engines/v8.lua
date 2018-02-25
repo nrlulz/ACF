@@ -5,7 +5,7 @@
 
 ACF_DefineEngine( "5.7-V8", {
 	name = "5.7L V8 Petrol",
-	desc = "Car sized petrol engine with good power and mid range torque",
+	desc = "Car sized petrol engine; good power and mid range torque",
 	model = "models/engines/v8s.mdl",
 	sound = "acf_engines/v8_petrolsmall.wav",
 	category = "V8",
@@ -22,7 +22,7 @@ ACF_DefineEngine( "5.7-V8", {
 
 ACF_DefineEngine( "9.0-V8", {
 	name = "9.0L V8 Petrol",
-	desc = "Giant, thirsty V8 for medium applications",
+	desc = "Giant, thirsty V8; for medium applications",
 	model = "models/engines/v8m.mdl",
 	sound = "acf_engines/v8_petrolmedium.wav",
 	category = "V8",

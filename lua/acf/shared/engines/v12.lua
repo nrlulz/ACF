@@ -39,7 +39,7 @@ ACF_DefineEngine( "7.0-V12", {
 
 ACF_DefineEngine( "13.0-V12", {
 	name = "13.0L V12 Petrol",
-	desc = "Thirsty gasoline V12; good torque and power for medium applications.",
+	desc = "Thirsty gasoline V12; good torque and power for medium applications",
 	model = "models/engines/v12m.mdl",
 	sound = "acf_engines/v12_special.wav",
 	category = "V12",

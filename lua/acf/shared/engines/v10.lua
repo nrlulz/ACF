@@ -41,7 +41,7 @@ ACF_DefineEngine( "8.0-V10", {
 
 ACF_DefineEngine( "22.0-V10", {
 	name = "22.0L V10 Multifuel",
-	desc = "Heavy multifuel V10, gearbox-shredding torque but very heavy.",
+	desc = "Heavy multifuel V10; gearbox-shredding torque but very heavy.",
 	model = "models/engines/v10big.mdl",
 	sound = "acf_engines/v10_diesellarge.wav",
 	category = "V10",
