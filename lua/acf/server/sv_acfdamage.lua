@@ -241,17 +241,9 @@ end
 
 --Calculates the vector of the ricochet of a round upon impact at a set angle
 function ACF_RicochetVector(Flight, HitNormal)
-	--bit of maths shamelessly stolen from wiremod to rotate a vector around an axis
 	local Vec = Flight:GetNormalized()
-	local x,y,z = HitNormal[1], HitNormal[2], HitNormal[3]
-	
-	local length = (x*x+y*y+z*z)^0.5
-	x,y,z = x/length, y/length, z/length
-	local Rotated = -Vector((-1 + (x^2)*2) * Vec[1] + (x*y*2) * Vec[2] + (x*z*2) * Vec[3],
-	(y*x*2) * Vec[1] + (-1 + (y^2)*2) * Vec[2] + (y*z*2) * Vec[3],
-	(z*x*2) * Vec[1] + (z*y*2) * Vec[2] + (-1 + (z^2)*2) * Vec[3])
-	
-	return Rotated
+
+	return Vec - (2 * Vec:Dot(HitNormal))*HitNormal
 end
 
 --Handles the impact of a round on a target
@@ -259,9 +251,8 @@ function ACF_RoundImpact( Bullet, Speed, Energy, Target, HitPos, HitNormal , Bon
 	--if (Bullet.Type == "HEAT") then print("Pen: "..((Energy.Penetration / Bullet["PenAera"]) * ACF.KEtoRHA)) end
 	local Angle = ACF_GetHitAngle( HitNormal , Bullet["Flight"] )
 	local Ricochet = 0
-	local MinAngle = math.min(Bullet["Ricochet"] - Speed/39.37/18,89)	--Making the chance of a ricochet get higher as the speeds increase
-	if Angle > math.random(MinAngle,90) and Angle < 89.9 then	--Checking for ricochet
-		Ricochet = (Angle/100)			--If ricocheting, calculate how much of the energy is dumped into the plate and how much is carried by the ricochet
+	if ACF_RicoProbability( Angle, Bullet.Ricochet, Speed, 39.37 * 18 ) > math.random() then	--Checking for ricochet
+		Ricochet = ((90 - Angle)/100)			--If ricocheting, calculate how much of the energy is dumped into the plate and how much is carried by the ricochet
 		Energy.Penetration = Energy.Penetration - Energy.Penetration*Ricochet/5 --Ricocheting can save plates that would theorically get penetrated, can add up to 1/5 rating
 	end
 	local HitRes = ACF_Damage ( Target , Energy , Bullet["PenAera"] , Angle , Bullet["Owner"] , Bone, Bullet["Gun"], Bullet["Type"] )  --DAMAGE !!
@@ -306,9 +297,8 @@ function ACF_PenetrateGround( Bullet, Energy, HitPos, HitNormal )
 		local Ricochet = 0
 		local Speed = Bullet.Flight:Length() / ACF.VelScale
 		local Angle = ACF_GetHitAngle( HitNormal, Bullet.Flight )
-		local MinAngle = math.min(Bullet.Ricochet - Speed/39.37/30 + 20,89.9)	--Making the chance of a ricochet get higher as the speeds increase
-		if Angle > math.random(MinAngle,90) and Angle < 89.9 then	--Checking for ricochet
-			Ricochet = Angle/90*0.75
+		if ACF_RicoProbability( Angle, Bullet.Ricochet, Speed - 23622, 39.37 * 30 ) > math.random() then	--Checking for ricochet
+			Ricochet = (90 - Angle)/90*0.75
 		end
 		
 		if Ricochet > 0 and Bullet.GroundRicos < 2 then
