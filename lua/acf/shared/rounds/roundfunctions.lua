@@ -40,9 +40,10 @@ function ACF_RoundShellCapacity( Momentum, FrAera, Caliber, ProjLength )
 	return  Volume, Length, Radius --Returning the cavity volume and the minimum wall thickness
 end
 
-function ACF_RicoProbability( Rico, Speed)
-	local MinAngle = math.min(Rico - Speed/15,89)
-	return { Min = math.Round(math.max(MinAngle,0.1),1), Mean = math.Round(math.max(MinAngle+(90-MinAngle)/2,0.1),1), Max = 90 }
+function ACF_RicoProbability( Angle, Rico, Speed, Factor )
+	--sigmoid distribution
+	local sigmoidCenter = Rico - Speed/Factor
+	return 1/(1 + math.exp((Angle - sigmoidCenter)/-4))
 end
 
 --Formula from https://mathscinotes.wordpress.com/2013/10/03/parameter-determination-for-pejsa-velocity-model/
