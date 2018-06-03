@@ -3,7 +3,7 @@
 
 ACF_DefineEngine( "3.8-R7", {
 	name = "3.8L R7 Petrol",
-	desc = "A tiny, old worn-out radial.",
+	desc = "A tiny, old, worn-out radial",
 	model = "models/engines/radial7s.mdl",
 	sound = "acf_engines/r7_petrolsmall.wav",
 	category = "Radial",
@@ -20,7 +20,7 @@ ACF_DefineEngine( "3.8-R7", {
 
 ACF_DefineEngine( "11.0-R7", {
 	name = "11.0 R7 Petrol",
-	desc = "Mid range radial, thirsty and smooth",
+	desc = "Mid range radial; thirsty and smooth",
 	model = "models/engines/radial7m.mdl",
 	sound = "acf_engines/r7_petrolmedium.wav",
 	category = "Radial",
@@ -37,7 +37,7 @@ ACF_DefineEngine( "11.0-R7", {
 
 ACF_DefineEngine( "24.0-R7", {
 	name = "24.0L R7 Petrol",
-	desc = "Massive American radial monster, destined for fighter aircraft and heavy tanks.",
+	desc = "Massive American radial monster; destined for fighter aircraft and heavy tanks",
 	model = "models/engines/radial7l.mdl",
 	sound = "acf_engines/r7_petrollarge.wav",
 	category = "Radial",

@@ -3,7 +3,7 @@
 
 ACF_DefineEngine( "1.4-B4", {
 	name = "1.4L Flat 4 Petrol",
-	desc = "Small air cooled flat four, most commonly found in nazi insects",
+	desc = "Small air cooled flat four; most commonly found in nazi insects",
 	model = "models/engines/b4small.mdl",
 	sound = "acf_engines/b4_petrolsmall.wav",
 	category = "B4",
@@ -20,7 +20,7 @@ ACF_DefineEngine( "1.4-B4", {
 
 ACF_DefineEngine( "2.1-B4", {
 	name = "2.1L Flat 4 Petrol",
-	desc = "Tuned up flat four, probably find this in things that go fast in a desert.",
+	desc = "Tuned up flat four; probably find this in things that go fast in the desert.",
 	model = "models/engines/b4small.mdl",
 	sound = "acf_engines/b4_petrolmedium.wav",
 	category = "B4",
@@ -54,7 +54,7 @@ ACF_DefineEngine( "3.2-B4", {
 
 ACF_DefineEngine( "2.4-B4", {
 	name = "2.4L Flat 4 Multifuel",
-	desc = "Tiny military-grade multifuel. Heavy, but grunts hard.",
+	desc = "Tiny military-grade multifuel; heavy, but grunts hard.",
 	model = "models/engines/b4small.mdl",
 	sound = "acf_extra/vehiclefx/engines/coh/ba11.wav",
 	category = "B4",

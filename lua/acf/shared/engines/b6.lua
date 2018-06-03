@@ -3,7 +3,7 @@
 
 ACF_DefineEngine( "2.8-B6", {
 	name = "2.8L Flat 6 Petrol",
-	desc = "Car sized flat six engine, sporty and light",
+	desc = "Car sized flat six; sporty and light",
 	model = "models/engines/b6small.mdl",
 	sound = "acf_engines/b6_petrolsmall.wav",
 	category = "B6",
@@ -20,7 +20,7 @@ ACF_DefineEngine( "2.8-B6", {
 
 ACF_DefineEngine( "5.0-B6", {
 	name = "5.0 Flat 6 Petrol",
-	desc = "Sports car grade flat six, renown for their smooth operation and light weight",
+	desc = "Sports car grade flat six; renown for their smooth operation and light weight",
 	model = "models/engines/b6med.mdl",
 	sound = "acf_engines/b6_petrolmedium.wav",
 	category = "B6",
@@ -54,7 +54,7 @@ ACF_DefineEngine( "10.0-B6", {
 
 ACF_DefineEngine( "5.4-B6", {
 	name = "5.4 Flat 6 Multifuel",
-	desc = "Military-grade multifuel boxer engine.  Although heavy, it is compact, durable, and has excellent performance under adverse conditions.",
+	desc = "Military-grade multifuel boxer; although heavy, it's compact, durable, and has excellent performance under adverse conditions",
 	model = "models/engines/b6med.mdl",
 	sound = "acf_engines/v8_diesel.wav",
 	category = "B6",
