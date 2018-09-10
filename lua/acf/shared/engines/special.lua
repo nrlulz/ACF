@@ -201,3 +201,21 @@ ACF_DefineEngine( "3.0-V12", {
 	limitrpm = 12500
 } )
 
+ACF_DefineEngine( "8.0-V8", {
+	name = "8.0L V8 Diesel",
+	desc = "Sturdy truck engine with high torque",
+	model = "models/engines/v8m.mdl",
+	sound = "acf_extra/vehiclefx/engines/gnomefather/porschediesel.wav",
+	category = "Special",
+	fuel = "Diesel",
+	enginetype = "GenericDiesel",
+        requiresfuel = true,
+	weight = 550,
+	torque = 850,
+	flywheelmass = 1.6,
+	idlerpm = 600,
+	peakminrpm = 750,
+	peakmaxrpm = 2700,
+	limitrpm = 3000
+} )
+
