@@ -209,7 +209,7 @@ ACF_DefineEngine( "8.0-V8", {
 	category = "Special",
 	fuel = "Diesel",
 	enginetype = "GenericDiesel",
-        requiresfuel = true,
+       requiresfuel = true,
 	weight = 550,
 	torque = 850,
 	flywheelmass = 1.6,
