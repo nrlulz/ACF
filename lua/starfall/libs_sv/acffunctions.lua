@@ -18,12 +18,11 @@
 
 -- #fuel
 
-
 -- [ Helper Functions ] --
 
-local ents_metatable = SF.GetTypeDef( "Entity" )
-local ents_methods = ents_metatable.__methods
-local wrap, unwrap = ents_metatable.__wrap, ents_metatable.__unwrap
+local ents_metatable = SF.Entities.Metatable
+local ents_methods = SF.Entities.Methods
+local wrap, unwrap = SF.Entities.Wrap, SF.Entities.Unwrap
 
 local function isEngine ( ent )
 	if not validPhysics( ent ) then return false end
@@ -371,7 +370,7 @@ function ents_methods:acfFlyMass ()
 	return this.Inertia / ( 3.1416 )^2 or 0
 end
 
--- Returns the current power of an ACF engine
+--- Returns the current power of an ACF engine
 function ents_methods:acfPower ()
 	SF.CheckType( self, ents_metatable )
 	local this = unwrap( self )
