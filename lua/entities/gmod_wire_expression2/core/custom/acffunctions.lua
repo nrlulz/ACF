@@ -917,6 +917,20 @@ e2function number entity:acfFuel()
 	return 0
 end
 
+-- Sets the tank fuel to the specified ammount
+e2function void entity:acfSetFuel(number ammount)
+    if not isFuel(this) then return end
+	if not isOwner(self, this) then return end
+
+	if ammount >= 0 then
+		if ammount > this.Capacity then
+			this.Fuel = this.Capacity
+		else
+			this.Fuel = ammount
+		end
+	end
+end
+
 -- Returns the amount of fuel in an ACF fuel tank or linked to engine as a percentage of capacity
 e2function number entity:acfFuelLevel()
 	if isFuel(this) then

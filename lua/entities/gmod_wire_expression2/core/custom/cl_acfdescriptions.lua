@@ -94,6 +94,7 @@ E2Helper.Descriptions["acfEffectiveArmor"] = "Returns the effective armor of a g
 
 --fuel
 E2Helper.Descriptions["acfFuel"] = "Returns the remaining liters of fuel or kilowatt hours in an ACF fuel tank, or available to an engine."
+E2Helper.Descriptions["acfSetFuel"] = "Sets the tank fuel to the specified ammount."
 E2Helper.Descriptions["acfFuelLevel"] = "Returns the percent remaining fuel in an ACF fuel tank, or available to an engine."
 E2Helper.Descriptions["acfFuelRequired"] = "Returns 1 if an ACF engine requires fuel."
 E2Helper.Descriptions["acfRefuelDuty"] = "Sets an ACF fuel tank on refuel duty, causing it to supply other fuel tanks with fuel."
