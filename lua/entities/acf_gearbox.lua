@@ -678,6 +678,9 @@ function ENT:CheckLegal()
 	-- make sure weight is not below stock
 	if self:GetPhysicsObject():GetMass() < self.Mass then return false end
 	
+	--make sure it's not spherical
+	if self.EntityMods.MakeSphericalCollisions then return false end
+
 	self.RootParent = nil
 	-- if not parented then its legal
 	if not IsValid(self:GetParent()) then return true end
