@@ -131,6 +131,7 @@ function ENT:Initialize()
 	self.LastLoadDuration = 0
 	self.Owner = self
 	self.Parentable = false
+	self.FuseTime = 0
 	
 	self.IsMaster = true
 	self.AmmoLink = {}
@@ -144,7 +145,7 @@ function ENT:Initialize()
 	
 	self.Inaccuracy 	= 1
 	
-	self.Inputs = Wire_CreateInputs( self, { "Fire", "Unload", "Reload" } )
+	self.Inputs = Wire_CreateInputs( self, { "Fire", "Unload", "Reload", "Fuse Time" } )
 	self.Outputs = WireLib.CreateSpecialOutputs( self, { "Ready", "AmmoCount", "Entity", "Shots Left", "Fire Rate", "Muzzle Weight", "Muzzle Velocity" }, { "NORMAL", "NORMAL", "ENTITY", "NORMAL", "NORMAL", "NORMAL", "NORMAL" } )
 	Wire_TriggerOutput(self, "Entity", self)
 
@@ -190,7 +191,7 @@ function MakeACF_Gun(Owner, Pos, Angle, Id)
 	if(Lookup.magsize) then
 		Gun.MagSize = math.max(Gun.MagSize, Lookup.magsize)
 	else
-		Gun.Inputs = Wire_AdjustInputs( Gun, { "Fire", "Unload" } )
+		Gun.Inputs = Wire_AdjustInputs( Gun, { "Fire", "Unload" , "Fuse Time"} )
 	end
 	Gun.MagReload = 0
 	if(Lookup.magreload) then
@@ -421,6 +422,7 @@ function ENT:TriggerInput( iname, value )
 		self:UnloadAmmo()
 	elseif ( iname == "Fire" and value > 0 and ACF.GunfireEnabled ) then
 		if self.NextFire < CurTime() then
+		
 			self.User = self:GetUser(self.Inputs.Fire.Src) or self.Owner
 			if not IsValid(self.User) then self.User = self.Owner end
 			self:FireShell()
@@ -431,7 +433,13 @@ function ENT:TriggerInput( iname, value )
 		self.Firing = false
 	elseif ( iname == "Reload" and value ~= 0 ) then
 		self.Reloading = true
+	elseif ( iname == "Fuse Time" ) then
+	if value > 0 then
+		self.FuseTime = value
+	else
+		self.FuseTime = 0
 	end		
+	end
 end
 
 local function RetDist( enta, entb )
@@ -616,6 +624,21 @@ function ENT:FireShell()
 			self.BulletData.Flight = ShootVec * self.BulletData.MuzzleVel * 39.37 + ACF_GetPhysicalParent(self):GetVelocity()
 			self.BulletData.Owner = self.User
 			self.BulletData.Gun = self
+
+			local Cal = self.Caliber
+
+--			print("BooletType: "..self.BulletData.Type)
+			
+			if Cal>=3 and Cal<=10 and (self.BulletData.Type == "HE" or self.BulletData.Type == "SM") then
+			local FuseNoise = 1 + math.Rand(-1,1)* math.max(((Cal-3)/12),0.3)
+			self.BulletData.FuseLength = self.FuseTime * FuseNoise
+--			print("FuseNoise: "..FuseNoise)
+--			print("TestSuccess")
+--			else
+--			self.BulletData.FuseLength = 0
+--			print("TestFail")
+			end
+			
 			self.CreateShell = ACF.RoundTypes[self.BulletData.Type].create
 			self:CreateShell( self.BulletData )
 			
