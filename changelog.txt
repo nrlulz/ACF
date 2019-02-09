@@ -192,3 +192,6 @@ r500
 
 *r636
 - Fixed 140sc model size FINALLY, courtesy of Wizzard Lizzard and RDC
+
+*r637
+- Added the first special diesel engine
