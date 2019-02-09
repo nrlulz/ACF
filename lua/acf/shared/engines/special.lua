@@ -201,3 +201,21 @@ ACF_DefineEngine( "3.0-V12", {
 	limitrpm = 12500
 } )
 
+ACF_DefineEngine( "11.0-V12", {
+	name = "11.0L V12 Diesel",
+	desc = "A very powerful truck or light tank engine.",
+	model = "models/engines/v12m.mdl",
+	sound = "acf_engines/v12_diesellarge.wav",
+	pitch = 1,
+	category = "Special",
+	fuel = "Diesel",
+	enginetype = "GenericDiesel",
+	requiresfuel = true,
+	weight = 620,
+	torque = 1040,
+	flywheelmass = 2.5,
+	idlerpm = 675,
+	peakminrpm = 800,
+	peakmaxrpm = 3300,
+	limitrpm = 3500
+} )
