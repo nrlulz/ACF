@@ -166,7 +166,7 @@ end
 
 function Round.detonate( Index, Bullet, HitPos, HitNormal )
 	
-	ACF_HE( HitPos - Bullet.Flight:GetNormalized()*3 , HitNormal , Bullet.BoomFillerMass , Bullet.CasingMass , Bullet.Owner )
+	ACF_HE( HitPos - Bullet.Flight:GetNormalized()*3, HitNormal, Bullet.BoomFillerMass, Bullet.CasingMass, Bullet.Owner, nil, Bullet.Gun )
 
 	Bullet.Detonated = true
 	Bullet.InitTime = SysTime()

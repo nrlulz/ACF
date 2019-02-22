@@ -2,7 +2,7 @@ ACF = {}
 ACF.AmmoTypes = {}
 ACF.MenuFunc = {}
 ACF.AmmoBlacklist = {}
-ACF.Version = 642 -- REMEMBER TO CHANGE THIS FOR GODS SAKE, OMFG!!!!!!! -wrex   Update the changelog too! -Ferv
+ACF.Version = 643 -- REMEMBER TO CHANGE THIS FOR GODS SAKE, OMFG!!!!!!! -wrex   Update the changelog too! -Ferv
 ACF.CurrentVersion = 0 -- just defining a variable, do not change
 
 ACF.Year = 1945
@@ -144,18 +144,6 @@ elseif CLIENT then
 		include("acf/client/cl_acfpermission.lua")
 		include("acf/client/gui/cl_acfsetpermission.lua")
 	end
-	
-	killicon.Add( "acf_AC", "HUD/killicons/acf_AC", Color( 200, 200, 48, 255 ) )
-	killicon.Add( "acf_AL", "HUD/killicons/acf_AL", Color( 200, 200, 48, 255 ) )
-	killicon.Add( "acf_C", "HUD/killicons/acf_C", Color( 200, 200, 48, 255 ) )
-	killicon.Add( "acf_GL", "HUD/killicons/acf_GL", Color( 200, 200, 48, 255 ) )
-	killicon.Add( "acf_HMG", "HUD/killicons/acf_HMG", Color( 200, 200, 48, 255 ) )
-	killicon.Add( "acf_HW", "HUD/killicons/acf_HW", Color( 200, 200, 48, 255 ) )
-	killicon.Add( "acf_MG", "HUD/killicons/acf_MG", Color( 200, 200, 48, 255 ) )
-	killicon.Add( "acf_MO", "HUD/killicons/acf_MO", Color( 200, 200, 48, 255 ) )
-	killicon.Add( "acf_RAC", "HUD/killicons/acf_RAC", Color( 200, 200, 48, 255 ) )
-	killicon.Add( "acf_SA", "HUD/killicons/acf_SA", Color( 200, 200, 48, 255 ) )
-	killicon.Add( "acf_ammo", "HUD/killicons/acf_ammo", Color( 200, 200, 48, 255 ) )
 	
 	CreateConVar("acf_cl_particlemul", 1)
 	CreateClientConVar("ACF_MobilityRopeLinks", "1", true, true)
@@ -492,80 +480,3 @@ else
 	end
 	net.Receive("acf_smokewind", recvSmokeWind)
 end
-
-/*
-ONE HUGE HACK to get good killicons.
-*/
--- disabling this for now because it was breaking killicons completely and i don't want to deal with it right now
-/*
-if SERVER then
-	
-	hook.Add("PlayerDeath", "ACF_PlayerDeath",function( victim, inflictor, attacker )
-		if inflictor:GetClass() == "acf_ammo" then
-			net.Start("ACF_KilledByACF")
-				net.WriteString( victim:Nick()..";ammo;"..attacker:Nick() )
-			net.Broadcast()
-		end
-		if inflictor:GetClass() == "acf_gun" then
-			net.Start("ACF_KilledByACF")
-				net.WriteString( victim:Nick()..";"..inflictor.Class..";"..attacker:Nick() )
-			net.Broadcast()
-		end
-	end)
-end
-
-
-if CLIENT then
-	
-	net.Receive("ACF_KilledByACF", function()
-		local Table = string.Explode(";", net.ReadString())
-		local victim, gun, attacker = Table[1], Table[2], Table[3]
-		
-		if attacker == "worldspawn" then attacker = "" end
-		GAMEMODE:AddDeathNotice( attacker, -1, "acf_"..gun, victim, 1001 )
-	end)
-	
-	if not ACF.replacedPlayerKilled then
-		timer.Create("ACF_replacePlayerKilled", 1, 0, function()
-			local Hooks = usermessage.GetTable()
-			if Hooks["PlayerKilled"] then
-				local ACF_PlayerKilled = Hooks["PlayerKilled"].Function
-				ACF.replacedPlayerKilled = true
-				Hooks["PlayerKilled"].Function = function(msg)
-					local victim     = msg:ReadEntity()
-					if ( !IsValid( victim ) ) then return end
-					local inflictor    = msg:ReadString()
-					local attacker     = msg:ReadString()
-					if inflictor != "acf_gun" and inflictor != "acf_ammo" then
-						ACF_PlayerKilled(msg)
-					end
-				end
-				timer.Destroy("ACF_replacePlayerKilled")
-				Msg("[ACF] Replaced PlayerKilled\n")
-			end
-		end)
-	end
-	if not ACF.replacedPlayerKilledByPlayer then
-		timer.Create("ACF_replacePlayerKilledByPlayer", 1, 0, function()
-			local Hooks = usermessage.GetTable()
-			if Hooks["PlayerKilledByPlayer"] then
-				local ACF_PlayerKilledByPlayer = Hooks["PlayerKilledByPlayer"].Function
-				ACF.replacedPlayerKilledByPlayer = true
-				Hooks["PlayerKilledByPlayer"].Function = function(msg)
-					local victim     = msg:ReadEntity()
-					local inflictor    = msg:ReadString()
-					local attacker     = msg:ReadEntity()
-
-					if ( !IsValid( attacker ) ) then return end
-					if ( !IsValid( victim ) ) then return end
-					if inflictor != "acf_gun" and inflictor != "acf_ammo" then
-						ACF_PlayerKilledByPlayer(msg)
-					end
-				end
-				timer.Destroy("ACF_replacePlayerKilledByPlayer")
-				Msg("[ACF] Replaced PlayerKilledByPlayer\n")
-			end
-		end)
-	end
-end
-*/

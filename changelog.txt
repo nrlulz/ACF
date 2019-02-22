@@ -203,3 +203,9 @@ r500
 -- ENTITY:acfReloadTime() - returns time to next shot of an ACF weapon
 -- ENTITY:acfMagReloadTime() - returns time it takes for an ACF weapon to reload magazine
 -- ENTITY:acfReloadProgress() - returns reload progress of an ACF weapon, useful for progress bars
+
+*r643
+- 'Fixed' killicons
+-- Added ACF torch killicon
+- Fixed ACF_HE() argument naming
+- Fixed ACF_HE() usage in HE, APHE, HEAT ammunition
