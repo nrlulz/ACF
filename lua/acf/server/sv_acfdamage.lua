@@ -1,6 +1,20 @@
 -- This file is meant for the advanced damage functions used by the Armored Combat Framework
-function ACF_HE( Hitpos , HitNormal , FillerMass, FragMass , Inflictor, NoOcc, Ammo )	--HitPos = Detonation center, FillerMass = mass of TNT being detonated in KG, FragMass = Mass of the round casing for fragmentation purposes, Inflictor owner of said TNT
-	local Power = FillerMass * ACF.HEPower					--Power in KiloJoules of the filler mass of  TNT 
+
+--[[----------------------------------------------------------------------------
+	Function:
+		ACF_HE
+	Arguments:
+		HitPos 		- detonation center,
+		FillerMass 	- mass of TNT being detonated in KG
+		FragMass 	- mass of the round casing for fragmentation purposes
+		Inflictor	- owner of said TNT
+		NoOcc		- table with entities to ignore
+		Gun			- gun entity from which round is fired
+	Purpose:
+		Handles ACF explosions
+------------------------------------------------------------------------------]]
+function ACF_HE( Hitpos , HitNormal , FillerMass, FragMass, Inflictor, NoOcc, Gun )
+	local Power = FillerMass * ACF.HEPower					--Power in KiloJoules of the filler mass of  TNT
 	local Radius = (FillerMass)^0.33*8*39.37				--Scalling law found on the net, based on 1PSI overpressure from 1 kg of TNT at 15m
 	local MaxSphere = (4 * 3.1415 * (Radius*2.54 )^2) 		--Surface Aera of the sphere at maximum radius
 	local Amp = math.min(Power/2000,50)
@@ -158,9 +172,9 @@ function ACF_HE( Hitpos , HitNormal , FillerMass, FragMass , Inflictor, NoOcc, A
 					else
 						--confirmed proper hit, apply damage
 						--print("No HE bug on "..Tar:GetClass())
-						BlastRes = ACF_Damage ( Tar , Blast , AreaAdjusted , 0 , Inflictor ,0 , Ammo, "HE" )
-						FragRes = ACF_Damage ( Tar , FragKE , FragAera*FragHit , 0 , Inflictor , 0, Ammo, "Frag" )
 						
+						BlastRes = ACF_Damage ( Tar    , Blast  , AreaAdjusted , 0     , Inflictor , 0    , Gun , "HE" )
+						FragRes = ACF_Damage ( Tar , FragKE , FragAera*FragHit , 0 , Inflictor , 0, Gun, "Frag" )
 						if (BlastRes and BlastRes.Kill) or (FragRes and FragRes.Kill) then
 							local Debris = ACF_HEKill( Tar, (Tar:GetPos() - NewHitpos):GetNormal(), PowerFraction )
 						else
@@ -173,9 +187,8 @@ function ACF_HE( Hitpos , HitNormal , FillerMass, FragMass , Inflictor, NoOcc, A
 				BlastRes = ACF_CalcDamage( Tar, Blast, AreaAdjusted, 0 )
 				--FragRes = ACF_CalcDamage( Tar , FragKE , FragAera*FragHit , 0 ) --not used for anything in this case
 			else
-				BlastRes = ACF_Damage ( Tar , Blast , AreaAdjusted , 0 , Inflictor ,0 , Ammo, "HE" )
-				FragRes = ACF_Damage ( Tar , FragKE , FragAera*FragHit , 0 , Inflictor , 0, Ammo, "Frag" )
-			
+				BlastRes = ACF_Damage ( Tar , Blast , AreaAdjusted , 0 , Inflictor ,0 , Gun, "HE" )
+				FragRes = ACF_Damage ( Tar , FragKE , FragAera*FragHit , 0 , Inflictor , 0, Gun, "Frag" )
 				if (BlastRes and BlastRes.Kill) or (FragRes and FragRes.Kill) then
 					local Debris = ACF_HEKill( Tar , Table.Vec , PowerFraction )
 					table.insert( OccFilter , Debris )						--Add the debris created to the ignore so we don't hit it in other rounds

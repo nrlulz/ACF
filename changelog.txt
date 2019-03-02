@@ -197,3 +197,17 @@ r500
 - Rebalanced all Ground Turbine engines, torque nerfed drastically but HP remaining the same.
 - GGTs now act more like piston engines in that they do not have instant torque from idle and require to sit at a certain rpm to be efficient.
 -Added some Lockheed Bitchin' Betty F22 sounds from Serif
+
+*r642
+- Added new E2 functions:
+-- ENTITY:acfReloadTime() - returns time to next shot of an ACF weapon
+-- ENTITY:acfMagReloadTime() - returns time it takes for an ACF weapon to reload magazine
+-- ENTITY:acfReloadProgress() - returns reload progress of an ACF weapon, useful for progress bars
+
+*r643
+- 'Fixed' killicons
+-- Added ACF.EnableKillicons global variable to enable or disable 'fixed' killicons
+-- Added ACF torch killicon
+-- Added acf_gun killicon
+- Fixed ACF_HE() argument naming
+- Fixed ACF_HE() usage in HE, APHE, HEAT ammunition

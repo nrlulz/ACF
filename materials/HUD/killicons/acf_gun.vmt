@@ -1,0 +1,8 @@
+"UnlitGeneric"
+{
+	"$basetexture" "HUD/killicons/acf_gun"
+	"$vertexcolor" 		1
+	"$vertexalpha" 		1
+	"$nolod" 			1
+	"$additive"		1 // hldm style!
+}

@@ -36,6 +36,11 @@ local function isFuel(ent)
 	if (ent:GetClass() == "acf_fueltank") then return true else return false end
 end
 
+local function reloadTime(ent)
+	if ent.CurrentShot and ent.CurrentShot > 0 then return ent.ReloadTime end
+	return ent.MagReload
+end
+
 local function restrictInfo(ply, ent)
 	if GetConVar("sbox_acf_restrictinfo"):GetInt() != 0 then
 		if isOwner(ply, ent) then return false else return true end
@@ -604,6 +609,28 @@ e2function number entity:acfReady()
 	if restrictInfo(self, this) then return 0 end
 	if (this.Ready) then return 1 end
 	return 0
+end
+
+-- Returns time to next shot of an ACF weapon
+__e2setcost( 3 )
+e2function number entity:acfReloadTime()
+	if restrictInfo(self, this) or not isGun(this) or this.Ready then return 0 end
+	return reloadTime(this)
+end
+
+-- Returns number between 0 and 1 which represents reloading progress of an ACF weapon. Useful for progress bars
+__e2setcost( 5 )
+e2function number entity:acfReloadProgress()
+	if restrictInfo(self, this) or not isGun(this) or this.Ready then return 1 end
+	return math.Clamp( 1 - (this.NextFire - CurTime()) / reloadTime(this), 0, 1 )
+end
+
+__e2setcost( 1 )
+
+-- returns time it takes for an ACF weapon to reload magazine
+e2function number entity:acfMagReloadTime()
+	if restrictInfo(self, this) or not isGun(this) or not this.MagReload then return 0 end
+	return this.MagReload
 end
 
 -- Returns the magazine size for an ACF gun
