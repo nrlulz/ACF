@@ -105,6 +105,9 @@ end
 
 
 CreateConVar('sbox_max_acf_gun', 16)
+CreateConVar('sbox_max_acf_rapidgun', 4) --Guns like RACs, MGs, and ACs
+CreateConVar('sbox_max_acf_largegun', 4) --Guns with a caliber above 100mm
+ACF.LargeCaliber = 10 --Gun caliber in CM to be considered a large caliber gun, 10cm = 100mm
 CreateConVar('sbox_max_acf_smokelauncher', 10)
 CreateConVar('sbox_max_acf_ammo', 32)
 CreateConVar('sbox_max_acf_misc', 32)
