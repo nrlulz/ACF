@@ -160,6 +160,13 @@ function MakeACF_Gun(Owner, Pos, Angle, Id)
 	if Lookup.gunclass == "SL" then
 		if not Owner:CheckLimit("_acf_smokelauncher") then return false end
 	else
+		
+	if Lookup.gunclass == "RAC" or Lookup.gunclass == "MG" or Lookup.gunclass == "AC" then --Israpidfire?
+		if not Owner:CheckLimit("_acf_rapidgun") then return false end
+	elseif Lookup.caliber >= ACF.LargeCaliber then --IsBigGun?
+		if not Owner:CheckLimit("_acf_largegun") then return false end
+	end		
+		
 		if not Owner:CheckLimit("_acf_gun") then return false end
 	end
 	
@@ -238,6 +245,13 @@ function MakeACF_Gun(Owner, Pos, Angle, Id)
 	if Lookup.gunclass == "SL" then
 		Owner:AddCount("_acf_smokelauncher", Gun)
 	else
+		
+	if Lookup.gunclass == "RAC" or Lookup.gunclass == "MG" or Lookup.gunclass == "AC" then
+		Owner:AddCount("_acf_rapidgun", Gun)
+	elseif Lookup.caliber >= ACF.LargeCaliber then
+		Owner:AddCount("_acf_largegun", Gun)
+	end			
+		
 		Owner:AddCount("_acf_gun", Gun)
 	end
 	
