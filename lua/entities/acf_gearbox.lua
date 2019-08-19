@@ -938,36 +938,23 @@ function ENT:ChangeDrive(value)
 end
 
 -- Searches the "tree" which gearbox-gearbox connections forms, if the source is found
--- anywhere in the targets link tree, this function will return true and the loop path
+-- anywhere in the targets link tree, this function will return true
 function ACF_SearchGearboxLinkTree(source, target)
 	local queue = { target }
-	local parent = { }
-
+	
 	-- search the link tree
 	while #queue > 0 do
 		local ent = table.remove(queue)
 
 		if ent == source then
-			-- backtrack the loop
-			local nextInLoop = source:EntIndex()
-			local loop = { }
-
-			while nextInLoop do
-				table.insert(loop, nextInLoop)
-				nextInLoop = parent[nextInLoop]
-			end
-
-			loop = table.Reverse(loop)
-
-			return true, loop
+			return true
 		end
 		
 		if not ent.WheelLink then continue end
-		
+
 		-- add each link to the queue
 		for k, v in ipairs(ent.WheelLink) do
 			table.insert(queue, v.Ent)
-			parent[v.Ent:EntIndex()] = ent:EntIndex()
 		end
 	end
 
@@ -987,12 +974,8 @@ function ENT:Link( Target )
 		end
 	end
 
-	local hasLoop, loop = ACF_SearchGearboxLinkTree(self, Target)
-	if hasLoop then
-		local loopStr = string.format("%s (%i) (target) loops back to %s (%i) (source)",
-			ents.GetByIndex(loop[1]):GetClass(), loop[1], ents.GetByIndex(loop[#loop]):GetClass(), loop[#loop])
-		
-		return false, "You cannot link gearboxes in a loop!\n" .. loopStr
+	if ACF_SearchGearboxLinkTree(self, Target) then
+		return false, "You cannot link gearboxes in a loop!"
 	end
 
 	-- make sure the angle is not excessive
