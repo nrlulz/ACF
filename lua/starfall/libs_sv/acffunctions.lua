@@ -604,6 +604,7 @@ ammo_properties.Refill.create_data = {}
 -- @param pos Position of created ammo box
 -- @param ang Angle of created ammo box
 -- @param id id of the ammo box to create
+-- @param gun_id id of the gun
 -- @param ammo_id id of the ammo
 -- @param frozen True to spawn frozen
 -- @param ammo_data the ammo data
@@ -660,6 +661,7 @@ ammo_properties.Refill.create_data = {}
 -- \- tracer (bool)
 -- 
 -- Refil:
+-- 
 function acf_library.createAmmo(pos, ang, id, gun_id, ammo_id, frozen, ammo_data)
 	checkpermission(SF.instance, nil, "acf.createAmmo")
 	
@@ -830,7 +832,8 @@ SF.AddHook("postload", function()
 		return GetConVar( "sbox_acf_restrictinfo" ):GetInt() ~= 0
 	end]]
 
-	-- Returns true if this entity contains sensitive info and is not accessable to us
+	--- Returns true if this entity contains sensitive info and is not accessable to us
+	-- @server
 	function ents_methods:acfIsInfoRestricted ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -840,7 +843,8 @@ SF.AddHook("postload", function()
 		return restrictInfo( this )
 	end
 
-	-- Returns the short name of an ACF entity
+	--- Returns the short name of an ACF entity
+	-- @server
 	function ents_methods:acfNameShort ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -856,7 +860,8 @@ SF.AddHook("postload", function()
 		return ""
 	end
 
-	-- Returns the capacity of an acf ammo crate or fuel tank
+	--- Returns the capacity of an acf ammo crate or fuel tank
+	-- @server
 	function ents_methods:acfCapacity ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -868,7 +873,8 @@ SF.AddHook("postload", function()
 		return this.Capacity or 1
 	end
 
-	-- Returns true if the acf engine, fuel tank, or ammo crate is active
+	--- Returns true if the acf engine, fuel tank, or ammo crate is active
+	-- @server
 	function ents_methods:acfGetActive ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -885,7 +891,8 @@ SF.AddHook("postload", function()
 		return false
 	end
 
-	-- Turns an ACF engine, ammo crate, or fuel tank on or off
+	--- Turns an ACF engine, ammo crate, or fuel tank on or off
+	-- @server
 	function ents_methods:acfSetActive ( on )
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -897,7 +904,8 @@ SF.AddHook("postload", function()
 		this:TriggerInput( "Active", on and 1 or 0 )    
 	end
 
-	--returns true if hitpos is on a clipped part of prop
+	--- Returns true if hitpos is on a clipped part of prop
+	-- @server
 	function ents_methods:acfHitClip( hitpos )
 		checktype( self, ents_metatable )
 		checktype( hitpos, vec_meta )
@@ -953,7 +961,8 @@ SF.AddHook("postload", function()
 		return ret
 	end
 
-	-- Returns the ACF links associated with the entity
+	--- Returns the ACF links associated with the entity
+	-- @server
 	function ents_methods:acfLinks ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -969,7 +978,8 @@ SF.AddHook("postload", function()
 		return getLinks( this, enttype )    
 	end
 
-	-- Returns the full name of an ACF entity
+	--- Returns the full name of an ACF entity
+	-- @server
 	function ents_methods:acfName ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -988,7 +998,8 @@ SF.AddHook("postload", function()
 		return List[ acftype ][ this.Id ][ "name" ] or ""
 	end
 
-	-- Returns the type of ACF entity
+	--- Returns the type of ACF entity
+	-- @server
 	function ents_methods:acfType ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1008,7 +1019,8 @@ SF.AddHook("postload", function()
 		return ""
 	end
 
-	-- Perform ACF links
+	--- Perform ACF links
+	-- @server
 	function ents_methods:acfLinkTo ( target, notify )
 		checktype( self, ents_metatable )
 		checktype( target, ents_metatable )
@@ -1033,7 +1045,8 @@ SF.AddHook("postload", function()
 		return success, msg
 	end
 
-	-- Perform ACF unlinks
+	--- Perform ACF unlinks
+	-- @server
 	function ents_methods:acfUnlinkFrom ( target, notify )
 		checktype( self, ents_metatable )
 		checktype( target, ents_metatable )
@@ -1058,7 +1071,8 @@ SF.AddHook("postload", function()
 		return success, msg
 	end
 
-	-- returns any wheels linked to this engine/gearbox or child gearboxes
+	--- returns any wheels linked to this engine/gearbox or child gearboxes
+	-- @server
 	function ents_methods:acfGetLinkedWheels ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1076,7 +1090,8 @@ SF.AddHook("postload", function()
 
 	-- [ Engine Functions ] --
 
-	-- Returns true if the entity is an ACF engine
+	--- Returns true if the entity is an ACF engine
+	-- @server
 	function ents_methods:acfIsEngine ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1086,7 +1101,8 @@ SF.AddHook("postload", function()
 		return isEngine( this )
 	end
 
-	-- Returns true if an ACF engine is electric
+	--- Returns true if an ACF engine is electric
+	-- @server
 	function ents_methods:acfIsElectric ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1096,7 +1112,8 @@ SF.AddHook("postload", function()
 		return this.iselec == true
 	end
 
-	-- Returns the torque in N/m of an ACF engine
+	--- Returns the torque in N/m of an ACF engine
+	-- @server
 	function ents_methods:acfMaxTorque ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1107,7 +1124,8 @@ SF.AddHook("postload", function()
 		return this.PeakTorque or 0
 	end
 
-	-- Returns the torque in N/m of an ACF engine with fuel
+	--- Returns the torque in N/m of an ACF engine with fuel
+	-- @server
 	function ents_methods:acfMaxTorqueWithFuel ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1130,7 +1148,8 @@ SF.AddHook("postload", function()
 		return peakpower or 0
 	end
 
-	-- Returns the power in kW of an ACF engine
+	--- Returns the power in kW of an ACF engine
+	-- @server
 	function ents_methods:acfMaxPower ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1140,7 +1159,8 @@ SF.AddHook("postload", function()
 		return isEngine( this ) and getMaxPower( this ) or 0
 	end
 
-	-- Returns the power in kW of an ACF engine with fuel
+	--- Returns the power in kW of an ACF engine with fuel
+	-- @server
 	function ents_methods:acfMaxPowerWithFuel ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1150,7 +1170,8 @@ SF.AddHook("postload", function()
 		return (isEngine( this ) and getMaxPower( this ) or 0) * (ACF.TorqueBoost or 0)
 	end
 
-	-- Returns the idle rpm of an ACF engine
+	--- Returns the idle rpm of an ACF engine
+	-- @server
 	function ents_methods:acfIdleRPM ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1161,7 +1182,8 @@ SF.AddHook("postload", function()
 		return this.IdleRPM or 0
 	end
 
-	-- Returns the powerband min and max of an ACF Engine
+	--- Returns the powerband min and max of an ACF Engine
+	-- @server
 	function ents_methods:acfPowerband ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1172,7 +1194,8 @@ SF.AddHook("postload", function()
 		return this.PeakMinRPM or 0, this.PeakMaxRPM or 0
 	end
 
-	-- Returns the powerband min of an ACF engine
+	--- Returns the powerband min of an ACF engine
+	-- @server
 	function ents_methods:acfPowerbandMin ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1183,7 +1206,8 @@ SF.AddHook("postload", function()
 		return this.PeakMinRPM or 0
 	end
 
-	-- Returns the powerband max of an ACF engine
+	--- Returns the powerband max of an ACF engine
+	-- @server
 	function ents_methods:acfPowerbandMax ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1194,7 +1218,8 @@ SF.AddHook("postload", function()
 		return this.PeakMaxRPM or 0
 	end
 
-	-- Returns the redline rpm of an ACF engine
+	--- Returns the redline rpm of an ACF engine
+	-- @server
 	function ents_methods:acfRedline ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1205,7 +1230,8 @@ SF.AddHook("postload", function()
 		return this.LimitRPM or 0
 	end
 
-	-- Returns the current rpm of an ACF engine
+	--- Returns the current rpm of an ACF engine
+	-- @server
 	function ents_methods:acfRPM ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1217,7 +1243,8 @@ SF.AddHook("postload", function()
 		return math.floor( this.FlyRPM ) or 0
 	end
 
-	-- Returns the current torque of an ACF engine
+	--- Returns the current torque of an ACF engine
+	-- @server
 	function ents_methods:acfTorque ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1229,7 +1256,8 @@ SF.AddHook("postload", function()
 		return math.floor( this.Torque or 0 )
 	end
 
-	-- Returns the inertia of an ACF engine's flywheel
+	--- Returns the inertia of an ACF engine's flywheel
+	-- @server
 	function ents_methods:acfFlyInertia ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1241,7 +1269,8 @@ SF.AddHook("postload", function()
 		return this.Inertia or 0
 	end
 
-	-- Returns the mass of an ACF engine's flywheel
+	--- Returns the mass of an ACF engine's flywheel
+	-- @server
 	function ents_methods:acfFlyMass ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1254,6 +1283,7 @@ SF.AddHook("postload", function()
 	end
 
 	--- Returns the current power of an ACF engine
+	-- @server
 	function ents_methods:acfPower ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1265,7 +1295,8 @@ SF.AddHook("postload", function()
 		return math.floor( ( this.Torque or 0 ) * ( this.FlyRPM or 0 ) / 9548.8 )
 	end
 
-	-- Returns true if the RPM of an ACF engine is inside the powerband
+	--- Returns true if the RPM of an ACF engine is inside the powerband
+	-- @server
 	function ents_methods:acfInPowerband ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1280,6 +1311,8 @@ SF.AddHook("postload", function()
 		return true
 	end
 
+	--- Returns the throttle value
+	-- @server
 	function ents_methods:acfGetThrottle ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1291,7 +1324,8 @@ SF.AddHook("postload", function()
 		return ( this.Throttle or 0 ) * 100
 	end
 
-	-- Sets the throttle value for an ACF engine
+	--- Sets the throttle value for an ACF engine
+	-- @server
 	function ents_methods:acfSetThrottle ( throttle )
 		checktype( self, ents_metatable )
 		checkluatype( throttle, TYPE_NUMBER )
@@ -1307,7 +1341,8 @@ SF.AddHook("postload", function()
 
 	-- [ Gearbox Functions ] --
 
-	-- Returns true if the entity is an ACF gearbox
+	--- Returns true if the entity is an ACF gearbox
+	-- @server
 	function ents_methods:acfIsGearbox ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1317,7 +1352,8 @@ SF.AddHook("postload", function()
 		return isGearbox( this )
 	end
 
-	-- Returns the current gear for an ACF gearbox
+	--- Returns the current gear for an ACF gearbox
+	-- @server
 	function ents_methods:acfGear ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1329,7 +1365,8 @@ SF.AddHook("postload", function()
 		return this.Gear or 0
 	end
 
-	-- Returns the number of gears for an ACF gearbox
+	--- Returns the number of gears for an ACF gearbox
+	-- @server
 	function ents_methods:acfNumGears ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1341,7 +1378,8 @@ SF.AddHook("postload", function()
 		return this.Gears or 0
 	end
 
-	-- Returns the final ratio for an ACF gearbox
+	--- Returns the final ratio for an ACF gearbox
+	-- @server
 	function ents_methods:acfFinalRatio ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1353,7 +1391,8 @@ SF.AddHook("postload", function()
 		return this.GearTable[ "Final" ] or 0
 	end
 
-	-- Returns the total ratio (current gear * final) for an ACF gearbox
+	--- Returns the total ratio (current gear * final) for an ACF gearbox
+	-- @server
 	function ents_methods:acfTotalRatio ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1365,7 +1404,8 @@ SF.AddHook("postload", function()
 		return this.GearRatio or 0
 	end
 
-	-- Returns the max torque for an ACF gearbox
+	--- Returns the max torque for an ACF gearbox
+	-- @server
 	function ents_methods:acfTorqueRating ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1376,7 +1416,8 @@ SF.AddHook("postload", function()
 		return this.MaxTorque or 0
 	end
 
-	-- Returns whether an ACF gearbox is dual clutch
+	--- Returns whether an ACF gearbox is dual clutch
+	-- @server
 	function ents_methods:acfIsDual ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1389,7 +1430,8 @@ SF.AddHook("postload", function()
 		return this.Dual
 	end
 
-	-- Returns the time in ms an ACF gearbox takes to change gears
+	--- Returns the time in ms an ACF gearbox takes to change gears
+	-- @server
 	function ents_methods:acfShiftTime ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1400,7 +1442,8 @@ SF.AddHook("postload", function()
 		return ( this.SwitchTime or 0 ) * 1000
 	end
 
-	-- Returns true if an ACF gearbox is in gear
+	--- Returns true if an ACF gearbox is in gear
+	-- @server
 	function ents_methods:acfInGear ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1413,7 +1456,8 @@ SF.AddHook("postload", function()
 		return this.InGear
 	end
 
-	-- Returns the ratio for a specified gear of an ACF gearbox
+	--- Returns the ratio for a specified gear of an ACF gearbox
+	-- @server
 	function ents_methods:acfGearRatio ( gear )
 		checktype( self, ents_metatable )
 		checkluatype( gear, TYPE_NUMBER )
@@ -1427,7 +1471,8 @@ SF.AddHook("postload", function()
 		return this.GearTable[ g ] or 0
 	end
 
-	-- Returns the current torque output for an ACF gearbox
+	--- Returns the current torque output for an ACF gearbox
+	-- @server
 	function ents_methods:acfTorqueOut ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1438,7 +1483,8 @@ SF.AddHook("postload", function()
 		return math.min( this.TotalReqTq or 0, this.MaxTorque or 0 ) / ( this.GearRatio or 1 )
 	end
 
-	-- Sets the gear ratio of a CVT, set to 0 to use built-in algorithm
+	--- Sets the gear ratio of a CVT, set to 0 to use built-in algorithm
+	-- @server
 	function ents_methods:acfCVTRatio ( ratio )
 		checktype( self, ents_metatable )
 		checkluatype( ratio, TYPE_NUMBER )
@@ -1453,7 +1499,8 @@ SF.AddHook("postload", function()
 		this.CVTRatio = math.Clamp( ratio, 0, 1 )
 	end
 
-	-- Sets the current gear for an ACF gearbox
+	--- Sets the current gear for an ACF gearbox
+	-- @server
 	function ents_methods:acfShift ( gear )
 		checktype( self, ents_metatable )
 		checkluatype( gear, TYPE_NUMBER )
@@ -1467,7 +1514,8 @@ SF.AddHook("postload", function()
 		this:TriggerInput( "Gear", gear )
 	end
 
-	-- Cause an ACF gearbox to shift up
+	--- Cause an ACF gearbox to shift up
+	-- @server
 	function ents_methods:acfShiftUp ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1480,7 +1528,8 @@ SF.AddHook("postload", function()
 		this:TriggerInput( "Gear Up", 1 ) --doesn't need to be toggled off
 	end
 
-	-- Cause an ACF gearbox to shift down
+	--- Cause an ACF gearbox to shift down
+	-- @server
 	function ents_methods:acfShiftDown ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1493,7 +1542,8 @@ SF.AddHook("postload", function()
 		this:TriggerInput( "Gear Down", 1 ) --doesn't need to be toggled off
 	end
 
-	-- Sets the brakes for an ACF gearbox
+	--- Sets the brakes for an ACF gearbox
+	-- @server
 	function ents_methods:acfBrake ( brake )
 		checktype( self, ents_metatable )
 		checkluatype( brake, TYPE_NUMBER )
@@ -1507,7 +1557,8 @@ SF.AddHook("postload", function()
 		this:TriggerInput( "Brake", brake )
 	end
 
-	-- Sets the left brakes for an ACF gearbox
+	--- Sets the left brakes for an ACF gearbox
+	-- @server
 	function ents_methods:acfBrakeLeft ( brake )
 		checktype( self, ents_metatable )
 		checkluatype( brake, TYPE_NUMBER )
@@ -1522,7 +1573,8 @@ SF.AddHook("postload", function()
 		this:TriggerInput( "Left Brake", brake )
 	end
 
-	-- Sets the right brakes for an ACF gearbox
+	--- Sets the right brakes for an ACF gearbox
+	-- @server
 	function ents_methods:acfBrakeRight ( brake )
 		checktype( self, ents_metatable )
 		checkluatype( brake, TYPE_NUMBER )
@@ -1537,7 +1589,8 @@ SF.AddHook("postload", function()
 		this:TriggerInput("Right Brake", brake )
 	end
 
-	-- Sets the clutch for an ACF gearbox
+	--- Sets the clutch for an ACF gearbox
+	-- @server
 	function ents_methods:acfClutch ( clutch )
 		checktype( self, ents_metatable )
 		checkluatype( clutch, TYPE_NUMBER )
@@ -1551,7 +1604,8 @@ SF.AddHook("postload", function()
 		this:TriggerInput( "Clutch", clutch )
 	end
 
-	-- Sets the left clutch for an ACF gearbox
+	--- Sets the left clutch for an ACF gearbox
+	-- @server
 	function ents_methods:acfClutchLeft( clutch )
 		checktype( self, ents_metatable )
 		checkluatype( clutch, TYPE_NUMBER )
@@ -1566,7 +1620,8 @@ SF.AddHook("postload", function()
 		this:TriggerInput( "Left Clutch", clutch )
 	end
 
-	-- Sets the right clutch for an ACF gearbox
+	--- Sets the right clutch for an ACF gearbox
+	-- @server
 	function ents_methods:acfClutchRight ( clutch )
 		checktype( self, ents_metatable )
 		checkluatype( clutch, TYPE_NUMBER )
@@ -1581,7 +1636,8 @@ SF.AddHook("postload", function()
 		this:TriggerInput( "Right Clutch", clutch )
 	end
 
-	-- Sets the steer ratio for an ACF gearbox
+	--- Sets the steer ratio for an ACF gearbox
+	-- @server
 	function ents_methods:acfSteerRate ( rate )
 		checktype( self, ents_metatable )
 		checkluatype( rate, TYPE_NUMBER )
@@ -1596,7 +1652,8 @@ SF.AddHook("postload", function()
 		this:TriggerInput( "Steer Rate", rate )
 	end
 
-	-- Applies gear hold for an automatic ACF gearbox
+	--- Applies gear hold for an automatic ACF gearbox
+	-- @server
 	function ents_methods:acfHoldGear( hold )
 		checktype( self, ents_metatable )
 		checkluatype( hold, TYPE_NUMBER )
@@ -1611,7 +1668,8 @@ SF.AddHook("postload", function()
 		this:TriggerInput( "Hold Gear", hold )
 	end
 
-	-- Sets the shift point scaling for an automatic ACF gearbox
+	--- Sets the shift point scaling for an automatic ACF gearbox
+	-- @server
 	function ents_methods:acfShiftPointScale( scale )
 		checktype( self, ents_metatable )
 		checkluatype( scale, TYPE_NUMBER )
@@ -1629,7 +1687,8 @@ SF.AddHook("postload", function()
 
 	-- [ Gun Functions ] --
 
-	-- Returns true if the entity is an ACF gun
+	--- Returns true if the entity is an ACF gun
+	-- @server
 	function ents_methods:acfIsGun ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1639,7 +1698,8 @@ SF.AddHook("postload", function()
 		if isGun( this ) and not restrictInfo( this ) then return true else return false end
 	end
 
-	-- Returns true if the ACF gun is ready to fire
+	--- Returns true if the ACF gun is ready to fire
+	-- @server
 	function ents_methods:acfReady ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1652,7 +1712,8 @@ SF.AddHook("postload", function()
 		return false
 	end
 
-	-- Returns the magazine size for an ACF gun
+	--- Returns the magazine size for an ACF gun
+	-- @server
 	function ents_methods:acfMagSize ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1663,7 +1724,8 @@ SF.AddHook("postload", function()
 		return this.MagSize or 1
 	end
 
-	-- Returns the spread for an ACF gun or flechette ammo
+	--- Returns the spread for an ACF gun or flechette ammo
+	-- @server
 	function ents_methods:acfSpread ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1679,7 +1741,8 @@ SF.AddHook("postload", function()
 		return Spread
 	end
 
-	-- Returns true if an ACF gun is reloading
+	--- Returns true if an ACF gun is reloading
+	-- @server
 	function ents_methods:acfIsReloading ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1692,7 +1755,8 @@ SF.AddHook("postload", function()
 		return false
 	end
 
-	-- Returns the rate of fire of an acf gun
+	--- Returns the rate of fire of an acf gun
+	-- @server
 	function ents_methods:acfFireRate ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1703,7 +1767,8 @@ SF.AddHook("postload", function()
 		return math.Round( this.RateOfFire or 0, 3 )
 	end
 
-	-- Returns the number of rounds left in a magazine for an ACF gun
+	--- Returns the number of rounds left in a magazine for an ACF gun
+	-- @server
 	function ents_methods:acfMagRounds ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1719,7 +1784,8 @@ SF.AddHook("postload", function()
 		return 0
 	end
 
-	-- Sets the firing state of an ACF weapon
+	--- Sets the firing state of an ACF weapon
+	-- @server
 	function ents_methods:acfFire ( fire )
 		checktype( self, ents_metatable )
 		checkluatype( fire, TYPE_NUMBER )
@@ -1733,7 +1799,8 @@ SF.AddHook("postload", function()
 		this:TriggerInput( "Fire", fire )
 	end
 
-	-- Causes an ACF weapon to unload
+	--- Causes an ACF weapon to unload
+	-- @server
 	function ents_methods:acfUnload ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1746,7 +1813,8 @@ SF.AddHook("postload", function()
 		this:UnloadAmmo()
 	end
 
-	-- Causes an ACF weapon to reload
+	--- Causes an ACF weapon to reload
+	-- @server
 	function ents_methods:acfReload ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1759,7 +1827,8 @@ SF.AddHook("postload", function()
 		this.Reloading = true
 	end
 
-	--Returns the number of rounds in active ammo crates linked to an ACF weapon
+	--- Returns the number of rounds in active ammo crates linked to an ACF weapon
+	-- @server
 	function ents_methods:acfAmmoCount ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1777,7 +1846,8 @@ SF.AddHook("postload", function()
 		return Ammo
 	end
 
-	--Returns the number of rounds in all ammo crates linked to an ACF weapon
+	--- Returns the number of rounds in all ammo crates linked to an ACF weapon
+	-- @server
 	function ents_methods:acfTotalAmmoCount ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1795,7 +1865,8 @@ SF.AddHook("postload", function()
 		return Ammo
 	end
 
-	-- Returns time to next shot of an ACF weapon
+	--- Returns time to next shot of an ACF weapon
+	-- @server
 	function ents_methods:acfReloadTime ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1806,7 +1877,8 @@ SF.AddHook("postload", function()
 		return reloadTime( this )
 	end
 
-	-- Returns number between 0 and 1 which represents reloading progress of an ACF weapon. Useful for progress bars
+	--- Returns number between 0 and 1 which represents reloading progress of an ACF weapon. Useful for progress bars
+	-- @server
 	function ents_methods:acfReloadProgress ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1817,7 +1889,8 @@ SF.AddHook("postload", function()
 		return math.Clamp( 1 - (this.NextFire - CurTime()) / reloadTime( this ), 0, 1 )
 	end
 
-	-- Returns time it takes for an ACF weapon to reload magazine
+	--- Returns time it takes for an ACF weapon to reload magazine
+	-- @server
 	function ents_methods:acfMagReloadTime ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1830,7 +1903,8 @@ SF.AddHook("postload", function()
 
 	-- [ Ammo Functions ] --
 
-	-- Returns true if the entity is an ACF ammo crate
+	--- Returns true if the entity is an ACF ammo crate
+	-- @server
 	function ents_methods:acfIsAmmo ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1840,7 +1914,8 @@ SF.AddHook("postload", function()
 		return isAmmo( this ) and not restrictInfo( this )
 	end
 
-	-- Returns the rounds left in an acf ammo crate
+	--- Returns the rounds left in an acf ammo crate
+	-- @server
 	function ents_methods:acfRounds ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1852,7 +1927,8 @@ SF.AddHook("postload", function()
 		return this.Ammo or 0
 	end
 
-	-- Returns the type of weapon the ammo in an ACF ammo crate loads into
+	--- Returns the type of weapon the ammo in an ACF ammo crate loads into
+	-- @server
 	function ents_methods:acfRoundType () --cartridge?
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1865,7 +1941,8 @@ SF.AddHook("postload", function()
 		return this.RoundType or "" -- E2 uses this one now
 	end
 
-	-- Returns the type of ammo in a crate or gun
+	--- Returns the type of ammo in a crate or gun
+	-- @server
 	function ents_methods:acfAmmoType ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1877,7 +1954,8 @@ SF.AddHook("postload", function()
 		return this.BulletData[ "Type" ] or ""
 	end
 
-	-- Returns the caliber of an ammo or gun
+	--- Returns the caliber of an ammo or gun
+	-- @server
 	function ents_methods:acfCaliber ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1889,7 +1967,8 @@ SF.AddHook("postload", function()
 		return ( this.Caliber or 0 ) * 10
 	end
 
-	-- Returns the muzzle velocity of the ammo in a crate or gun
+	--- Returns the muzzle velocity of the ammo in a crate or gun
+	-- @server
 	function ents_methods:acfMuzzleVel ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1901,7 +1980,8 @@ SF.AddHook("postload", function()
 		return math.Round( ( this.BulletData[ "MuzzleVel" ] or 0 ) * ACF.VelScale, 3 )
 	end
 
-	-- Returns the mass of the projectile in a crate or gun
+	--- Returns the mass of the projectile in a crate or gun
+	-- @server
 	function ents_methods:acfProjectileMass ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1913,7 +1993,8 @@ SF.AddHook("postload", function()
 		return math.Round( this.BulletData[ "ProjMass" ] or 0, 3 )
 	end
 
-	-- Returns the number of projectiles in a flechette round
+	--- Returns the number of projectiles in a flechette round
+	-- @server
 	function ents_methods:acfFLSpikes ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1926,7 +2007,8 @@ SF.AddHook("postload", function()
 		return this.BulletData[ "Flechettes" ] or 0
 	end
 
-	-- Returns the mass of a single spike in a FL round in a crate or gun
+	--- Returns the mass of a single spike in a FL round in a crate or gun
+	-- @server
 	function ents_methods:acfFLSpikeMass ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1939,7 +2021,8 @@ SF.AddHook("postload", function()
 		return math.Round( this.BulletData[ "FlechetteMass" ] or 0, 3)
 	end
 
-	-- Returns the radius of the spikes in a flechette round in mm
+	--- Returns the radius of the spikes in a flechette round in mm
+	-- @server
 	function ents_methods:acfFLSpikeRadius ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1952,7 +2035,8 @@ SF.AddHook("postload", function()
 		return math.Round( ( this.BulletData[ "FlechetteRadius" ] or 0 ) * 10, 3)
 	end
 
-	-- Returns the penetration of an AP, APHE, or HEAT round
+	--- Returns the penetration of an AP, APHE, or HEAT round
+	-- @server
 	function ents_methods:acfPenetration ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -1991,7 +2075,8 @@ SF.AddHook("postload", function()
 		return 0
 	end
 
-	-- Returns the blast radius of an HE, APHE, or HEAT round
+	--- Returns the blast radius of an HE, APHE, or HEAT round
+	-- @server
 	function ents_methods:acfBlastRadius ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -2024,7 +2109,8 @@ SF.AddHook("postload", function()
 
 	-- [ Armor Functions ] --
 
-	-- Returns the current health of an entity
+	--- Returns the current health of an entity
+	-- @server
 	function ents_methods:acfPropHealth ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -2037,7 +2123,8 @@ SF.AddHook("postload", function()
 		return math.Round( this.ACF.Health or 0, 3 )
 	end
 
-	-- Returns the current armor of an entity
+	--- Returns the current armor of an entity
+	-- @server
 	function ents_methods:acfPropArmor ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -2050,7 +2137,8 @@ SF.AddHook("postload", function()
 		return math.Round( this.ACF.Armour or 0, 3 )
 	end
 
-	-- Returns the max health of an entity
+	--- Returns the max health of an entity
+	-- @server
 	function ents_methods:acfPropHealthMax ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -2063,7 +2151,8 @@ SF.AddHook("postload", function()
 		return math.Round( this.ACF.MaxHealth or 0, 3 )
 	end
 
-	-- Returns the max armor of an entity
+	--- Returns the max armor of an entity
+	-- @server
 	function ents_methods:acfPropArmorMax ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -2076,7 +2165,8 @@ SF.AddHook("postload", function()
 		return math.Round( this.ACF.MaxArmour or 0, 3 )
 	end
 
-	-- Returns the ductility of an entity
+	--- Returns the ductility of an entity
+	-- @server
 	function ents_methods:acfPropDuctility ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -2091,7 +2181,8 @@ SF.AddHook("postload", function()
 
 	-- [ Fuel Functions ] --
 
-	-- Returns true if the entity is an ACF fuel tank
+	--- Returns true if the entity is an ACF fuel tank
+	-- @server
 	function ents_methods:acfIsFuel ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -2101,7 +2192,8 @@ SF.AddHook("postload", function()
 		return isFuel( this ) and not restrictInfo( this )
 	end
 
-	-- Returns true if the current engine requires fuel to run
+	--- Returns true if the current engine requires fuel to run
+	-- @server
 	function ents_methods:acfFuelRequired ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -2113,7 +2205,8 @@ SF.AddHook("postload", function()
 		return ( this.RequiresFuel and true ) or false
 	end
 
-	-- Sets the ACF fuel tank refuel duty status, which supplies fuel to other fuel tanks
+	--- Sets the ACF fuel tank refuel duty status, which supplies fuel to other fuel tanks
+	-- @server
 	function ents_methods:acfRefuelDuty ( on )
 		checktype( self, ents_metatable )
 		checktype( on, "boolean" )
@@ -2127,7 +2220,8 @@ SF.AddHook("postload", function()
 		this:TriggerInput( "Refuel Duty", on )
 	end
 
-	-- Returns the remaining liters or kilowatt hours of fuel in an ACF fuel tank or engine
+	--- Returns the remaining liters or kilowatt hours of fuel in an ACF fuel tank or engine
+	-- @server
 	function ents_methods:acfFuel ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -2152,7 +2246,8 @@ SF.AddHook("postload", function()
 		return 0
 	end
 
-	-- Returns the amount of fuel in an ACF fuel tank or linked to engine as a percentage of capacity
+	--- Returns the amount of fuel in an ACF fuel tank or linked to engine as a percentage of capacity
+	-- @server
 	function ents_methods:acfFuelLevel ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -2181,7 +2276,8 @@ SF.AddHook("postload", function()
 		return 0
 	end
 
-	-- Returns the current fuel consumption in liters per minute or kilowatts of an engine
+	--- Returns the current fuel consumption in liters per minute or kilowatts of an engine
+	-- @server
 	function ents_methods:acfFuelUse ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
@@ -2211,7 +2307,8 @@ SF.AddHook("postload", function()
 		return math.Round( Consumption, 3 )
 	end
 
-	-- Returns the peak fuel consumption in liters per minute or kilowatts of an engine at powerband max, for the current fuel type the engine is using
+	--- Returns the peak fuel consumption in liters per minute or kilowatts of an engine at powerband max, for the current fuel type the engine is using
+	-- @server
 	function ents_methods:acfPeakFuelUse ()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
