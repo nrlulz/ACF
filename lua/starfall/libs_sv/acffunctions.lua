@@ -2209,7 +2209,6 @@ SF.AddHook("postload", function()
 	-- @server
 	function ents_methods:acfRefuelDuty ( on )
 		checktype( self, ents_metatable )
-		checktype( on, "boolean" )
 		local this = unwrap( self )
 
 		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
@@ -2217,7 +2216,7 @@ SF.AddHook("postload", function()
 
 		if not isFuel( this ) then return end
 		
-		this:TriggerInput( "Refuel Duty", on )
+		this:TriggerInput( "Refuel Duty", on and true or false )
 	end
 
 	--- Returns the remaining liters or kilowatt hours of fuel in an ACF fuel tank or engine
