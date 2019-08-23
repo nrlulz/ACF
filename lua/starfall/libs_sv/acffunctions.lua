@@ -21,31 +21,31 @@
 -- [ Helper Functions ] --
 
 local function isEngine ( ent )
-    if not validPhysics( ent ) then return false end
-    if ( ent:GetClass() == "acf_engine" ) then return true else return false end
+	if not validPhysics( ent ) then return false end
+	if ( ent:GetClass() == "acf_engine" ) then return true else return false end
 end
 
 local function isGearbox ( ent )
-    if not validPhysics( ent ) then return false end
-    if ( ent:GetClass() == "acf_gearbox" ) then return true else return false end
+	if not validPhysics( ent ) then return false end
+	if ( ent:GetClass() == "acf_gearbox" ) then return true else return false end
 end
 
 local function isGun ( ent )
-    if not validPhysics( ent ) then return false end
-    if ( ent:GetClass() == "acf_gun" ) then return true else return false end
+	if not validPhysics( ent ) then return false end
+	if ( ent:GetClass() == "acf_gun" ) then return true else return false end
 end
 
 local function isAmmo ( ent )
-    if not validPhysics( ent ) then return false end
-    if ( ent:GetClass() == "acf_ammo" ) then return true else return false end
+	if not validPhysics( ent ) then return false end
+	if ( ent:GetClass() == "acf_ammo" ) then return true else return false end
 end
 
 local function isFuel ( ent )
-    if not validPhysics(ent) then return false end
-    if ( ent:GetClass() == "acf_fueltank" ) then return true else return false end
+	if not validPhysics(ent) then return false end
+	if ( ent:GetClass() == "acf_fueltank" ) then return true else return false end
 end
 
-local function reloadTime(ent)
+local function reloadTime( ent )
 	if ent.CurrentShot and ent.CurrentShot > 0 then return ent.ReloadTime end
 	return ent.MagReload
 end
@@ -54,40 +54,814 @@ local propProtectionInstalled = FindMetaTable("Entity").CPPIGetOwner and true
 
 local function restrictInfo ( ent )
 	if not propProtectionInstalled then return false end
-    if GetConVar("sbox_acf_restrictinfo"):GetInt() ~= 0 then
-        if ent:CPPIGetOwner() ~= SF.instance.player then return true else return false end
-    end
-    return false
+	if GetConVar("sbox_acf_restrictinfo"):GetInt() ~= 0 then
+		if ent:CPPIGetOwner() ~= SF.instance.player then return true else return false end
+	end
+	return false
 end
 
+----------------------------------------
+-- ACF Library
+
+local acf_library = SF.RegisterLibrary("acf")
+
+local checktype = SF.CheckType
+local checkluatype = SF.CheckLuaType
+local checkpermission = SF.Permissions.check
+
+local ents_metatable, ents_methods, vec_meta, ang_meta, wrap, unwrap, vwrap, vunwrap, awrap, aunwrap
+
+SF.Permissions.registerPrivilege("acf.createMobility", "Create acf engine", "Allows the user to create ACF engines and gearboxes")
+SF.Permissions.registerPrivilege("acf.createFuelTank", "Create acf fuel tank", "Allows the user to create ACF fuel tanks")
+SF.Permissions.registerPrivilege("acf.createGun", "Create acf gun", "Allows the user to create ACF guns")
+SF.Permissions.registerPrivilege("acf.createAmmo", "Create acf ammo", "Allows the user to create ACF ammoboxes")
+SF.Permissions.registerPrivilege("entities.acf", "ACF", "Allows the user to control ACF components", { entities = {} })
+
+local plyCount = SF.LimitObject("acf_components", "acf_components", -1, "The number of ACF components allowed to spawn via Starfall")
+local plyBurst = SF.BurstObject("acf_components", "acf_components", 4, 4, "Rate ACF components can be spawned per second.", "Number of ACF components that can be spawned in a short time.")
+
+local function propOnDestroy(ent, instance)
+	local ply = instance.player
+	plyCount:free(ply, 1)
+	instance.data.props.props[ent] = nil
+end
+
+local function register(ent, instance)
+	ent:CallOnRemove("starfall_prop_delete", propOnDestroy, instance)
+	plyCount:free(instance.player, -1)
+	instance.data.props.props[ent] = true
+end
+
+--- Returns true if functions returning sensitive info are restricted to owned props
+-- @server
+-- @return True if restriced, False if not
+function acf_library.infoRestricted()
+	return GetConVar("sbox_acf_restrictinfo"):GetInt() ~= 0
+end
+
+--- Returns current ACF drag divisor
+-- @server
+-- @return The current drag divisor
+function acf_library.dragDivisor()
+	return ACF.DragDiv
+end
+
+--- Returns the effective armor given an armor value and hit angle
+-- @server
+-- @return The effective armor
+function acf_library.effectiveArmor(armor, angle)
+	checkluatype(armor, TYPE_NUMBER)
+	checkluatype(angle, TYPE_NUMBER)
+	
+	return math.Round(armor / math.abs(math.cos(math.rad(math.min(angle, 89.999)))), 1)
+end
+
+-- Dont create a cache on init because maby a new entity get registered later on?
+local id_name_cache = {}
+local function idFromName(list, name)
+	id_name_cache[list] = id_name_cache[list] or {}
+	
+	if id_name_cache[list][name] then return id_name_cache[list][name] end
+	
+	for id, data in pairs(list) do
+		if data.name == name then
+			id_name_cache[list][name] = id
+			
+			return id
+		end
+	end
+end
+
+--- Creates a engine or gearbox given the id or name
+-- @param pos Position of created engine or gearbox
+-- @param ang Angle of created engine or gearbox
+-- @param id id or name of the engine or gearbox to create
+-- @param frozen True to spawn frozen
+-- @param gear_ratio A table containing the gear ratios, only applied if the mobility is a gearbox. -1 is final drive
+-- @server
+-- @return The created engine or gearbox
+function acf_library.createMobility(pos, ang, id, frozen, gear_ratio)
+	checkpermission(SF.instance, nil, "acf.createMobility")
+	
+	local instance = SF.instance
+	local ply = instance.player
+	
+	if not hook.Run("CanTool", ply, {Hit = true, Entity = game.GetWorld()}, "acfmenu") then SF.Throw("No permission to spawn ACF components", 2) end
+	
+	checktype(pos, vec_meta)
+	checktype(ang, ang_meta)
+	checkluatype(id, TYPE_STRING)
+	frozen = frozen and true or false
+	gear_ratio = type(gear_ratio) == "table" and gear_ratio or {}
+	
+	local pos = vunwrap(pos)
+	local ang = aunwrap(ang)
+	
+	local list_entries = ACF.Weapons.Mobility
+	
+	-- Not a valid id, try name
+	if not list_entries[id] then
+		id = idFromName(list_entries, id)
+		
+		-- Name is also invalid, error
+		if not id or not list_entries[id] then
+			SF.Throw("Invalid id or name", 2)
+		end
+	end
+	
+	local type_id = list_entries[id]
+	local dupe_class = duplicator.FindEntityClass(type_id.ent) 
+	
+	if not dupe_class then SF.Throw("Didn't find entity duplicator records", 2) end
+	
+	plyBurst:use(ply, 1)
+	plyCount:checkuse(ply, 1)
+	
+	local args_table = {
+		SF.clampPos(pos),
+		ang,
+		id
+	}
+	
+	if type_id.ent == "acf_gearbox" then
+		for i = 1, 9 do
+			args_table[3 + i] = type(gear_ratio[i]) == "number" and gear_ratio[i] or (i < type_id.gears and i / 10 or -0.1)
+		end
+		
+		args_table[13] = gear_ratio[-1] or 0.5
+	end
+	
+	local ent = dupe_class.Func(ply, unpack(args_table))
+	ent:Activate()
+	
+	local phys = ent:GetPhysicsObject()
+	if phys:IsValid() then
+		phys:EnableMotion(not frozen)
+	end
+	
+	if instance.data.props.undo then
+		undo.Create("ACF Mobility")
+			undo.SetPlayer(ply)
+			undo.AddEntity(ent)
+		undo.Finish("ACF Mobility (" .. tostring(id) .. ")")
+	end
+	
+	ply:AddCleanup("props", ent)
+	register(ent, instance)
+	
+	return SF.WrapObject(ent)
+end
+
+--- Returns the specs of the engine or gearbox
+-- @param id id or name of the engine or gearbox
+-- @server
+-- @return The specs table
+function acf_library.getMobilitySpecs(id)
+	checkluatype(id, TYPE_STRING)
+	
+	local list_entries = ACF.Weapons.Mobility
+	
+	-- Not a valid id, try name
+	if not list_entries[id] then
+		id = idFromName(list_entries, id)
+		
+		-- Name is also invalid, error
+		if not id or not list_entries[id] then
+			SF.Throw("Invalid id or name", 2)
+		end
+	end
+	
+	local specs = table.Copy(list_entries[id])
+	specs.BaseClass = nil
+	
+	return specs
+end
+
+--- Returns a list of all mobility components
+-- @server
+-- @return The mobility component list
+function acf_library.getAllMobility()
+	local list = {}
+	
+	for id, _ in pairs(ACF.Weapons.Mobility) do
+		table.insert(list, id)
+	end
+	
+	return list
+end
+
+--- Returns a list of all engines
+-- @server
+-- @return The engine list
+function acf_library.getAllEngines()
+	local list = {}
+	
+	for id, d in pairs(ACF.Weapons.Mobility) do
+		if d.ent == "acf_engine" then
+			table.insert(list, id)
+		end
+	end
+	
+	return list
+end
+
+--- Returns a list of all gearboxes
+-- @server
+-- @return The gearbox list
+function acf_library.getAllGearboxes()
+	local list = {}
+	
+	for id, d in pairs(ACF.Weapons.Mobility) do
+		if d.ent == "acf_gearbox" then
+			table.insert(list, id)
+		end
+	end
+	
+	return list
+end
+
+--- Creates a fuel tank given the id
+-- @param pos Position of created fuel tank
+-- @param ang Angle of created fuel tank
+-- @param id id of the fuel tank to create
+-- @param frozen True to spawn frozen
+-- @param fueltype The type of fuel to use (Diesel, Electric, Petrol)
+-- @server
+-- @return The created fuel tank
+function acf_library.createFuelTank(pos, ang, id, fueltype, frozen)
+	checkpermission(SF.instance, nil, "acf.createFuelTank")
+	
+	local instance = SF.instance
+	local ply = instance.player
+	
+	if not hook.Run("CanTool", ply, {Hit = true, Entity = game.GetWorld()}, "acfmenu") then SF.Throw("No permission to spawn ACF components", 2) end
+	
+	checktype(pos, vec_meta)
+	checktype(ang, ang_meta)
+	checkluatype(id, TYPE_STRING)
+	frozen = frozen and true or false
+	fueltype = fueltype or "Diesel"
+	checkluatype(fueltype, TYPE_STRING)
+	
+	local pos = vunwrap(pos)
+	local ang = aunwrap(ang)
+	
+	if fueltype ~= "Diesel" and fueltype ~= "Electric" and fueltype ~= "Petrol" then SF.Throw("Invalid fuel type") end
+	
+	local list_entries = ACF.Weapons.FuelTanks
+	if not list_entries[id] then SF.Throw("Invalid id", 2) end
+	
+	local type_id = list_entries[id]
+	local dupe_class = duplicator.FindEntityClass(type_id.ent) 
+	
+	if not dupe_class then SF.Throw("Didn't find entity duplicator records", 2) end
+	
+	plyBurst:use(ply, 1)
+	plyCount:checkuse(ply, 1)
+	
+	local ent = dupe_class.Func(ply, SF.clampPos(pos), ang, "Basic_FuelTank", id, fueltype)
+	ent:Activate()
+	
+	local phys = ent:GetPhysicsObject()
+	if phys:IsValid() then
+		phys:EnableMotion(not frozen)
+	end
+	
+	if instance.data.props.undo then
+		undo.Create("ACF Fuel Tank")
+			undo.SetPlayer(ply)
+			undo.AddEntity(ent)
+		undo.Finish("ACF Fuel Tank (" .. tostring(id) .. ")")
+	end
+	
+	ply:AddCleanup("props", ent)
+	register(ent, instance)
+	
+	return SF.WrapObject(ent)
+end
+
+--- Returns the specs of the fuel tank
+-- @param id id of the engine or gearbox
+-- @server
+-- @return The specs table
+function acf_library.getFuelTankSpecs(id)
+	checkluatype(id, TYPE_STRING)
+	
+	local list_entries = ACF.Weapons.FuelTanks
+	if not list_entries[id] then SF.Throw("Invalid id", 2) end
+	
+	local specs = table.Copy(list_entries[id])
+	specs.BaseClass = nil
+	
+	return specs
+end
+
+--- Returns a list of all fuel tanks
+-- @server
+-- @return The fuel tank list
+function acf_library.getAllFuelTanks()
+	local list = {}
+	
+	for id, _ in pairs(ACF.Weapons.FuelTanks) do
+		table.insert(list, id)
+	end
+	
+	return list
+end
+
+--- Creates a fun given the id or name
+-- @param pos Position of created gun
+-- @param ang Angle of created gun
+-- @param id id or name of the gun to create
+-- @param frozen True to spawn frozen
+-- @server
+-- @return The created gun
+function acf_library.createGun(pos, ang, id, frozen)
+	checkpermission(SF.instance, nil, "acf.createGun")
+	
+	local instance = SF.instance
+	local ply = instance.player
+	
+	if not hook.Run("CanTool", ply, {Hit = true, Entity = game.GetWorld()}, "acfmenu") then SF.Throw("No permission to spawn ACF components", 2) end
+	
+	checktype(pos, vec_meta)
+	checktype(ang, ang_meta)
+	checkluatype(id, TYPE_STRING)
+	frozen = frozen and true or false
+	
+	local pos = vunwrap(pos)
+	local ang = aunwrap(ang)
+	
+	local list_entries = ACF.Weapons.Guns
+	
+	-- Not a valid id, try name
+	if not list_entries[id] then
+		id = idFromName(list_entries, id)
+		
+		-- Name is also invalid, error
+		if not id or not list_entries[id] then
+			SF.Throw("Invalid id or name", 2)
+		end
+	end
+	
+	local type_id = list_entries[id]
+	local dupe_class = duplicator.FindEntityClass(type_id.ent) 
+	
+	if not dupe_class then SF.Throw("Didn't find entity duplicator records", 2) end
+	
+	plyBurst:use(ply, 1)
+	plyCount:checkuse(ply, 1)
+	
+	local ent = dupe_class.Func(ply, SF.clampPos(pos), ang, id)
+	ent:Activate()
+	
+	local phys = ent:GetPhysicsObject()
+	if phys:IsValid() then
+		phys:EnableMotion(not frozen)
+	end
+	
+	if instance.data.props.undo then
+		undo.Create("ACF Gun")
+			undo.SetPlayer(ply)
+			undo.AddEntity(ent)
+		undo.Finish("ACF Gun (" .. tostring(id) .. ")")
+	end
+	
+	ply:AddCleanup("props", ent)
+	register(ent, instance)
+	
+	return SF.WrapObject(ent)
+end
+
+--- Returns the specs of gun
+-- @param id id or name of the gun
+-- @server
+-- @return The specs table
+function acf_library.getGunSpecs(id)
+	checkluatype(id, TYPE_STRING)
+	
+	local list_entries = ACF.Weapons.Guns
+	
+	-- Not a valid id, try name
+	if not list_entries[id] then
+		id = idFromName(list_entries, id)
+		
+		-- Name is also invalid, error
+		if not id or not list_entries[id] then
+			SF.Throw("Invalid id or name", 2)
+		end
+	end
+	
+	local specs = table.Copy(list_entries[id])
+	specs.BaseClass = nil
+	
+	return specs
+end
+
+--- Returns a list of all guns
+-- @server
+-- @return The guns list
+function acf_library.getAllGuns()
+	local list = {}
+	
+	for id, _ in pairs(ACF.Weapons.Guns) do
+		table.insert(list, id)
+	end
+	
+	return list
+end
+
+-- Set ammo properties
+local ammo_properties = {}
+
+for id, data in pairs(list.Get("ACFRoundTypes")) do
+	ammo_properties[id] = {
+		name = data.name,
+		desc = data.desc,
+		model = data.model,
+		gun_blacklist = ACF.AmmoBlacklist[id],
+		create_data = {}
+	}
+end
+
+-- No other way to get this so hardcoded here it is ;(
+local ammo_property_data = {
+	propellantLength = {
+		type = "number",
+		default = 0.01,
+		data = 3,
+		convert = function(value) return value end
+	},
+	
+	projectileLength = {
+		type = "number",
+		default = 15,
+		data = 4,
+		convert = function(value) return value end
+	},
+	
+	heFillerVolume = {
+		type = "number",
+		default = 0,
+		data = 5,
+		convert = function(value) return value end
+	},
+	
+	tracer = {
+		type = "boolean",
+		default = false,
+		data = 10,
+		convert = function(value) return value and 0.5 or 0 end
+	}
+}
+
+ammo_properties.AP.create_data = {
+	propellantLength = ammo_property_data.propellantLength,
+	projectileLength = ammo_property_data.projectileLength,
+	tracer = ammo_property_data.tracer
+}
+
+ammo_properties.APHE.create_data = {
+	propellantLength = ammo_property_data.propellantLength,
+	projectileLength = ammo_property_data.projectileLength,
+	heFillerVolume = ammo_property_data.heFillerVolume,
+	tracer = ammo_property_data.tracer
+}
+
+ammo_properties.FL.create_data = {
+	propellantLength = ammo_property_data.propellantLength,
+	projectileLength = ammo_property_data.projectileLength,
+	flechettes = {
+		type = "number",
+		default = 6,
+		data = 5,
+		convert = function(value) return value end
+	},
+	flechettesSpread = {
+		type = "number",
+		default = 10,
+		data = 6,
+		convert = function(value) return value end
+	},
+	tracer = ammo_property_data.tracer
+}
+
+ammo_properties.HE.create_data = {
+	propellantLength = ammo_property_data.propellantLength,
+	projectileLength = ammo_property_data.projectileLength,
+	heFillerVolume = ammo_property_data.heFillerVolume,
+	tracer = ammo_property_data.tracer
+}
+
+ammo_properties.HEAT.create_data = {
+	propellantLength = ammo_property_data.propellantLength,
+	projectileLength = ammo_property_data.projectileLength,
+	heFillerVolume = ammo_property_data.heFillerVolume,
+	crushConeAngle = {
+		type = "number",
+		default = 0,
+		data = 6,
+		convert = function(value) return value end
+	},
+	tracer = ammo_property_data.tracer
+}
+
+ammo_properties.HP.create_data = {
+	propellantLength = ammo_property_data.propellantLength,
+	projectileLength = ammo_property_data.projectileLength,
+	heFillerVolume = ammo_property_data.heFillerVolume,
+	hollowPointCavityVolume = {
+		type = "number",
+		default = 0,
+		data = 5,
+		convert = function(value) return value end
+	},
+	tracer = ammo_property_data.tracer
+}
+
+ammo_properties.SM.create_data = {
+	propellantLength = ammo_property_data.propellantLength,
+	projectileLength = ammo_property_data.projectileLength,
+	smokeFillerVolume = ammo_property_data.heFillerVolume,
+	wpFillerVolume = {
+		type = "number",
+		default = 0,
+		data = 6,
+		convert = function(value) return value end
+	},
+	fuseTime = {
+		type = "number",
+		default = 0,
+		data = 7,
+		convert = function(value) return value end
+	},
+	tracer = ammo_property_data.tracer
+}
+
+ammo_properties.Refill.create_data = {}
+
+--- Creates a ammo box given the id
+-- @param pos Position of created ammo box
+-- @param ang Angle of created ammo box
+-- @param id id of the ammo box to create
+-- @param ammo_id id of the ammo
+-- @param frozen True to spawn frozen
+-- @param ammo_data the ammo data
+-- @server
+-- @return The created ammo box
+-- @usage
+-- If ammo_data isn't provided default values will be used (same as in the ACF menu)
+-- Possible values for ammo_data corresponding to ammo_id:
+-- 
+-- AP:
+-- \- propellantLength (number)
+-- \- projectileLength (number)
+-- \- tracer (bool)
+-- 
+-- APHE:
+-- \- propellantLength (number)
+-- \- projectileLength (number)
+-- \- heFillerVolume (number)
+-- \- tracer (bool)
+-- 
+-- FL:
+-- \- propellantLength (number)
+-- \- projectileLength (number)
+-- \- flechettes (number)
+-- \- flechettesSpread (number)
+-- \- tracer (bool)
+-- 
+-- HE:
+-- \- propellantLength (number)
+-- \- projectileLength (number)
+-- \- heFillerVolume (number)
+-- \- tracer (bool)
+-- 
+-- HEAT:
+-- \- propellantLength (number)
+-- \- projectileLength (number)
+-- \- heFillerVolume (number)
+-- \- crushConeAngle (number)
+-- \- tracer (bool)
+-- 
+-- HP:
+-- \- propellantLength (number)
+-- \- projectileLength (number)
+-- \- heFillerVolume (number)
+-- \- hollowPointCavityVolume (number)
+-- \- tracer (bool)
+-- 
+-- SM:
+-- \- propellantLength (number)
+-- \- projectileLength (number)
+-- \- smokeFillerVolume (number)
+-- \- wpFillerVolume (number)
+-- \- fuseTime (number)
+-- \- tracer (bool)
+-- 
+-- Refil:
+function acf_library.createAmmo(pos, ang, id, gun_id, ammo_id, frozen, ammo_data)
+	checkpermission(SF.instance, nil, "acf.createAmmo")
+	
+	local instance = SF.instance
+	local ply = instance.player
+	
+	if not hook.Run("CanTool", ply, {Hit = true, Entity = game.GetWorld()}, "acfmenu") then SF.Throw("No permission to spawn ACF components", 2) end
+	
+	checktype(pos, vec_meta)
+	checktype(ang, ang_meta)
+	checkluatype(id, TYPE_STRING)
+	checkluatype(ammo_id, TYPE_STRING)
+	checkluatype(gun_id, TYPE_STRING)
+	frozen = frozen and true or false
+	ammo_data = type(ammo_data) == "table" and ammo_data or {}
+	
+	local pos = vunwrap(pos)
+	local ang = aunwrap(ang)
+	
+	local list_entries = ACF.Weapons.Ammo
+	local type_id = list_entries[id]
+	if not type_id then SF.Throw("Invalid id", 2) end
+	
+	local ammo = ammo_properties[ammo_id]
+	if not ammo then SF.Throw("Invalid ammo id", 2) end
+	
+	local gun_list_entries = ACF.Weapons.Guns
+	if not gun_list_entries[gun_id] then
+		gun_id = idFromName(gun_list_entries, gun_id)
+		
+		if not gun_id or not gun_list_entries[gun_id] then
+			SF.Throw("Invalid gun id or name", 2)
+		end
+	end
+	
+	local dupe_class = duplicator.FindEntityClass(type_id.ent) 
+	if not dupe_class then SF.Throw("Didn't find entity duplicator records", 2) end
+	
+	plyBurst:use(ply, 1)
+	plyCount:checkuse(ply, 1)
+	
+	local args_table = {
+		SF.clampPos(pos),
+		ang,
+		id,
+		gun_id,
+		ammo_id,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0
+	}
+	
+	for k, v in pairs(ammo.create_data) do
+		local value = ammo_data[k]
+		
+		if value then
+			if type(value) == v.type then
+				args_table[3 + v.data] = v.convert(value)
+			else
+				args_table[3 + v.data] = v.convert(v.default)
+			end
+		else
+			args_table[3 + v.data] = v.convert(v.default)
+		end
+	end
+	
+	local ent = dupe_class.Func(ply, unpack(args_table))
+	ent:Activate()
+	
+	local phys = ent:GetPhysicsObject()
+	if phys:IsValid() then
+		phys:EnableMotion(not frozen)
+	end
+	
+	if instance.data.props.undo then
+		undo.Create("ACF Ammo")
+			undo.SetPlayer(ply)
+			undo.AddEntity(ent)
+		undo.Finish("ACF Ammo (" .. tostring(id) .. ")")
+	end
+	
+	ply:AddCleanup("props", ent)
+	register(ent, instance)
+	
+	return SF.WrapObject(ent)
+end
+
+--- Returns the specs of the ammo
+-- @param id id of the ammo
+-- @server
+-- @return The specs table
+function acf_library.getAmmoSpecs(id)
+	checkluatype(id, TYPE_STRING)
+	
+	local data = ammo_properties[id]
+	if not data then SF.Throw("Invalid id", 2) end
+	
+	local properties = {}
+	for name, d in pairs(data.create_data) do
+		properties[name] = {
+			type = d.type,
+			default = d.default,
+			convert = d.convert
+		}
+	end
+	
+	return {
+		name = data.name,
+		desc = data.desc,
+		model = data.model,
+		properties = table.Copy(data.create_data)--properties
+	}
+end
+
+--- Returns a list of all ammo types
+-- @server
+-- @return The ammo list
+function acf_library.getAllAmmo()
+	local list = {}
+	
+	for id, _ in pairs(ammo_properties) do
+		table.insert(list, id)
+	end
+	
+	return list
+end
+
+--- Returns a list of all ammo boxes
+-- @server
+-- @return The ammo box list
+function acf_library.getAllAmmoBoxes()
+	local list = {}
+	
+	for id, _ in pairs(ACF.Weapons.Ammo) do
+		table.insert(list, id)
+	end
+	
+	return list
+end
+
+----------------------------------------
+-- Entity Methods
+
 SF.AddHook("postload", function()
-	local ents_metatable = SF.Entities.Metatable
-	local ents_methods = SF.Entities.Methods
-	local wrap, unwrap = SF.Entities.Wrap, SF.Entities.Unwrap
+	ents_metatable = SF.Entities.Metatable
+	ents_methods = SF.Entities.Methods
+	
+	vec_meta = SF.Vectors.Metatable
+	ang_meta = SF.Angles.Metatable
+	
+	wrap = SF.Entities.Wrap
+	unwrap = SF.Entities.Unwrap
+	vwrap = SF.Vectors.Wrap
+	vunwrap = SF.Vectors.Unwrap
+	awrap = SF.Angles.Wrap
+	aunwrap = SF.Angles.Unwrap
 
 	-- [General Functions ] --
 
+	-- Moved to acf lib
 	-- Returns true if functions returning sensitive info are restricted to owned props
-	function ents_methods:acfInfoRestricted ()
+	--[[function ents_methods:acfInfoRestricted ()
 		return GetConVar( "sbox_acf_restrictinfo" ):GetInt() ~= 0
+	end]]
+
+	-- Returns true if this entity contains sensitive info and is not accessable to us
+	function ents_methods:acfIsInfoRestricted ()
+		checktype( self, ents_metatable )
+		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+
+		return restrictInfo( this )
 	end
 
 	-- Returns the short name of an ACF entity
 	function ents_methods:acfNameShort ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if isEngine( this ) then return this.Id or "" end
 		if isGearbox( this ) then return this.Id or "" end
 		if isGun( this ) then return this.Id or "" end
 		if isAmmo( this ) then return this.RoundId or "" end
 		if isFuel( this ) then return this.FuelType .. " " .. this.SizeId end
+		
+		return ""
 	end
 
 	-- Returns the capacity of an acf ammo crate or fuel tank
 	function ents_methods:acfCapacity ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not ( isAmmo( this ) or isFuel( this ) ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -96,8 +870,10 @@ SF.AddHook("postload", function()
 
 	-- Returns true if the acf engine, fuel tank, or ammo crate is active
 	function ents_methods:acfGetActive ()
-		SF.CheckType( self, ents_metatable )
-		local this = unwrap( self )	
+		checktype( self, ents_metatable )
+		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not ( isEngine( this ) or isAmmo( this ) or isFuel( this ) ) then return false end
 		if restrictInfo( this ) then return false end
@@ -111,34 +887,39 @@ SF.AddHook("postload", function()
 
 	-- Turns an ACF engine, ammo crate, or fuel tank on or off
 	function ents_methods:acfSetActive ( on )
-		SF.CheckType( self, ents_metatable )
-		local this = unwrap( self )	
+		checktype( self, ents_metatable )
+		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" )
 
 		if not ( isEngine( this ) or isAmmo( this ) or isFuel( this ) ) then return end
-		if restrictInfo( this ) then return end
-		this:TriggerInput( "Active", on and 1 or 0 )	
+		this:TriggerInput( "Active", on and 1 or 0 )    
 	end
 
-	--returns 1 if hitpos is on a clipped part of prop
+	--returns true if hitpos is on a clipped part of prop
 	function ents_methods:acfHitClip( hitpos )
-		SF.CheckType( self, ents_metatable )
-		SF.CheckType( hitpos, "vector" )
-		local this = unwrap( self )	
+		checktype( self, ents_metatable )
+		checktype( hitpos, vec_meta )
+		local this = unwrap( self )
+		local hitpos = vunwrap( hitpos )
 
-		if not isOwner( self, this ) then return false end
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" ) -- E2 has owner check so i guess having a check if the player has permission is sufficient enough?
+
 		if ACF_CheckClips( nil, nil, this, hitpos ) then return true else return false end
 	end
 
 	local linkTables =
 	{ -- link resources within each ent type. should point to an ent: true if adding link.Ent, false to add link itself
-		acf_engine 		= { GearLink = true, FuelLink = false },
-		acf_gearbox		= { WheelLink = true, Master = false },
-		acf_fueltank	= { Master = false },
-		acf_gun			= { AmmoLink = false },
-		acf_ammo		= { Master = false }
+		acf_engine      = { GearLink = true, FuelLink = false },
+		acf_gearbox     = { WheelLink = true, Master = false },
+		acf_fueltank    = { Master = false },
+		acf_gun         = { AmmoLink = false },
+		acf_ammo        = { Master = false }
 	}
 
-	local function getLinks ( ent, enttype )	
+	local function getLinks ( ent, enttype )    
 		local ret = {}
 		-- find the link resources available for this ent type
 		for entry, mode in pairs( linkTables[ enttype ] ) do
@@ -174,10 +955,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the ACF links associated with the entity
 	function ents_methods:acfLinks ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
 
-		if not IsValid( this ) then return {} end
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		local enttype = this:GetClass()
 
@@ -185,13 +966,15 @@ SF.AddHook("postload", function()
 			return searchForGearboxLinks( this )
 		end
 
-		return getLinks( this, enttype )	
+		return getLinks( this, enttype )    
 	end
 
 	-- Returns the full name of an ACF entity
 	function ents_methods:acfName ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if isAmmo( this ) then return ( this.RoundId .. " " .. this.RoundType) end
 		if isFuel( this ) then return this.FuelType .. " " .. this.SizeId end
@@ -207,8 +990,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the type of ACF entity
 	function ents_methods:acfType ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if isEngine( this ) or isGearbox( this ) then
 			local List = list.Get( "ACFEnts" )
@@ -223,99 +1008,176 @@ SF.AddHook("postload", function()
 		return ""
 	end
 
-	--perform ACF links
+	-- Perform ACF links
 	function ents_methods:acfLinkTo ( target, notify )
-		SF.CheckType( self, ents_metatable )
-		SF.CheckType( target, ents_metatable )
-		SF.CheckType( notify, "number" )
+		checktype( self, ents_metatable )
+		checktype( target, ents_metatable )
+
 		local this = unwrap( self )
 		local tar = unwrap( target )
 
-		if not ( ( isGun( this ) or isEngine( this ) or isGearbox( this ) ) and ( isOwner( self, this ) and isOwner( self, tar ) ) ) then
-			if notify > 0 then
-				ACF_SendNotify( self.player, 0, "Must be called on a gun, engine, or gearbox you own." )
-			end
-			return 0
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		if not ( tar and tar:IsValid() ) then SF.Throw( "Invalid Link Entity", 2 ) end
+
+		checkpermission( SF.instance, this, "entities.acf" )
+		checkpermission( SF.instance, tar, "entities.acf" )
+
+		if not ( isGun( this ) or isEngine( this ) or isGearbox( this ) ) then
+			SF.Throw( "Target must be a gun, engine, or gearbox", 2 )
 		end
 
-	    local success, msg = this:Link( tar )
-	    if notify > 0 then
-		ACF_SendNotify( self.player, success, msg )
-	    end
-	    return success and 1 or 0
+		local success, msg = this:Link( tar )
+		if notify then
+			ACF_SendNotify( self.player, success, msg )
+		end
+		return success, msg
 	end
 
-	--perform ACF unlinks
+	-- Perform ACF unlinks
 	function ents_methods:acfUnlinkFrom ( target, notify )
-		SF.CheckType( self, ents_metatable )
-		SF.CheckType( target, ents_metatable )
-		SF.CheckType( notify, "number" )
+		checktype( self, ents_metatable )
+		checktype( target, ents_metatable )
+
 		local this = unwrap( self )
 		local tar = unwrap( target )
 
-		if not ( ( isGun( this ) or isEngine( this ) or isGearbox( this ) ) and ( isOwner( self, this ) and isOwner( self, tar ) ) ) then
-			if notify > 0 then
-				ACF_SendNotify( self.player, 0, "Must be called on a gun, engine, or gearbox you own." )
-			end
-			return 0
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		if not ( tar and tar:IsValid() ) then SF.Throw( "Invalid Link Entity", 2 ) end
+
+		checkpermission( SF.instance, this, "entities.acf" )
+		checkpermission( SF.instance, tar, "entities.acf" )
+
+		if not ( isGun( this ) or isEngine( this ) or isGearbox( this ) ) then
+			SF.Throw( "Target must be a gun, engine, or gearbox", 2 )
 		end
 
-	    local success, msg = this:Unlink( tar )
-	    if notify > 0 then
-		ACF_SendNotify( self.player, success, msg )
-	    end
-	    return success and 1 or 0
+		local success, msg = this:Unlink( tar )
+		if notify then
+			ACF_SendNotify( self.player, success, msg )
+		end
+		return success, msg
 	end
 
+	-- returns any wheels linked to this engine/gearbox or child gearboxes
+	function ents_methods:acfGetLinkedWheels ()
+		checktype( self, ents_metatable )
+		local this = unwrap( self )
 
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		if not ( isEngine(this) or isGearbox(this) ) then SF.Throw( "Target must be a engine, or gearbox", 2 ) end
+
+		local wheels = {}
+		for k, ent in pairs( ACF_GetLinkedWheels( this ) ) do
+			table.insert( wheels, wrap( ent ) )
+		end
+
+		return wheels
+	end
 
 	-- [ Engine Functions ] --
 
 	-- Returns true if the entity is an ACF engine
 	function ents_methods:acfIsEngine ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
 
-		if isEngine( this ) then return true else return false end
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+
+		return isEngine( this )
+	end
+
+	-- Returns true if an ACF engine is electric
+	function ents_methods:acfIsElectric ()
+		checktype( self, ents_metatable )
+		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+
+		return this.iselec == true
 	end
 
 	-- Returns the torque in N/m of an ACF engine
 	function ents_methods:acfMaxTorque ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isEngine( this ) then return 0 end
 		return this.PeakTorque or 0
 	end
 
-	-- Returns the power in kW of an ACF engine
-	function ents_methods:acfMaxPower ()
-		SF.CheckType( self, ents_metatable )
+	-- Returns the torque in N/m of an ACF engine with fuel
+	function ents_methods:acfMaxTorqueWithFuel ()
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
 
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+
 		if not isEngine( this ) then return 0 end
+		return (this.PeakTorque or 0) * (ACF.TorqueBoost or 0)
+	end
+
+	local function getMaxPower( ent )
 		local peakpower
-		if this.iselec then
-			peakpower = math.floor( this.PeakTorque * this.LimitRPM / ( 4 * 9548.8 ) )
+		
+		if ent.iselec then
+			peakpower = math.floor( ent.PeakTorque * ent.LimitRPM / ( 4 * 9548.8 ) )
 		else
-			peakpower = math.floor( this.PeakTorque * this.PeakMaxRPM / 9548.8 )
+			peakpower = math.floor( ent.PeakTorque * ent.PeakMaxRPM / 9548.8 )
 		end
+		
 		return peakpower or 0
+	end
+
+	-- Returns the power in kW of an ACF engine
+	function ents_methods:acfMaxPower ()
+		checktype( self, ents_metatable )
+		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+
+		return isEngine( this ) and getMaxPower( this ) or 0
+	end
+
+	-- Returns the power in kW of an ACF engine with fuel
+	function ents_methods:acfMaxPowerWithFuel ()
+		checktype( self, ents_metatable )
+		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+
+		return (isEngine( this ) and getMaxPower( this ) or 0) * (ACF.TorqueBoost or 0)
 	end
 
 	-- Returns the idle rpm of an ACF engine
 	function ents_methods:acfIdleRPM ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isEngine( this ) then return 0 end
 		return this.IdleRPM or 0
 	end
 
+	-- Returns the powerband min and max of an ACF Engine
+	function ents_methods:acfPowerband ()
+		checktype( self, ents_metatable )
+		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+
+		if not isEngine( this ) then return 0, 0 end
+		return this.PeakMinRPM or 0, this.PeakMaxRPM or 0
+	end
+
 	-- Returns the powerband min of an ACF engine
 	function ents_methods:acfPowerbandMin ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isEngine( this ) then return 0 end
 		return this.PeakMinRPM or 0
@@ -323,8 +1185,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the powerband max of an ACF engine
 	function ents_methods:acfPowerbandMax ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isEngine( this ) then return 0 end
 		return this.PeakMaxRPM or 0
@@ -332,8 +1196,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the redline rpm of an ACF engine
 	function ents_methods:acfRedline ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isEngine( this ) then return 0 end
 		return this.LimitRPM or 0
@@ -341,8 +1207,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the current rpm of an ACF engine
 	function ents_methods:acfRPM ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isEngine( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -351,8 +1219,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the current torque of an ACF engine
 	function ents_methods:acfTorque ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isEngine( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -361,8 +1231,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the inertia of an ACF engine's flywheel
 	function ents_methods:acfFlyInertia ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isEngine( this ) then return nil end
 		if restrictInfo( this ) then return 0 end
@@ -371,8 +1243,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the mass of an ACF engine's flywheel
 	function ents_methods:acfFlyMass ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isEngine( this ) then return nil end
 		if restrictInfo( this ) then return 0 end
@@ -381,8 +1255,10 @@ SF.AddHook("postload", function()
 
 	--- Returns the current power of an ACF engine
 	function ents_methods:acfPower ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isEngine( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -391,19 +1267,24 @@ SF.AddHook("postload", function()
 
 	-- Returns true if the RPM of an ACF engine is inside the powerband
 	function ents_methods:acfInPowerband ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isEngine( this ) then return false end
 		if restrictInfo( this ) then return false end
 		if ( this.FlyRPM < this.PeakMinRPM ) then return false end
 		if ( this.FlyRPM > this.PeakMaxRPM ) then return false end
+
 		return true
 	end
 
 	function ents_methods:acfGetThrottle ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isEngine( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -412,12 +1293,14 @@ SF.AddHook("postload", function()
 
 	-- Sets the throttle value for an ACF engine
 	function ents_methods:acfSetThrottle ( throttle )
-		SF.CheckType( self, ents_metatable )
-		SF.CheckType( throttle, "number" )
+		checktype( self, ents_metatable )
+		checkluatype( throttle, TYPE_NUMBER )
 		local this = unwrap( self )
 
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" )
+
 		if not isEngine( this ) then return end
-		if restrictInfo( this ) then return end
 		this:TriggerInput( "Throttle", throttle )
 	end
 
@@ -426,16 +1309,20 @@ SF.AddHook("postload", function()
 
 	-- Returns true if the entity is an ACF gearbox
 	function ents_methods:acfIsGearbox ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
 
-		if isGearbox( this ) then return true else return false end
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+
+		return isGearbox( this )
 	end
 
 	-- Returns the current gear for an ACF gearbox
 	function ents_methods:acfGear ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isGearbox( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -444,8 +1331,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the number of gears for an ACF gearbox
 	function ents_methods:acfNumGears ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isGearbox( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -454,8 +1343,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the final ratio for an ACF gearbox
 	function ents_methods:acfFinalRatio ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isGearbox( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -464,8 +1355,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the total ratio (current gear * final) for an ACF gearbox
 	function ents_methods:acfTotalRatio ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isGearbox( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -474,8 +1367,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the max torque for an ACF gearbox
 	function ents_methods:acfTorqueRating ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isGearbox( this ) then return 0 end
 		return this.MaxTorque or 0
@@ -483,19 +1378,23 @@ SF.AddHook("postload", function()
 
 	-- Returns whether an ACF gearbox is dual clutch
 	function ents_methods:acfIsDual ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isGearbox( this ) then return false end
 		if restrictInfo( this ) then return false end
-		if this.Dual then return true end
-		return false
+		
+		return this.Dual
 	end
 
 	-- Returns the time in ms an ACF gearbox takes to change gears
 	function ents_methods:acfShiftTime ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isGearbox( this ) then return 0 end
 		return ( this.SwitchTime or 0 ) * 1000
@@ -503,21 +1402,24 @@ SF.AddHook("postload", function()
 
 	-- Returns true if an ACF gearbox is in gear
 	function ents_methods:acfInGear ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isGearbox( this ) then return false end
 		if restrictInfo( this ) then return false end
-		if this.InGear then return true end
-		return false
+		
+		return this.InGear
 	end
 
 	-- Returns the ratio for a specified gear of an ACF gearbox
 	function ents_methods:acfGearRatio ( gear )
-		SF.CheckType( self, ents_metatable )
-		SF.CheckType( gear, "number" )
-
+		checktype( self, ents_metatable )
+		checkluatype( gear, TYPE_NUMBER )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isGearbox( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -527,8 +1429,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the current torque output for an ACF gearbox
 	function ents_methods:acfTorqueOut ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isGearbox( this ) then return 0 end
 		return math.min( this.TotalReqTq or 0, this.MaxTorque or 0 ) / ( this.GearRatio or 1 )
@@ -536,10 +1440,12 @@ SF.AddHook("postload", function()
 
 	-- Sets the gear ratio of a CVT, set to 0 to use built-in algorithm
 	function ents_methods:acfCVTRatio ( ratio )
-		SF.CheckType( self, ents_metatable )
-		SF.CheckType( ratio, "number" )
-
+		checktype( self, ents_metatable )
+		checkluatype( ratio, TYPE_NUMBER )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" )
 
 		if not isGearbox( this ) then return end
 		if restrictInfo( this ) then return end
@@ -549,9 +1455,12 @@ SF.AddHook("postload", function()
 
 	-- Sets the current gear for an ACF gearbox
 	function ents_methods:acfShift ( gear )
-		SF.CheckType( self, ents_metatable )
-		SF.CheckType( gear, "number" )
+		checktype( self, ents_metatable )
+		checkluatype( gear, TYPE_NUMBER )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" )
 
 		if not isGearbox( this ) then return end
 		if restrictInfo( this ) then return end
@@ -560,8 +1469,11 @@ SF.AddHook("postload", function()
 
 	-- Cause an ACF gearbox to shift up
 	function ents_methods:acfShiftUp ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" )
 
 		if not isGearbox( this ) then return end
 		if restrictInfo( this ) then return end
@@ -570,8 +1482,11 @@ SF.AddHook("postload", function()
 
 	-- Cause an ACF gearbox to shift down
 	function ents_methods:acfShiftDown ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" )
 
 		if not isGearbox( this ) then return end
 		if restrictInfo( this ) then return end
@@ -580,20 +1495,26 @@ SF.AddHook("postload", function()
 
 	-- Sets the brakes for an ACF gearbox
 	function ents_methods:acfBrake ( brake )
-		SF.CheckType( self, ents_metatable )
-		SF.CheckType( brake, "number" )
+		checktype( self, ents_metatable )
+		checkluatype( brake, TYPE_NUMBER )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" )
 
 		if not isGearbox( this ) then return end
 		if restrictInfo( this ) then return end
-		this:TriggerInput("Brake", brake)
+		this:TriggerInput( "Brake", brake )
 	end
 
 	-- Sets the left brakes for an ACF gearbox
 	function ents_methods:acfBrakeLeft ( brake )
-		SF.CheckType( self, ents_metatable )
-		SF.CheckType( brake, "number" )
+		checktype( self, ents_metatable )
+		checkluatype( brake, TYPE_NUMBER )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" )
 
 		if not isGearbox( this ) then return end
 		if restrictInfo( this ) then return end
@@ -603,9 +1524,12 @@ SF.AddHook("postload", function()
 
 	-- Sets the right brakes for an ACF gearbox
 	function ents_methods:acfBrakeRight ( brake )
-		SF.CheckType( self, ents_metatable )
-		SF.CheckType( brake, "number" )
+		checktype( self, ents_metatable )
+		checkluatype( brake, TYPE_NUMBER )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" )
 
 		if not isGearbox( this ) then return end
 		if restrictInfo( this ) then return end
@@ -615,9 +1539,12 @@ SF.AddHook("postload", function()
 
 	-- Sets the clutch for an ACF gearbox
 	function ents_methods:acfClutch ( clutch )
-		SF.CheckType( self, ents_metatable )
-		SF.CheckType( clutch, "number" )
+		checktype( self, ents_metatable )
+		checkluatype( clutch, TYPE_NUMBER )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" )
 
 		if not isGearbox( this ) then return end
 		if restrictInfo( this ) then return end
@@ -626,9 +1553,12 @@ SF.AddHook("postload", function()
 
 	-- Sets the left clutch for an ACF gearbox
 	function ents_methods:acfClutchLeft( clutch )
-		SF.CheckType( self, ents_metatable )
-		SF.CheckType( clutch, "number" )
+		checktype( self, ents_metatable )
+		checkluatype( clutch, TYPE_NUMBER )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" )
 
 		if not isGearbox( this ) then return end
 		if restrictInfo( this ) then return end
@@ -638,9 +1568,12 @@ SF.AddHook("postload", function()
 
 	-- Sets the right clutch for an ACF gearbox
 	function ents_methods:acfClutchRight ( clutch )
-		SF.CheckType( self, ents_metatable )
-		SF.CheckType( clutch, "number" )
+		checktype( self, ents_metatable )
+		checkluatype( clutch, TYPE_NUMBER )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" )
 
 		if not isGearbox( this ) then return end
 		if restrictInfo( this ) then return end
@@ -650,9 +1583,12 @@ SF.AddHook("postload", function()
 
 	-- Sets the steer ratio for an ACF gearbox
 	function ents_methods:acfSteerRate ( rate )
-		SF.CheckType( self, ents_metatable )
-		SF.CheckType( rate, "number" )
+		checktype( self, ents_metatable )
+		checkluatype( rate, TYPE_NUMBER )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" )
 
 		if not isGearbox( this ) then return end
 		if restrictInfo( this ) then return end
@@ -662,9 +1598,12 @@ SF.AddHook("postload", function()
 
 	-- Applies gear hold for an automatic ACF gearbox
 	function ents_methods:acfHoldGear( hold )
-		SF.CheckType( self, ents_metatable )
-		SF.CheckType( hold, "number" )
+		checktype( self, ents_metatable )
+		checkluatype( hold, TYPE_NUMBER )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" )
 
 		if not isGearbox( this ) then return end
 		if restrictInfo( this ) then return end
@@ -674,9 +1613,12 @@ SF.AddHook("postload", function()
 
 	-- Sets the shift point scaling for an automatic ACF gearbox
 	function ents_methods:acfShiftPointScale( scale )
-		SF.CheckType( self, ents_metatable )
-		SF.CheckType( scale, "number" )
+		checktype( self, ents_metatable )
+		checkluatype( scale, TYPE_NUMBER )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" )
 
 		if not isGearbox( this ) then return end
 		if restrictInfo( this ) then return end
@@ -689,16 +1631,20 @@ SF.AddHook("postload", function()
 
 	-- Returns true if the entity is an ACF gun
 	function ents_methods:acfIsGun ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if isGun( this ) and not restrictInfo( this ) then return true else return false end
 	end
 
 	-- Returns true if the ACF gun is ready to fire
 	function ents_methods:acfReady ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isGun( this ) then return false end
 		if restrictInfo( this ) then return false end
@@ -708,8 +1654,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the magazine size for an ACF gun
 	function ents_methods:acfMagSize ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isGun( this ) then return 0 end
 		return this.MagSize or 1
@@ -717,8 +1665,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the spread for an ACF gun or flechette ammo
 	function ents_methods:acfSpread ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isGun( this ) or isAmmo( this ) then return 0 end
 		local Spread = this.GetInaccuracy and this:GetInaccuracy() or this.Inaccuracy or 0
@@ -731,8 +1681,10 @@ SF.AddHook("postload", function()
 
 	-- Returns true if an ACF gun is reloading
 	function ents_methods:acfIsReloading ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isGun( this ) then return false end
 		if restrictInfo( this ) then return false end
@@ -742,8 +1694,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the rate of fire of an acf gun
 	function ents_methods:acfFireRate ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isGun( this ) then return 0 end
 		return math.Round( this.RateOfFire or 0, 3 )
@@ -751,8 +1705,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the number of rounds left in a magazine for an ACF gun
 	function ents_methods:acfMagRounds ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isGun( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -765,39 +1721,50 @@ SF.AddHook("postload", function()
 
 	-- Sets the firing state of an ACF weapon
 	function ents_methods:acfFire ( fire )
-		SF.CheckType( self, ents_metatable )
-		SF.CheckType( fire, "number" )
+		checktype( self, ents_metatable )
+		checkluatype( fire, TYPE_NUMBER )
 		local this = unwrap( self )
 
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" )
+
 		if not isGun( this ) then return end
-		if restrictInfo( this ) then return end
+		
 		this:TriggerInput( "Fire", fire )
 	end
 
 	-- Causes an ACF weapon to unload
 	function ents_methods:acfUnload ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
 
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" )
+
 		if not isGun( this ) then return end
-		if restrictInfo( this ) then return end
+		
 		this:UnloadAmmo()
 	end
 
 	-- Causes an ACF weapon to reload
 	function ents_methods:acfReload ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
 
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" )
+
 		if not isGun( this ) then return end
-		if restrictInfo( this ) then return end
+		
 		this.Reloading = true
 	end
 
 	--Returns the number of rounds in active ammo crates linked to an ACF weapon
 	function ents_methods:acfAmmoCount ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isGun( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -812,8 +1779,10 @@ SF.AddHook("postload", function()
 
 	--Returns the number of rounds in all ammo crates linked to an ACF weapon
 	function ents_methods:acfTotalAmmoCount ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isGun( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -826,47 +1795,57 @@ SF.AddHook("postload", function()
 		return Ammo
 	end
 
-    -- Returns time to next shot of an ACF weapon
-    function ents_methods:acfReloadTime ()
-        SF.CheckType( self, ents_metatable )
+	-- Returns time to next shot of an ACF weapon
+	function ents_methods:acfReloadTime ()
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
 
-	    if restrictInfo( this ) or not isGun( this ) or this.Ready then return 0 end
-	    return reloadTime( this )
-    end
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
-    -- Returns number between 0 and 1 which represents reloading progress of an ACF weapon. Useful for progress bars
-    function ents_methods:acfReloadProgress ()
-        SF.CheckType( self, ents_metatable )
+		if restrictInfo( this ) or not isGun( this ) or this.Ready then return 0 end
+		return reloadTime( this )
+	end
+
+	-- Returns number between 0 and 1 which represents reloading progress of an ACF weapon. Useful for progress bars
+	function ents_methods:acfReloadProgress ()
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
 
-        if restrictInfo( this ) or not isGun( this ) or this.Ready then return 1 end
-        return math.Clamp( 1 - (this.NextFire - CurTime()) / reloadTime( this ), 0, 1 )
-    end
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
-    -- Returns time it takes for an ACF weapon to reload magazine
-    function ents_methods:acfMagReloadTime ()
-        SF.CheckType( self, ents_metatable )
+		if restrictInfo( this ) or not isGun( this ) or this.Ready then return 1 end
+		return math.Clamp( 1 - (this.NextFire - CurTime()) / reloadTime( this ), 0, 1 )
+	end
+
+	-- Returns time it takes for an ACF weapon to reload magazine
+	function ents_methods:acfMagReloadTime ()
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
 
-        if restrictInfo( SF.instance.player , this ) or not isGun( this ) or not this.MagReload then return 0 end
-        return this.MagReload
-    end
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+
+		if restrictInfo( SF.instance.player , this ) or not isGun( this ) or not this.MagReload then return 0 end
+		return this.MagReload
+	end
 
 	-- [ Ammo Functions ] --
 
 	-- Returns true if the entity is an ACF ammo crate
 	function ents_methods:acfIsAmmo ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
 
-		if isAmmo( this ) and not restrictInfo( this ) then return true else return false end
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+
+		return isAmmo( this ) and not restrictInfo( this )
 	end
 
 	-- Returns the rounds left in an acf ammo crate
 	function ents_methods:acfRounds ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isAmmo( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -875,18 +1854,23 @@ SF.AddHook("postload", function()
 
 	-- Returns the type of weapon the ammo in an ACF ammo crate loads into
 	function ents_methods:acfRoundType () --cartridge?
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isAmmo( this ) then return "" end
 		if restrictInfo( this ) then return "" end
-		return this.RoundId or ""
+		--return this.RoundId or ""
+		return this.RoundType or "" -- E2 uses this one now
 	end
 
 	-- Returns the type of ammo in a crate or gun
 	function ents_methods:acfAmmoType ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isAmmo( this ) or isGun( this ) then return "" end
 		if restrictInfo( this ) then return "" end
@@ -895,8 +1879,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the caliber of an ammo or gun
 	function ents_methods:acfCaliber ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not ( isAmmo( this ) or isGun( this ) ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -905,8 +1891,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the muzzle velocity of the ammo in a crate or gun
 	function ents_methods:acfMuzzleVel ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not ( isAmmo( this ) or isGun( this ) ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -915,8 +1903,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the mass of the projectile in a crate or gun
 	function ents_methods:acfProjectileMass ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not ( isAmmo( this ) or isGun( this ) ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -925,8 +1915,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the number of projectiles in a flechette round
 	function ents_methods:acfFLSpikes ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not ( isAmmo( this ) or isGun( this ) ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -936,8 +1928,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the mass of a single spike in a FL round in a crate or gun
 	function ents_methods:acfFLSpikeMass ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not ( isAmmo( this ) or isGun( this ) ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -947,8 +1941,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the radius of the spikes in a flechette round in mm
 	function ents_methods:acfFLSpikeRadius ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not ( isAmmo( this ) or isGun( this ) ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -958,14 +1954,17 @@ SF.AddHook("postload", function()
 
 	-- Returns the penetration of an AP, APHE, or HEAT round
 	function ents_methods:acfPenetration ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not ( isAmmo( this ) or isGun( this ) ) then return 0 end
 		if restrictInfo( this ) then return 0 end
 		local Type = this.BulletData[ "Type" ] or ""
 		local Energy
-		if Type == "AP" or Type == "APHE" then
+		
+		--[[if Type == "AP" or Type == "APHE" then
 			Energy = ACF_Kinetic( this.BulletData[ "MuzzleVel" ] * 39.37, this.BulletData[ "ProjMass" ] - ( this.BulletData[ "FillerMass" ] or 0 ), this.BulletData[ "LimitVel" ] )
 			return math.Round( ( Energy.Penetration / this.BulletData[ "PenAera" ] ) * ACF.KEtoRHA, 3 )
 		elseif Type == "HEAT" then
@@ -974,14 +1973,30 @@ SF.AddHook("postload", function()
 		elseif Type == "FL" then
 			Energy = ACF_Kinetic( this.BulletData[ "MuzzleVel" ] * 39.37 , this.BulletData[ "FlechetteMass" ], this.BulletData[ "LimitVel" ] )
 			return math.Round( ( Energy.Penetration / this.BulletData[ "FlechettePenArea" ] ) * ACF.KEtoRHA, 3 )
+		end]]
+		
+		if Type == "AP" or Type == "APHE" then
+			Energy = ACF_Kinetic(this.BulletData["MuzzleVel"]*39.37, this.BulletData["ProjMass"] - (this.BulletData["FillerMass"] or 0), this.BulletData["LimitVel"] )
+			return math.Round((Energy.Penetration/this.BulletData["PenAera"])*ACF.KEtoRHA,3)
+		elseif Type == "HEAT" then
+			local Crushed, HEATFillerMass, BoomFillerMass = ACF.RoundTypes["HEAT"].CrushCalc(this.BulletData.MuzzleVel, this.BulletData.FillerMass)
+			if Crushed == 1 then return 0 end -- no HEAT jet to fire off, it was all converted to HE
+			Energy = ACF_Kinetic(ACF.RoundTypes["HEAT"].CalcSlugMV( this.BulletData, HEATFillerMass )*39.37, this.BulletData["SlugMass"], 9999999 )
+			return math.Round((Energy.Penetration/this.BulletData["SlugPenAera"])*ACF.KEtoRHA,3)
+		elseif Type == "FL" then
+			Energy = ACF_Kinetic(this.BulletData["MuzzleVel"]*39.37 , this.BulletData["FlechetteMass"], this.BulletData["LimitVel"] )
+			return math.Round((Energy.Penetration/this.BulletData["FlechettePenArea"])*ACF.KEtoRHA, 3)
 		end
+		
 		return 0
 	end
 
 	-- Returns the blast radius of an HE, APHE, or HEAT round
 	function ents_methods:acfBlastRadius ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not ( isAmmo( this ) or isGun( this ) ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -995,21 +2010,26 @@ SF.AddHook("postload", function()
 	end
 
 	-- Returns the drag coef of the ammo in a crate or gun
-	function ents_methods:acfDragCoef()
-		SF.CheckType( self, ents_metatable )
+	-- E2 doesnt have this function (anymore), no clue why but i guess i will comment it out
+	--[[function ents_methods:acfDragCoef()
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not ( isAmmo( this ) or isGun( this ) ) then return 0 end
 		if restrictInfo( this ) then return 0 end
 		return ( this.BulletData[ "DragCoef" ] or 0 ) / ACF.DragDiv
-	end
+	end]]
 
 	-- [ Armor Functions ] --
 
 	-- Returns the current health of an entity
 	function ents_methods:acfPropHealth ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not validPhysics( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -1019,8 +2039,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the current armor of an entity
 	function ents_methods:acfPropArmor ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not validPhysics( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -1030,8 +2052,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the max health of an entity
 	function ents_methods:acfPropHealthMax ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not validPhysics( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -1041,8 +2065,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the max armor of an entity
 	function ents_methods:acfPropArmorMax ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not validPhysics( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -1052,8 +2078,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the ductility of an entity
 	function ents_methods:acfPropDuctility ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not validPhysics( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -1065,16 +2093,20 @@ SF.AddHook("postload", function()
 
 	-- Returns true if the entity is an ACF fuel tank
 	function ents_methods:acfIsFuel ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
 
-		if isFuel( this ) and not restrictInfo( this ) then return true else return false end
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+
+		return isFuel( this ) and not restrictInfo( this )
 	end
 
 	-- Returns true if the current engine requires fuel to run
 	function ents_methods:acfFuelRequired ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isEngine( this ) then return false end
 		if restrictInfo( this ) then return false end
@@ -1083,25 +2115,29 @@ SF.AddHook("postload", function()
 
 	-- Sets the ACF fuel tank refuel duty status, which supplies fuel to other fuel tanks
 	function ents_methods:acfRefuelDuty ( on )
-		SF.CheckType( self, ents_metatable )
-		SF.CheckType( on, "boolean" )
+		checktype( self, ents_metatable )
+		checktype( on, "boolean" )
 		local this = unwrap( self )
 
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+		checkpermission( SF.instance, this, "entities.acf" )
+
 		if not isFuel( this ) then return end
-		if restrictInfo( this ) then return end
+		
 		this:TriggerInput( "Refuel Duty", on )
 	end
 
 	-- Returns the remaining liters or kilowatt hours of fuel in an ACF fuel tank or engine
 	function ents_methods:acfFuel ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
 
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
+
+		if restrictInfo( this ) then return 0 end
 		if isFuel( this ) then
-			if restrictInfo( this ) then return 0 end
 			return math.Round( this.Fuel, 3 )
 		elseif isEngine( this ) then
-			if restrictInfo( this ) then return 0 end
 			if not #(this.FuelLink) then return 0 end --if no tanks, return 0
 
 			local liters = 0
@@ -1118,8 +2154,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the amount of fuel in an ACF fuel tank or linked to engine as a percentage of capacity
 	function ents_methods:acfFuelLevel ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if isFuel( this ) then
 			if restrictInfo( this ) then return 0 end
@@ -1145,8 +2183,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the current fuel consumption in liters per minute or kilowatts of an engine
 	function ents_methods:acfFuelUse ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isEngine( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
@@ -1173,8 +2213,10 @@ SF.AddHook("postload", function()
 
 	-- Returns the peak fuel consumption in liters per minute or kilowatts of an engine at powerband max, for the current fuel type the engine is using
 	function ents_methods:acfPeakFuelUse ()
-		SF.CheckType( self, ents_metatable )
+		checktype( self, ents_metatable )
 		local this = unwrap( self )
+
+		if not ( this and this:IsValid() ) then SF.Throw( "Entity is not valid", 2 ) end
 
 		if not isEngine( this ) then return 0 end
 		if restrictInfo( this ) then return 0 end
