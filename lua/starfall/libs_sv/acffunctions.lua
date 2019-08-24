@@ -188,7 +188,7 @@ function acf_library.createMobility(pos, ang, id, frozen, gear_ratio)
 			args_table[3 + i] = type(gear_ratio[i]) == "number" and gear_ratio[i] or (i < type_id.gears and i / 10 or -0.1)
 		end
 		
-		args_table[13] = gear_ratio[-1] or 0.5
+		args_table[13] = type(gear_ratio[-1]) == "number" and gear_ratio[-1] or 0.5
 	end
 	
 	local ent = dupe_class.Func(ply, unpack(args_table))
@@ -2094,9 +2094,9 @@ SF.AddHook("postload", function()
 		return 0
 	end
 
-	-- Returns the drag coef of the ammo in a crate or gun
-	-- E2 doesnt have this function (anymore), no clue why but i guess i will comment it out
-	--[[function ents_methods:acfDragCoef()
+	--- Returns the drag coef of the ammo in a crate or gun
+	-- @server
+	function ents_methods:acfDragCoef()
 		checktype( self, ents_metatable )
 		local this = unwrap( self )
 
@@ -2105,7 +2105,7 @@ SF.AddHook("postload", function()
 		if not ( isAmmo( this ) or isGun( this ) ) then return 0 end
 		if restrictInfo( this ) then return 0 end
 		return ( this.BulletData[ "DragCoef" ] or 0 ) / ACF.DragDiv
-	end]]
+	end
 
 	-- [ Armor Functions ] --
 
