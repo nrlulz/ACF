@@ -1,5 +1,13 @@
 local ACFEnts = list.Get("ACFEnts")
 local GunTable = ACFEnts["Guns"]
+
+--Not done programmatically in case of future sounds not being numerically incremented.
+local PenetrationSounds = {
+	"/acf_other/penetratingshots/00000292.wav",
+	"/acf_other/penetratingshots/00000293.wav",
+	"/acf_other/penetratingshots/00000294.wav",
+	"/acf_other/penetratingshots/00000295.wav",
+}
    
  /*--------------------------------------------------------- 
     Initializes the effect. The data is a table of data  
@@ -23,7 +31,7 @@ local GunTable = ACFEnts["Guns"]
 	local Impact = util.TraceLine(ImpactTr)					--Trace to see if it will hit anything
 	self.Normal = Impact.HitNormal
 	
-	sound.Play( "/acf_other/penetratingshots/0000029"..math.random(2,5)..".wav", Impact.HitPos, math.Clamp(self.Mass*200,65,500), math.Clamp(self.Velocity*0.01,25,255), 1 )
+	sound.Play( PenetrationSounds[math.random( #PenetrationSounds )], Impact.HitPos, math.Clamp(self.Mass*200,65,500), math.Clamp(self.Velocity*0.01,25,255), 1 )
 	
 	--self.Entity:EmitSound( "ambient/explosions/explode_1.wav" , 100 + self.Radius*10, 200 - self.Radius*10 )
 	
