@@ -135,11 +135,16 @@ function ACF_CalcDamage( Entity , Energy , FrAera , Angle )
 	local HitRes = {}
 
 
-	
+	if istable(Entity) == false then -- ACF feeds us a table for some reason when we shoot living things.
+		if (!Entity:IsNPC() and !Entity:IsPlayer()) and (!Entity:IsNextBot()) then -- Don't do this to living things!
 
-	
+			if Entity:GetCollisionBounds() != Entity:GetModelBounds() then -- Did they do the makespherical cheat?
+				armor = 1
+				losArmor = 1
+			end
+		end
+	end
 
-	
 	local dmul = 1--This actually controls overall prop damage from rounds. It should be in globals but i'm suck's at Coding's -karb
 
 	--BNK Stuff
