@@ -57,6 +57,21 @@ ACF_defineGun("75mmSC", {
 	}
 } )
 
+ACF_defineGun("85mmSC", {
+	name = "85mm Short Cannon",
+	desc = "Like the 85mm Cannon except shorter and mildly angrier.",
+	model = "models/tankgun/tankgun_short_85mm.mdl",
+	gunclass = "SC",
+	caliber = 8.5,
+	weight = 1250,
+	year = 1942,
+	round = {
+		maxlength = 84.5,
+		propweight = 3.25
+	}
+} )
+
+
 ACF_defineGun("100mmSC", {
 	name = "100mm Short Cannon",
 	desc = "The 100mm is an effective infantry-support or antitank weapon, with a lot of uses and surprising lethality.",
