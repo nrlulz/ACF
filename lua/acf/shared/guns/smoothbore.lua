@@ -42,7 +42,7 @@ ACF_defineGun("120mmSB", {
 } )
 	
 ACF_defineGun("140mmSB", {
-	name = "140mm Smoothbore Cannonn",
+	name = "140mm Smoothbore Cannon",
 	desc = "The 140mm fires a massive shell with enormous penetrative capability, but has a glacial reload speed and a very hefty weight.",
 	model = "models/tankgun_old/tankgun_140mm.mdl",
 	gunclass = "SB",
