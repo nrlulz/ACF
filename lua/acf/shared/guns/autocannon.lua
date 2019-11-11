@@ -4,7 +4,7 @@ ACF_defineGunClass("AC", {
 	name = "Autocannon",
 	desc = "Autocannons have a rather high weight and bulk for the ammo they fire, but they can fire it extremely fast.",
 	muzzleflash = "30mm_muzzleflash_noscale",
-	rofmod = 0.35,
+	rofmod = 0.85,
 	sound = "weapons/ACF_Gun/ac_fire4.wav",
 	soundDistance = " ",
 	soundNormal = " "
@@ -19,7 +19,7 @@ ACF_defineGun("20mmAC", { --id
 	gunclass = "AC",
 	weight = 225,
 	year = 1930,
-	rofmod = 1.8,
+	rofmod = 0.7,
 	magsize = 100,
 	magreload = 3,
 	round = {
@@ -36,7 +36,7 @@ ACF_defineGun("30mmAC", {
 	caliber = 3.0,
 	weight = 960,
 	year = 1935,
-	rofmod = 1,
+	rofmod = 0.5,
 	magsize = 75,
 	magreload = 3,
 	round = {
@@ -53,7 +53,7 @@ ACF_defineGun("40mmAC", {
 	caliber = 4.0,
 	weight = 1500,
 	year = 1940,
-	rofmod = 0.92,
+	rofmod = 0.48,
 	magsize = 30,
 	magreload = 3,
 	round = {
@@ -70,7 +70,7 @@ ACF_defineGun("50mmAC", {
 	caliber = 5.0,
 	weight = 2130,
 	year = 1965,
-	rofmod = 0.9,
+	rofmod = 0.4,
 	magsize = 20,
 	magreload = 3,
 	round = {
