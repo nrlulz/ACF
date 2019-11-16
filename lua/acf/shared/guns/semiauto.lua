@@ -1,10 +1,10 @@
 --define the class
 ACF_defineGunClass("SA", {
-	spread = 0.12,
+	spread = 0.1,
 	name = "Semiautomatic Cannon",
 	desc = "Semiautomatic cannons offer better payloads than autocannons and less weight at the cost of rate of fire.",
 	muzzleflash = "30mm_muzzleflash_noscale",
-	rofmod = 0.85,
+	rofmod = 0.36,
 	sound = "acf_extra/tankfx/gnomefather/25mm1.wav",
 	soundDistance = " ",
 	soundNormal = " "
@@ -19,7 +19,7 @@ ACF_defineGun("25mmSA", { --id
 	caliber = 2.5,
 	weight = 200,
 	year = 1935,
-	rofmod = 1,
+	rofmod = 0.7,
 	magsize = 5,
 	magreload = 2,
 	round = {
