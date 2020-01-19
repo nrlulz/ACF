@@ -1,15 +1,16 @@
 
 AddCSLuaFile()
 
-ACF.AmmoBlacklist.AP = { "MO", "SL", "SB" }
+ACF.AmmoBlacklist.APDS = { "MO", "SL", "HW" , "SC", "MG" , "SB", "RAC", "GL", "HMG", "AAM", "ARTY", "ASM", "BOMB", "GBU", "POD", "SAM", "UAR", "FFAR", "FGL" }
 
 local Round = {}
+local PenMod = 1.5
 
 Round.type = "Ammo" --Tells the spawn menu what entity to spawn
-Round.name = "Armour Piercing (AP)" --Human readable name
+Round.name = "Armor Piercing, Discarding Sabot (APDS)" --Human readable name
 Round.model = "models/munitions/round_100mm_shot.mdl" --Shell flight model
-Round.desc = "A shell made out of a solid piece of steel, meant to penetrate armour"
-Round.netid = 1 --Unique ammotype ID for network transmission
+Round.desc = "A subcaliber munition designed to trade damage for penetration. Loses energy quickly over distance."
+Round.netid = 10 --Unique ammotype ID for network transmission
 
 function Round.create( Gun, BulletData )
 	
@@ -24,16 +25,17 @@ function Round.convert( Crate, PlayerData )
 	local ServerData = {}
 	local GUIData = {}
 	
+	
 	if not PlayerData.PropLength then PlayerData.PropLength = 0 end
 	if not PlayerData.ProjLength then PlayerData.ProjLength = 0 end
 	if not PlayerData.Data10 then PlayerData.Data10 = 0 end
 	
 	PlayerData, Data, ServerData, GUIData = ACF_RoundBaseGunpowder( PlayerData, Data, ServerData, GUIData )
 	
-	Data.ProjMass = Data.FrAera * (Data.ProjLength*7.9/1000) --Volume of the projectile as a cylinder * density of steel
+	Data.ProjMass = (Data.FrAera/5) * (Data.ProjLength*7.9/1000)  --Volume of the projectile as a cylinder * density of steel
 	Data.ShovePower = 0.2
-	Data.PenAera = Data.FrAera^ACF.PenAreaMod
-	Data.DragCoef = ((Data.FrAera/10000)/Data.ProjMass)
+	Data.PenAera = (Data.FrAera^ACF.PenAreaMod)/3
+	Data.DragCoef = ((Data.FrAera/20000)/Data.ProjMass)
 	Data.LimitVel = 800										--Most efficient penetration speed in m/s
 	Data.KETransfert = 0.1									--Kinetic energy transfert to the target for movement purposes
 	Data.Ricochet = 60										--Base ricochet angle
@@ -57,8 +59,8 @@ end
 
 function Round.getDisplayData(Data)
 	local GUIData = {}
-	local Energy = ACF_Kinetic( Data.MuzzleVel*39.37 , Data.ProjMass, Data.LimitVel )
-	GUIData.MaxPen = (Energy.Penetration/Data.PenAera)*ACF.KEtoRHA
+	local Energy = ACF_Kinetic( Data.MuzzleVel*(39.37) , Data.ProjMass, Data.LimitVel )
+	GUIData.MaxPen = (Energy.Penetration/(Data.PenAera))*ACF.KEtoRHA
 	return GUIData
 end
 
@@ -66,7 +68,7 @@ end
 
 function Round.network( Crate, BulletData )
 	
-	Crate:SetNWString( "AmmoType", "AP" )
+	Crate:SetNWString( "AmmoType", "APDS" )
 	Crate:SetNWString( "AmmoID", BulletData.Id )
 	Crate:SetNWFloat( "Caliber", BulletData.Caliber )
 	Crate:SetNWFloat( "ProjMass", BulletData.ProjMass )
@@ -196,7 +198,7 @@ end
 
 function Round.guicreate( Panel, Table )
 
-	acfmenupanel:AmmoSelect( ACF.AmmoBlacklist.AP )
+	acfmenupanel:AmmoSelect( ACF.AmmoBlacklist.APDS )
 	
 	acfmenupanel:CPanelText("BonusDisplay", "")
 	
@@ -204,7 +206,7 @@ function Round.guicreate( Panel, Table )
 	acfmenupanel:CPanelText("LengthDisplay", "")	--Total round length (Name, Desc)
 	
 	acfmenupanel:AmmoSlider("PropLength",0,0,1000,3, "Propellant Length", "")	--Propellant Length Slider (Name, Value, Min, Max, Decimals, Title, Desc)
-	acfmenupanel:AmmoSlider("ProjLength",0,0,1000,3, "Projectile Length", "")	--Projectile Length Slider (Name, Value, Min, Max, Decimals, Title, Desc)
+	acfmenupanel:AmmoSlider("ProjLength",0,0,1000,3, "Penetrator Length", "")	--Projectile Length Slider (Name, Value, Min, Max, Decimals, Title, Desc)
 	
 	acfmenupanel:AmmoCheckbox("Tracer", "Tracer", "")			--Tracer checkbox (Name, Title, Desc)
 	
@@ -220,7 +222,7 @@ function Round.guiupdate( Panel, Table )
 	
 	local PlayerData = {}
 		PlayerData.Id = acfmenupanel.AmmoData.Data.id			--AmmoSelect GUI
-		PlayerData.Type = "AP"										--Hardcoded, match ACFRoundTypes table index
+		PlayerData.Type = "APDS"										--Hardcoded, match ACFRoundTypes table index
 		PlayerData.PropLength = acfmenupanel.AmmoData.PropLength	--PropLength slider
 		PlayerData.ProjLength = acfmenupanel.AmmoData.ProjLength	--ProjLength slider
 		local Tracer = 0
@@ -241,7 +243,7 @@ function Round.guiupdate( Panel, Table )
 	acfmenupanel:CPanelText("BonusDisplay", "Crate info: +"..(math.Round((CapMul-1)*100,1)).."% capacity, +"..(math.Round((RoFMul-1)*-100,1)).."% RoF\nContains "..Cap.." rounds")
 	
 	acfmenupanel:AmmoSlider("PropLength",Data.PropLength,Data.MinPropLength,Data.MaxTotalLength,3, "Propellant Length", "Propellant Mass : "..(math.floor(Data.PropMass*1000)).." g" )	--Propellant Length Slider (Name, Min, Max, Decimals, Title, Desc)
-	acfmenupanel:AmmoSlider("ProjLength",Data.ProjLength,Data.MinProjLength,Data.MaxTotalLength,3, "Projectile Length", "Projectile Mass : "..(math.floor(Data.ProjMass*1000)).." g")	--Projectile Length Slider (Name, Min, Max, Decimals, Title, Desc)
+	acfmenupanel:AmmoSlider("ProjLength",Data.ProjLength,Data.MinProjLength,Data.MaxTotalLength,3, "Penetrator Length", "Projectile Mass : "..(math.floor(Data.ProjMass*1000)).." g")	--Projectile Length Slider (Name, Min, Max, Decimals, Title, Desc)
 
 	acfmenupanel:AmmoCheckbox("Tracer", "Tracer : "..(math.floor(Data.Tracer*10)/10).."cm\n", "" )			--Tracer checkbox (Name, Title, Desc)
 	
@@ -260,5 +262,5 @@ function Round.guiupdate( Panel, Table )
 	
 end
 
-list.Set( "ACFRoundTypes", "AP", Round )  --Set the round properties
-list.Set( "ACFIdRounds", Round.netid, "AP" ) --Index must equal the ID entry in the table above, Data must equal the index of the table above
+list.Set( "ACFRoundTypes", "APDS", Round )  --Set the round properties
+list.Set( "ACFIdRounds", Round.netid, "APDS" ) --Index must equal the ID entry in the table above, Data must equal the index of the table above

@@ -301,7 +301,7 @@ function ACF_RoundImpact( Bullet, Speed, Energy, Target, HitPos, HitNormal , Bon
 		-- Checking for ricochet
 		if ricoProb > math.random() and Angle < 90 then
 			Ricochet       = math.Clamp(Angle / 90, 0.05, 1) -- atleast 5% of energy is kept
-			HitRes.Loss    = 1 - Ricochet
+			HitRes.Loss    = 0.25 - Ricochet
 			Energy.Kinetic = Energy.Kinetic * HitRes.Loss
 		end	
 	end

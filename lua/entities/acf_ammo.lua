@@ -367,10 +367,41 @@ function ENT:CreateAmmo(Id, Data1, Data2, Data3, Data4, Data5, Data6, Data7, Dat
 	local vol = math.floor(self:GetPhysicsObject():GetVolume())
 	self.Volume = vol*Efficiency
 	local CapMul = (vol > 40250) and ((math.log(vol*0.00066)/math.log(2)-4)*0.15+1) or 1
+	
+	local roundType2 = self.RoundType
+	local MassMod = 0
+	
+	
+	if roundType2 == "APFSDS" then 
+		MassMod = 11
+			
+	elseif roundType2 == "APDS" then 
+		MassMod = 5.25
+		
+	elseif roundType2 == "APCR" then 
+		MassMod = 5
+		
+		
+	else MassMod = 1
+		
+		end
+		
+		
+	
+
+	
+
+
+
+	
+	
 	self.Capacity = math.floor(CapMul*self.Volume*16.38/self.BulletData.RoundVolume)
-	self.AmmoMassMax = (self.BulletData.ProjMass + self.BulletData.PropMass) * self.Capacity * 2 -- why *2 ?
+	self.AmmoMassMax = (self.BulletData.ProjMass*MassMod + self.BulletData.PropMass) * self.Capacity * 2 -- why *2 ?
 	self.Caliber = GunData.caliber
-	self.RoFMul = (vol > 40250) and (1-(math.log(vol*0.00066)/math.log(2)-4)*0.05) or 1 --*0.0625 for 25% @ 4x8x8, 0.025 10%, 0.0375 15%, 0.05 20%
+
+
+	
+	self.RoFMul = (vol > 27000) and (1-(math.log(vol*0.00066)/math.log(2)-4)*0.2) or 1 --*0.0625 for 25% @ 4x8x8, 0.025 10%, 0.0375 15%, 0.05 20% --0.23 karb edit for cannon rof 2. changed to start from 2x3x4 instead of 2x4x4
 	
 	self:SetNWString( "Ammo", self.Ammo )
 	self:SetNWString( "WireName", GunData.name .. " Ammo" )

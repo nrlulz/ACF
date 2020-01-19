@@ -42,7 +42,7 @@ function ACF_Activate ( Entity , Recalc )
 	else
 		local Size = Entity.OBBMaxs(Entity) - Entity.OBBMins(Entity)
 		if not Entity.ACF.Aera then
-			Entity.ACF.Aera = ((Size.x * Size.y)+(Size.x * Size.z)+(Size.y * Size.z)) * 6.45
+			Entity.ACF.Aera = ((Size.x * Size.y)+(Size.x * Size.z)+(Size.y * Size.z)) * 6.45 --^ 1.15
 		end
 		--if not Entity.ACF.Volume then
 		--	Entity.ACF.Volume = Size.x * Size.y * Size.z * 16.38
@@ -56,7 +56,7 @@ function ACF_Activate ( Entity , Recalc )
 	local Armour = ACF_CalcArmor( Area, Ductility, Entity:GetPhysicsObject():GetMass() ) -- So we get the equivalent thickness of that prop in mm if all its weight was a steel plate
 	local Health = ( Area / ACF.Threshold ) * ( 1 + Ductility ) -- Setting the threshold of the prop aera gone
 	
-	local Percent = 1 
+	local Percent = 1
 	
 	if Recalc and Entity.ACF.Health and Entity.ACF.MaxHealth then
 		Percent = Entity.ACF.Health/Entity.ACF.MaxHealth
@@ -64,8 +64,8 @@ function ACF_Activate ( Entity , Recalc )
 	
 	Entity.ACF.Health = Health * Percent
 	Entity.ACF.MaxHealth = Health
-	Entity.ACF.Armour = Armour * (0.5 + Percent/2)
-	Entity.ACF.MaxArmour = Armour * ACF.ArmorMod
+	Entity.ACF.Armour = (Armour) * (0.5 + Percent/2)
+	Entity.ACF.MaxArmour = (Armour) * ACF.ArmorMod 
 	Entity.ACF.Type = nil
 	Entity.ACF.Mass = PhysObj:GetMass()
 	--Entity.ACF.Density = (PhysObj:GetMass()*1000)/Entity.ACF.Volume
@@ -133,8 +133,16 @@ function ACF_CalcDamage( Entity , Energy , FrAera , Angle )
 	local maxPenetration = (Energy.Penetration / FrAera) * ACF.KEtoRHA	--RHA Penetration
 	
 	local HitRes = {}
+
+
+	
+
+	
+
+	
+	local dmul = 1--This actually controls overall prop damage from rounds. It should be in globals but i'm suck's at Coding's -karb
+
 	--BNK Stuff
-	local dmul = 1
 	if (ISBNK) then
 		local cvar = GetConVarNumber("sbox_godmode")
 	
@@ -192,14 +200,16 @@ end
 function ACF_PropDamage( Entity , Energy , FrAera , Angle , Inflictor , Bone )
 
 	local HitRes = ACF_CalcDamage( Entity , Energy , FrAera , Angle )
+
 	
 	HitRes.Kill = false
 	if HitRes.Damage >= Entity.ACF.Health then
 		HitRes.Kill = true 
 	else
 		Entity.ACF.Health = Entity.ACF.Health - HitRes.Damage
-		Entity.ACF.Armour = Entity.ACF.MaxArmour * (0.5 + Entity.ACF.Health/Entity.ACF.MaxHealth/2) --Simulating the plate weakening after a hit
+		Entity.ACF.Armour = math.Clamp(Entity.ACF.MaxArmour * (0.5 + Entity.ACF.Health/Entity.ACF.MaxHealth/2)^1.7, Entity.ACF.MaxArmour*0.25, Entity.ACF.MaxArmour)  --Simulating the plate weakening after a hit
 		
+		--math.Clamp( Entity.ACF.Ductility, -0.8, 0.8 )
 		if Entity.ACF.PrHealth then
 			ACF_UpdateVisualHealth(Entity)
 		end
@@ -305,7 +315,7 @@ function ACF_SquishyDamage( Entity , Energy , FrAera , Angle , Inflictor , Bone,
 	
 	end
 	
-	local dmul = 2.5
+	local dmul = 1
 	
 	--BNK stuff
 	if (ISBNK) then

@@ -38,7 +38,7 @@ ACF_defineGun("12.7mmMG", {
 	caliber = 1.27,
 	weight = 30,
 	year = 1910,
-	rofmod = 0.766,
+	rofmod = 1, --0.766
 	magsize = 150,
 	magreload = 6,
 	round = {
@@ -56,7 +56,7 @@ ACF_defineGun("14.5mmMG", {
 	caliber = 1.45,
 	weight = 45,
 	year = 1932,
-	rofmod = 0.72,
+	rofmod = 1, --0.722
 	magsize = 90,
 	magreload = 5,
 	round = {
@@ -65,19 +65,19 @@ ACF_defineGun("14.5mmMG", {
 	}
 } )
 	
-ACF_defineGun("20mmMG", {
-	name = "20mm Machinegun",
-	desc = "The 20mm MG is practically a cannon in its own right; the weight and recoil made it difficult to mount on light land vehicles, though it was adapted for use on both aircraft and ships.",
-	model = "models/machinegun/machinegun_20mm.mdl",
-	gunclass = "MG",
-	caliber = 2.0,
-	weight = 95,
-	year = 1935,
-	rofmod = 0.55,
-	magsize = 50,
-	magreload = 4,
-	round = {
-		maxlength = 22,
-		propweight = 0.09
-	}
-} )
+--ACF_defineGun("20mmMG", {
+	--name = "20mm Machinegun",
+	--desc = "The 20mm MG is practically a cannon in its own right; the weight and recoil made it difficult to mount on light land vehicles, though it was adapted for use on both aircraft and ships.",
+	--model = "models/machinegun/machinegun_20mm.mdl",
+	--gunclass = "MG",
+	--caliber = 2.0,
+	--weight = 95,
+	--year = 1935,
+	--rofmod = 0.3,
+	--magsize = 50,
+	--magreload = 4,
+	--round = {
+		--maxlength = 22,
+		--propweight = 0.09
+	--}
+--} )

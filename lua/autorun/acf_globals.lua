@@ -2,19 +2,19 @@ ACF = {}
 ACF.AmmoTypes = {}
 ACF.MenuFunc = {}
 ACF.AmmoBlacklist = {}
-ACF.Version = 657 -- REMEMBER TO CHANGE THIS FOR GODS SAKE, OMFG!!!!!!! -wrex   Update the changelog too! -Ferv
+ACF.Version = 660 -- REMEMBER TO CHANGE THIS FOR GODS SAKE, OMFG!!!!!!! -wrex   Update the changelog too! -Ferv
 ACF.CurrentVersion = 0 -- just defining a variable, do not change
 
 ACF.Year = 1945
 
-ACF.Threshold = 264.7	--Health Divisor (don't forget to update cvar function down below)
+ACF.Threshold =   264.7	--Health Divisor (don't forget to update cvar function down below)
 ACF.PartialPenPenalty = 5 --Exponent for the damage penalty for partial penetration
 ACF.PenAreaMod = 0.85
 ACF.KinFudgeFactor = 2.1	--True kinetic would be 2, over that it's speed biaised, below it's mass biaised
 ACF.KEtoRHA = 0.25		--Empirical conversion from (kinetic energy in KJ)/(Aera in Cm2) to RHA penetration
 ACF.GroundtoRHA = 0.15		--How much mm of steel is a mm of ground worth (Real soil is about 0.15)
 ACF.KEtoSpall = 1
-ACF.AmmoMod = 0.6		-- Ammo modifier. 1 is 1x the amount of ammo
+ACF.AmmoMod = 1.05		-- Ammo modifier. 1 is 1x the amount of ammo. 0.6 default
 ACF.CrateVolEff = 0.1576 -- magic number that adjusts the efficiency of crate model volume to ammo capacity
 ACF.ArmorMod = 1
 ACF.SlopeEffectFactor = 1.1	-- Sloped armor effectiveness: armor / cos(angle)^factor
@@ -183,6 +183,10 @@ include("acf/shared/rounds/roundap.lua")
 include("acf/shared/rounds/roundaphe.lua")
 include("acf/shared/rounds/roundhe.lua")
 include("acf/shared/rounds/roundheat.lua")
+include("acf/shared/rounds/roundheatfs.lua")
+include("acf/shared/rounds/roundapfsds.lua")
+include("acf/shared/rounds/roundapds.lua")
+include("acf/shared/rounds/roundapcr.lua")
 include("acf/shared/rounds/roundfl.lua")
 include("acf/shared/rounds/roundhp.lua")
 include("acf/shared/rounds/roundsmoke.lua")

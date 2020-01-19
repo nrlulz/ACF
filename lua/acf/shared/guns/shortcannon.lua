@@ -4,7 +4,7 @@ ACF_defineGunClass("SC", {
 	name = "Short-Barrel Cannon",
 	desc = "Short cannons trade muzzle velocity and accuracy for lighter weight and smaller size, with more penetration than howitzers and lighter than cannons.",
 	muzzleflash = "120mm_muzzleflash_noscale",
-	rofmod = 1.3,
+	rofmod = 1.7,
 	sound = "weapons/ACF_Gun/cannon_new.wav",
 	soundDistance = "Cannon.Fire",
 	soundNormal = " "
@@ -34,6 +34,7 @@ ACF_defineGun("50mmSC", {
 	gunclass = "SC",
 	caliber = 5.0,
 	weight = 330,
+	rofmod = 1.4,
 	year = 1915,
 	sound = "weapons/ACF_Gun/ac_fire4.wav",
 	round = {
