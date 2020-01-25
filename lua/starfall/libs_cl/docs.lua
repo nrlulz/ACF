@@ -285,3 +285,5 @@ Returns true if functions returning sensitive info are restricted to owned props
 Returns true if functions returning sensitive info are restricted to owned props ";};};["libtbl"]="acf_library";["name"]="acf";["summary"]="\
  \
 ACF Library ";["tables"]={};};};})
+
+return function() end
