@@ -67,6 +67,9 @@ local propProtectionInstalled = FindMetaTable("Entity").CPPIGetOwner and true
 
 ----------------------------------------
 -- ACF Library
+-- @name acf
+-- @class library
+-- @libtbl acf_library
 SF.RegisterLibrary("acf")
 
 -- Local to each starfall
@@ -608,6 +611,8 @@ ammo_properties.SM.create_data = {
 ammo_properties.Refill.create_data = {}
 
 --- Creates a ammo box given the id
+-- If ammo_data isn't provided default values will be used (same as in the ACF menu)
+-- Possible values for ammo_data corresponding to ammo_id:
 -- @param pos Position of created ammo box
 -- @param ang Angle of created ammo box
 -- @param id id of the ammo box to create
@@ -617,9 +622,6 @@ ammo_properties.Refill.create_data = {}
 -- @param ammo_data the ammo data
 -- @server
 -- @return The created ammo box
--- @usage
--- If ammo_data isn't provided default values will be used (same as in the ACF menu)
--- Possible values for ammo_data corresponding to ammo_id:
 -- 
 -- AP:
 -- \- propellantLength (number)
