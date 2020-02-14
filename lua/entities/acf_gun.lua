@@ -147,7 +147,7 @@ function ENT:Initialize()
 	self.Inaccuracy 	= 1
 	
 	self.Inputs = Wire_CreateInputs( self, { "Fire", "Unload", "Reload" } )
-	self.Outputs = WireLib.CreateSpecialOutputs( self, { "Ready", "AmmoCount", "Entity", "Shots Left", "Fire Rate", "Muzzle Weight", "Muzzle Velocity" }, { "NORMAL", "NORMAL", "ENTITY", "NORMAL", "NORMAL", "NORMAL", "NORMAL" } )
+	self.Outputs = WireLib.CreateSpecialOutputs( self, { "Ready", "AmmoCount", "Entity", "Shots Left", "Fire Rate", "Muzzle Weight", "Muzzle Velocity", "Reloading" }, { "NORMAL", "NORMAL", "ENTITY", "NORMAL", "NORMAL", "NORMAL", "NORMAL", "NORMAL" } )
 	Wire_TriggerOutput(self, "Entity", self)
 
 end  
@@ -505,10 +505,18 @@ function ENT:Think()
 		self.Ammo = Ammo
 		self:UpdateOverlayText()
 		
+
 		Wire_TriggerOutput(self, "AmmoCount", Ammo)
+
+		local isReloading = not isEmpty and CurTime() < self.NextFire and (self.MagSize == 1 or (self.LastLoadDuration > self.ReloadTime))
 		
-		
-		if( self.MagSize ) then
+		if isReloading then
+			Wire_TriggerOutput(self, "Reloading", 1)
+		else
+			Wire_TriggerOutput(self, "Reloading", 0)
+		end
+
+		if ( self.MagSize ) then
 			Wire_TriggerOutput(self, "Shots Left", self.MagSize - self.CurrentShot)
 		else
 			Wire_TriggerOutput(self, "Shots Left", 1)
