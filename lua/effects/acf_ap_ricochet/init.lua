@@ -1,4 +1,9 @@
-
+--Not done programmatically in case of future sounds not being numerically incremented.
+local RicochetSounds = {
+	"/acf_other/ricochets/00000320.wav",
+	"/acf_other/ricochets/00000321.wav",
+	"/acf_other/ricochets/00000322.wav",
+}
    
  /*--------------------------------------------------------- 
     Initializes the effect. The data is a table of data  
@@ -26,7 +31,7 @@
 		BulletEffect.Damage = 0	 
 	LocalPlayer():FireBullets(BulletEffect) 
 	
-	sound.Play( "/acf_other/ricochets/0000032"..math.random(0,2)..".wav", self.Origin, math.Clamp(self.Mass*200,65,500), math.Clamp(self.Velocity*0.01,25,255), 1 )
+	sound.Play( RicochetSounds[math.random( #RicochetSounds )], self.Origin, math.Clamp(self.Mass*200,65,500), math.Clamp(self.Velocity*0.01,25,255), 1 )
 	
 	util.Decal("ExplosiveGunshot", self.Origin + self.DirVec*10, self.Origin - self.DirVec*10)
 	

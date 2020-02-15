@@ -448,6 +448,13 @@ local function RetDist( enta, entb )
 	return dist
 end
 
+--Not done programmatically in case of future sounds not being numerically incremented.
+local UnlinkSounds = {
+	"physics/metal/metal_box_impact_bullet1.wav",
+	"physics/metal/metal_box_impact_bullet2.wav",
+	"physics/metal/metal_box_impact_bullet3.wav",
+}
+
 function ENT:Think()
 	
 	if ACF.CurTime > self.NextLegalCheck then
@@ -491,7 +498,7 @@ function ENT:Think()
 					totalcap = totalcap + Crate.Capacity
 				else
 					self:Unlink( Crate )
-					soundstr =  "physics/metal/metal_box_impact_bullet" .. tostring(math.random(1, 3)) .. ".wav"
+					soundstr = UnlinkSounds[math.random( #UnlinkSounds )]
 					self:EmitSound(soundstr,500,100)
 				end
 			end

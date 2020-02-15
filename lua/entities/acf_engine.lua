@@ -664,12 +664,19 @@ function ENT:CheckRopes()
 	
 end
 
+--Not done programmatically in case of future sounds not being numerically incremented.
+local UnlinkSounds = {
+	"physics/metal/metal_box_impact_bullet1.wav",
+	"physics/metal/metal_box_impact_bullet2.wav",
+	"physics/metal/metal_box_impact_bullet3.wav",
+}
+
 --unlink fuel tanks out of range
 function ENT:CheckFuel()
 	for _,tank in pairs(self.FuelLink) do
 		if self:GetPos():Distance(tank:GetPos()) > 512 then
 			self:Unlink( tank )
-			soundstr =  "physics/metal/metal_box_impact_bullet" .. tostring(math.random(1, 3)) .. ".wav"
+			soundstr = UnlinkSounds[math.random( #UnlinkSounds )]
 			self:EmitSound(soundstr,500,100)
 		end
 	end

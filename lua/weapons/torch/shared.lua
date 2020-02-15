@@ -37,17 +37,30 @@ SWEP.DrawCrosshair		= true
 
 
 
+local RepairSounds = {
+	"ambient/energy/NewSpark03.wav",
+	"ambient/energy/NewSpark04.wav",
+	"ambient/energy/NewSpark05.wav",
+}
+
+local ZapSounds = {
+	"weapons/physcannon/superphys_small_zap1.wav",
+	"weapons/physcannon/superphys_small_zap2.wav",
+	"weapons/physcannon/superphys_small_zap3.wav",
+	"weapons/physcannon/superphys_small_zap4.wav",
+}
+
 function SWEP:Initialize()
 	if ( SERVER ) then 
 		self:SetWeaponHoldType("pistol")--"357 hold type doesnt exist, it's the generic pistol one" Kaf
 	end
-	util.PrecacheSound( "ambient/energy/NewSpark03.wav" )
-	util.PrecacheSound( "ambient/energy/NewSpark04.wav" )
-	util.PrecacheSound( "ambient/energy/NewSpark05.wav" )
-	util.PrecacheSound( "weapons/physcannon/superphys_small_zap1.wav" )
-	util.PrecacheSound( "weapons/physcannon/superphys_small_zap2.wav" )
-	util.PrecacheSound( "weapons/physcannon/superphys_small_zap3.wav" )
-	util.PrecacheSound( "weapons/physcannon/superphys_small_zap4.wav" )
+
+	for i = 1, #RepairSounds do
+		util.PrecacheSound( RepairSounds[i] )
+	end
+	for i = 1, #ZapSounds do
+		util.PrecacheSound( ZapSounds[i] )
+	end
 	util.PrecacheSound( "items/medshot4.wav" )
 	
 	self.LastSend = 0
@@ -124,7 +137,7 @@ function SWEP:PrimaryAttack()
 			if ( Valid and ent.ACF.Health < ent.ACF.MaxHealth ) then
 				ent.ACF.Health = math.min(ent.ACF.Health + (30/ent.ACF.MaxArmour),ent.ACF.MaxHealth)
 				ent.ACF.Armour = ent.ACF.MaxArmour * (0.5 + ent.ACF.Health/ent.ACF.MaxHealth/2)
-				ent:EmitSound( "ambient/energy/NewSpark0" ..tostring( math.random( 3, 5 ) ).. ".wav", true, true )--Welding noise here, gotte figure out how to do a looped sound.
+				ent:EmitSound( RepairSounds[math.random( #RepairSounds )], true, true )--Welding noise here, gotte figure out how to do a looped sound.
 				TeslaSpark(tr.HitPos , 1 )
 			end
 			self.Weapon:SetNWFloat( "HP", ent.ACF.Health )
@@ -183,7 +196,7 @@ self.Weapon:SetNextPrimaryFire( CurTime() + 0.05 )
 				effectdata:SetStart( userid:GetShootPos() )
 				effectdata:SetOrigin( tr.HitPos )
 				util.Effect( "Sparks", effectdata , true , true )
-				ent:EmitSound( "weapons/physcannon/superphys_small_zap" ..tostring( math.random( 1, 4 ) ).. ".wav", true , true ) --old annoyinly loud sounds
+				ent:EmitSound( ZapSounds[math.random( #ZapSounds )], true , true ) --old annoyinly loud sounds
 			end
 		else 
 			self.Weapon:SetNWFloat( "HP", 0 )
