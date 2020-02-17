@@ -937,6 +937,30 @@ function ENT:ChangeDrive(value)
 	
 end
 
+-- Searches the "tree" which gearbox-gearbox connections forms, if the source is found
+-- anywhere in the targets link tree, this function will return true
+function ACF_SearchGearboxLinkTree(source, target)
+	local queue = { target }
+	
+	-- search the link tree
+	while #queue > 0 do
+		local ent = table.remove(queue)
+
+		if ent == source then
+			return true
+		end
+		
+		if not ent.WheelLink then continue end
+
+		-- add each link to the queue
+		for k, v in ipairs(ent.WheelLink) do
+			table.insert(queue, v.Ent)
+		end
+	end
+
+	return false
+end
+
 function ENT:Link( Target )
 
 	if not IsValid( Target ) or not table.HasValue( { "prop_physics", "acf_gearbox", "tire" }, Target:GetClass() ) then
@@ -949,7 +973,11 @@ function ENT:Link( Target )
 			return false, "That is already linked to this gearbox!"
 		end
 	end
-	
+
+	if ACF_SearchGearboxLinkTree(self, Target) then
+		return false, "You cannot link gearboxes in a loop!"
+	end
+
 	-- make sure the angle is not excessive
 	local InPos = Vector( 0, 0, 0 )
 	if Target.IsGeartrain then
