@@ -395,7 +395,7 @@ function ENT:CreateAmmo(Id, Data1, Data2, Data3, Data4, Data5, Data6, Data7, Dat
 
 	
 	
-	self.Capacity = math.floor(CapMul*self.Volume*16.38/self.BulletData.RoundVolume)
+	self.Capacity = math.floor(CapMul*self.Volume*16.38/self.BulletData.RoundVolume) or 0
 	self.AmmoMassMax = (self.BulletData.ProjMass*MassMod + self.BulletData.PropMass) * self.Capacity * 2 -- why *2 ?
 	self.Caliber = GunData.caliber
 
