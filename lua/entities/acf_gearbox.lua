@@ -294,7 +294,7 @@ function ENT:Initialize()
 	self.CanUpdate = true
 	self.LastActive = 0
 	self.Legal = true
-	self.Parentable = false
+	self.Parentable = true
 	self.RootParent = nil
 	self.NextLegalCheck = ACF.CurTime + 30 -- give any spawning issues time to iron themselves out
 	self.LegalIssues = ""
@@ -665,7 +665,7 @@ end
 function ENT:Think()
 
 	if ACF.CurTime > self.NextLegalCheck then
-		self.Legal, self.LegalIssues = ACF_CheckLegal(self, self.Model, self.Mass, self.ModelInertia, false, true, not self.Parentable, true) -- requiresweld overrides parentable, need to set it false for parent-only gearboxes
+		self.Legal, self.LegalIssues = ACF_CheckLegal(self, self.Model, self.Mass, self.ModelInertia, false, true, false, true) -- 
 		self.NextLegalCheck = ACF.LegalSettings:NextCheck(self.Legal)
 		self:UpdateOverlayText()
 

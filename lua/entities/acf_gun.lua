@@ -129,7 +129,7 @@ function ENT:Initialize()
 	self.LastSend = 0
 	self.LastLoadDuration = 0
 	self.Owner = self
-	self.Parentable = false
+	self.Parentable = true
 	self.NextLegalCheck = ACF.CurTime + 30 -- give any spawning issues time to iron themselves out
 	self.Legal = true
 	self.LegalIssues = ""
@@ -453,7 +453,7 @@ function ENT:Think()
 	if ACF.CurTime > self.NextLegalCheck then
 
 		-- check gun is legal
-		self.Legal, self.LegalIssues = ACF_CheckLegal(self, self.Model, self.Mass, self.ModelInertia, false, self.Parentable, false, true)
+		self.Legal, self.LegalIssues = ACF_CheckLegal(self, self.Model, self.Mass, self.ModelInertia, false, true, false, true)
 		self.NextLegalCheck = ACF.LegalSettings:NextCheck(self.Legal)
 
 		-- check the seat is legal
