@@ -629,7 +629,7 @@ function ENT:FireShell()
 	end
 
 	if ( bool and self.IsUnderWeight and self.Ready and self.Legal ) then
-		Blacklist = {}
+		local Blacklist = {}
 		if not ACF.AmmoBlacklist[self.BulletData.Type] then
 			Blacklist = {}
 		else
