@@ -1,4 +1,6 @@
-# Armoured Combat Framework
+# This version of ACF is no longer maintained.
+## The newest version of ACF with active development can be found at https://github.com/Stooberton/ACF-3
+
 
 The Armoured Combat Framework is a [Garry's Mod][] addon which creates a balanced, realistic and fun to play combat damage system, simulating projectiles, armor and explosions, as well as engines and gearboxes.
 
